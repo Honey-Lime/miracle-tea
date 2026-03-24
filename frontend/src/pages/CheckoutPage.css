@@ -87,6 +87,87 @@
   border-radius: 4px;
 }
 
+/* Стили для поиска городов */
+.city-search {
+  position: relative;
+}
+
+.city-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.city-input:focus {
+  outline: none;
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.1);
+}
+
+.search-loading {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+}
+
+.city-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  max-height: 250px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+
+.city-option {
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.city-option:hover {
+  background: #f5f5f5;
+}
+
+.city-option:first-child {
+  border-radius: 4px 4px 0 0;
+}
+
+.city-option:last-child {
+  border-radius: 0 0 4px 4px;
+}
+
+.popular-cities {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #666;
+}
+
+.popular-city-btn {
+  background: none;
+  border: none;
+  color: #2e7d32;
+  cursor: pointer;
+  padding: 2px 6px;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.popular-city-btn:hover {
+  color: #1b5e20;
+  text-decoration: underline;
+}
+
 .total-breakdown {
   margin-bottom: 2rem;
 }

@@ -1,10 +1,11 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useRef } from "react";
 import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import {
   getYandexCities,
   calculateYandexDelivery,
+  searchYandexCities,
 } from "../services/yandexDeliveryService";
 import "./CheckoutPage.css";
 
@@ -19,6 +20,14 @@ const CheckoutPage = () => {
   const [selectedCityName, setSelectedCityName] = useState("");
   const [isCalculating, setIsCalculating] = useState(false);
 
+  // Поиск городов
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const searchRef = useRef(null);
+  const searchTimeoutRef = useRef(null);
+
   // Вычисляем общий вес заказа в граммах
   const totalWeight = cartItems.reduce((sum, item) => sum + item.count, 0);
 
@@ -29,10 +38,57 @@ const CheckoutPage = () => {
       setCities(citiesList);
       if (citiesList.length > 0) {
         setSelectedCityName(citiesList[0].name);
+        setSearchQuery(citiesList[0].name);
       }
     };
     fetchCities();
   }, []);
+
+  // Поиск городов при вводе
+  useEffect(() => {
+    if (searchQuery.length >= 2) {
+      setIsSearching(true);
+
+      // Debounce поиск
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+
+      searchTimeoutRef.current = setTimeout(async () => {
+        try {
+          const results = await searchYandexCities(searchQuery);
+          setSearchResults(results);
+          setShowDropdown(true);
+        } catch (err) {
+          console.error("Ошибка поиска городов:", err);
+        } finally {
+          setIsSearching(false);
+        }
+      }, 300);
+    } else {
+      setSearchResults([]);
+      setShowDropdown(false);
+    }
+  }, [searchQuery]);
+
+  // Закрытие dropdown при клике вне
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleCitySelect = (city) => {
+    setSelectedCityName(city.name);
+    setSearchQuery(city.name);
+    setSearchResults([]);
+    setShowDropdown(false);
+  };
 
   const handleCalculateDelivery = async () => {
     if (!selectedCityName) {
@@ -110,16 +166,49 @@ const CheckoutPage = () => {
               <h3>Калькулятор Яндекс Доставки</h3>
               <div className="address-input">
                 <label>Город доставки</label>
-                <select
-                  value={selectedCityName}
-                  onChange={(e) => setSelectedCityName(e.target.value)}
-                >
-                  {cities.map((city) => (
-                    <option key={city.code} value={city.name}>
-                      {city.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="city-search" ref={searchRef}>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() =>
+                      searchResults.length > 0 && setShowDropdown(true)
+                    }
+                    placeholder="Начните вводить название города"
+                    className="city-input"
+                    autoComplete="off"
+                  />
+                  {isSearching && <span className="search-loading">⏳</span>}
+                  {showDropdown && searchResults.length > 0 && (
+                    <div className="city-dropdown">
+                      {searchResults.map((city) => (
+                        <div
+                          key={city.code}
+                          className="city-option"
+                          onClick={() => handleCitySelect(city)}
+                        >
+                          {city.name}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {cities.length > 0 && !searchQuery && (
+                  <div className="popular-cities">
+                    <span>Популярные: </span>
+                    {cities.slice(0, 5).map((city, index) => (
+                      <button
+                        key={city.code}
+                        type="button"
+                        className="popular-city-btn"
+                        onClick={() => handleCitySelect(city)}
+                      >
+                        {city.name}
+                        {index < Math.min(4, cities.length - 1) && ","}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="address-input">
                 <label>Адрес доставки (улица, дом)</label>

@@ -29,8 +29,8 @@ const HomePage = () => {
             </div>
             <div className="benefit-card">
               <div className="benefit-icon">🎁</div>
-              <h3>Пробники по 10г</h3>
-              <p>От 5 сортов чая. Идеально для знакомства с новинками.</p>
+              <h3>Снимите пробу</h3>
+              <p>Можно заказать пробники по 10г</p>
             </div>
           </div>
         </div>
