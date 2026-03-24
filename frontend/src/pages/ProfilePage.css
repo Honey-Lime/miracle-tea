@@ -1,0 +1,58 @@
+.profile-page {
+  padding: 2rem 0;
+}
+
+.profile-page h1 {
+  margin-bottom: 2rem;
+}
+
+.profile-info {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 3rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.profile-info h2 {
+  margin-bottom: 1rem;
+  color: #2e7d32;
+}
+
+.profile-info p {
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.orders {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.orders h2 {
+  margin-bottom: 1.5rem;
+  color: #2e7d32;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.orders-table th,
+.orders-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.orders-table th {
+  background: #f9f9f9;
+  font-weight: 600;
+}
+
+.orders-table tr:hover {
+  background: #f5f5f5;
+}
