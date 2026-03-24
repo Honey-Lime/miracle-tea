@@ -6,5 +6,6 @@ const yandexDeliveryController = require("../controllers/yandexDeliveryControlle
 router.get("/cities", yandexDeliveryController.getCities);
 router.post("/calculate", yandexDeliveryController.calculateDelivery);
 router.get("/check", yandexDeliveryController.checkAvailability);
+router.get("/search-cities", yandexDeliveryController.searchCitiesEndpoint);
 
 module.exports = router;

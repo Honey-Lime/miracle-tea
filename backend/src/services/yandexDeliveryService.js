@@ -1,22 +1,32 @@
-const axios = require("axios");
 require("dotenv").config();
+const path = require("path");
+const { pathToFileURL } = require("url");
 
 const YANDEX_DELIVERY_API_KEY = process.env.YANDEX_DELIVERY_API_KEY;
-const YANDEX_DELIVERY_BASE_URL =
-  process.env.YANDEX_DELIVERY_BASE_URL || "https://api.dostavka.yandex.ru";
-const YANDEX_DELIVERY_PARTNER_ID = process.env.YANDEX_DELIVERY_PARTNER_ID;
+
+// Координаты городов для API Яндекс Доставки
+const CITY_COORDINATES = {
+  Воронеж: { lat: 51.6717, lon: 39.2106, address: "ул. Героев Сибиряков, 7" },
+  Москва: { lat: 55.7558, lon: 37.6173 },
+  "Санкт-Петербург": { lat: 59.9343, lon: 30.3351 },
+  Екатеринбург: { lat: 56.8389, lon: 60.6057 },
+  Новосибирск: { lat: 55.0084, lon: 82.9357 },
+  Казань: { lat: 55.7961, lon: 49.1064 },
+  "Нижний Новгород": { lat: 56.2965, lon: 43.9361 },
+  Самара: { lat: 53.2001, lon: 50.15 },
+  "Ростов-на-Дону": { lat: 47.2357, lon: 39.7015 },
+  Уфа: { lat: 54.7388, lon: 55.9721 },
+};
 
 /**
- * Получение токена авторизации (если требуется)
+ * Получить координаты города
  */
-async function getAuthToken() {
-  // В зависимости от API может потребоваться OAuth2
-  // Возвращаем API ключ как Bearer токен
-  return YANDEX_DELIVERY_API_KEY;
+function getCityCoordinates(cityName) {
+  return CITY_COORDINATES[cityName] || null;
 }
 
 /**
- * Расчет стоимости доставки через Яндекс Доставку Next Day Delivery
+ * Расчет стоимости доставки через Яндекс Доставку с использованием официального SDK
  * @param {Object} params
  * @param {string} params.fromCity - город отправления (название)
  * @param {string} params.toCity - город получения (название)
@@ -28,68 +38,31 @@ async function calculateNextDayDelivery(params) {
   const { fromCity = "Воронеж", toCity, weight, amount = 0 } = params;
 
   // Если нет конфигурации, используем заглушку
-  if (!YANDEX_DELIVERY_API_KEY || !YANDEX_DELIVERY_PARTNER_ID) {
+  if (!YANDEX_DELIVERY_API_KEY) {
     console.warn(
-      "Yandex Delivery API credentials missing, using stub data for Next Day Delivery",
+      "Yandex Delivery API key missing, using stub data for Next Day Delivery",
     );
     return calculateStub(fromCity, toCity, weight);
   }
 
-  const token = await getAuthToken();
-  const url = `${YANDEX_DELIVERY_BASE_URL}/v2/calculator/next-day`;
-
-  const requestBody = {
-    partner_id: YANDEX_DELIVERY_PARTNER_ID,
-    sender_point: {
-      location: {
-        city: fromCity,
-        address: "ул. Героев Сибиряков, 7",
-      },
-    },
-    receiver_point: {
-      location: {
-        city: toCity,
-      },
-    },
-    items: [
-      {
-        weight: weight / 1000, // кг
-        dimensions: {
-          length: 0.1,
-          width: 0.1,
-          height: 0.1,
-        },
-      },
-    ],
-    delivery_type: "NEXT_DAY",
-    declared_value: amount,
-  };
-
   try {
-    const response = await axios.post(url, requestBody, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      timeout: 10000,
+    // Динамический импорт ES6 модуля
+    const wrapperPath = pathToFileURL(
+      path.join(__dirname, "yandexDeliveryApiWrapper.mjs"),
+    ).href;
+    const wrapper = await import(wrapperPath);
+
+    // Вызываем функцию расчета из ES6 обертки
+    const result = await wrapper.calculateWithSDK({
+      fromCity,
+      toCity,
+      weight,
+      amount,
     });
 
-    // Предполагаем структуру ответа
-    const data = response.data;
-    return {
-      success: true,
-      price: data.delivery_cost / 100, // переводим из копеек в рубли
-      currency: "RUB",
-      minDays: data.delivery_min_days || 1,
-      maxDays: data.delivery_max_days || 2,
-      service: "Yandex Next Day Delivery",
-      details: data,
-    };
+    return result;
   } catch (error) {
-    console.error(
-      "Yandex Delivery API error:",
-      error.response?.data || error.message,
-    );
+    console.error("Yandex Delivery SDK error:", error.message);
     // В случае ошибки используем заглушку
     return calculateStub(fromCity, toCity, weight);
   }
@@ -126,22 +99,49 @@ function calculateStub(fromCity, toCity, weight) {
 
 /**
  * Получение списка городов, куда возможна доставка на следующий день
+ * Загружает города из Яндекс Карт Suggest API
  */
 async function getAvailableCities() {
-  // Заглушка: возвращаем популярные города
-  return [
-    { code: "MOS", name: "Москва" },
-    { code: "SPB", name: "Санкт-Петербург" },
-    { code: "VOR", name: "Воронеж" },
-    { code: "EKB", name: "Екатеринбург" },
-    { code: "NSK", name: "Новосибирск" },
-    { code: "KZN", name: "Казань" },
-    { code: "NNG", name: "Нижний Новгород" },
-    { code: "SMR", name: "Самара" },
-  ];
+  try {
+    // Динамический импорт ES6 модуля
+    const wrapperPath = pathToFileURL(
+      path.join(__dirname, "yandexDeliveryApiWrapper.mjs"),
+    ).href;
+    const wrapper = await import(wrapperPath);
+
+    // Получаем города из Яндекс Карт
+    const cities = await wrapper.getCitiesFromYandex();
+    return cities;
+  } catch (error) {
+    console.error("Error loading cities from Yandex:", error.message);
+    // Fallback на локальный список
+    return Object.entries(CITY_COORDINATES).map(([name, coords], index) => ({
+      code: name.substring(0, 3).toUpperCase(),
+      name,
+    }));
+  }
+}
+
+/**
+ * Поиск городов по названию
+ * @param {string} query - поисковый запрос
+ */
+async function searchCities(query) {
+  try {
+    const wrapperPath = pathToFileURL(
+      path.join(__dirname, "yandexDeliveryApiWrapper.mjs"),
+    ).href;
+    const wrapper = await import(wrapperPath);
+
+    return await wrapper.searchCities(query);
+  } catch (error) {
+    console.error("Error searching cities:", error.message);
+    return [];
+  }
 }
 
 module.exports = {
   calculateNextDayDelivery,
   getAvailableCities,
+  searchCities,
 };

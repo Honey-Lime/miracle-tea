@@ -51,7 +51,8 @@
 }
 
 .form-group select,
-.form-group input[type="number"] {
+.form-group input[type="number"],
+.form-group input[type="text"] {
   padding: 12px 15px;
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -119,9 +120,7 @@
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
-  transition:
-    background 0.3s,
-    transform 0.2s;
+  transition: background 0.3s, transform 0.2s;
   margin-top: 10px;
 }
 
@@ -180,6 +179,16 @@
   font-size: 0.9rem;
 }
 
+.stub-notice {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 10px 15px;
+  margin-top: 15px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #856404;
+}
+
 .calculator-info {
   margin-top: 30px;
   padding-top: 20px;
@@ -210,4 +219,73 @@
   text-align: center;
   color: #777;
   margin-top: 20px;
+}
+
+/* City search styles */
+.city-search {
+  position: relative;
+}
+
+.city-input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.search-loading {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+}
+
+.city-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 1000;
+  margin-top: 4px;
+}
+
+.city-option {
+  padding: 12px 15px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.city-option:last-child {
+  border-bottom: none;
+}
+
+.city-option:hover {
+  background: #f5f5f5;
+}
+
+.popular-cities {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.popular-city-btn {
+  background: none;
+  border: none;
+  color: #ffcc00;
+  cursor: pointer;
+  padding: 2px 6px;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+
+.popular-city-btn:hover {
+  color: #ffdb4d;
+  text-decoration: underline;
 }

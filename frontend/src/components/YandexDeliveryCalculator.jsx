@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   getYandexCities,
   calculateYandexDelivery,
+  searchYandexCities,
 } from "../services/yandexDeliveryService";
 import "./YandexDeliveryCalculator.css";
 
@@ -15,6 +16,14 @@ const YandexDeliveryCalculator = () => {
   const [error, setError] = useState("");
   const [available, setAvailable] = useState(true);
 
+  // Поиск городов
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const searchRef = useRef(null);
+  const searchTimeoutRef = useRef(null);
+
   // Загружаем список городов при монтировании
   useEffect(() => {
     const fetchCities = async () => {
@@ -23,6 +32,7 @@ const YandexDeliveryCalculator = () => {
         setCities(data);
         if (data.length > 0) {
           setSelectedCity(data[0].name);
+          setSearchQuery(data[0].name);
         }
       } catch (err) {
         console.error("Ошибка загрузки городов:", err);
@@ -31,6 +41,52 @@ const YandexDeliveryCalculator = () => {
     };
     fetchCities();
   }, []);
+
+  // Поиск городов при вводе
+  useEffect(() => {
+    if (searchQuery.length >= 2) {
+      setIsSearching(true);
+
+      // Debounce поиск
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+
+      searchTimeoutRef.current = setTimeout(async () => {
+        try {
+          const results = await searchYandexCities(searchQuery);
+          setSearchResults(results);
+          setShowDropdown(true);
+        } catch (err) {
+          console.error("Ошибка поиска городов:", err);
+        } finally {
+          setIsSearching(false);
+        }
+      }, 300);
+    } else {
+      setSearchResults([]);
+      setShowDropdown(false);
+    }
+  }, [searchQuery]);
+
+  // Закрытие dropdown при клике вне
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleCitySelect = (city) => {
+    setSelectedCity(city.name);
+    setSearchQuery(city.name);
+    setSearchResults([]);
+    setShowDropdown(false);
+  };
 
   const handleCalculate = async () => {
     if (!selectedCity || weight <= 0) {
@@ -77,18 +133,48 @@ const YandexDeliveryCalculator = () => {
       <div className="calculator-form">
         <div className="form-group">
           <label htmlFor="city">Город получения</label>
-          <select
-            id="city"
-            value={selectedCity}
-            onChange={(e) => setSelectedCity(e.target.value)}
-            disabled={cities.length === 0}
-          >
-            {cities.map((city) => (
-              <option key={city.code} value={city.name}>
-                {city.name}
-              </option>
-            ))}
-          </select>
+          <div className="city-search" ref={searchRef}>
+            <input
+              id="city"
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
+              placeholder="Начните вводить название города"
+              className="city-input"
+              autoComplete="off"
+            />
+            {isSearching && <span className="search-loading">⏳</span>}
+            {showDropdown && searchResults.length > 0 && (
+              <div className="city-dropdown">
+                {searchResults.map((city) => (
+                  <div
+                    key={city.code}
+                    className="city-option"
+                    onClick={() => handleCitySelect(city)}
+                  >
+                    {city.name}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          {cities.length > 0 && !searchQuery && (
+            <div className="popular-cities">
+              <span>Популярные: </span>
+              {cities.slice(0, 5).map((city, index) => (
+                <button
+                  key={city.code}
+                  type="button"
+                  className="popular-city-btn"
+                  onClick={() => handleCitySelect(city)}
+                >
+                  {city.name}
+                  {index < Math.min(4, cities.length - 1) && ","}
+                </button>
+              ))}
+            </div>
+          )}
           {!available && (
             <p className="warning">
               Доставка в выбранный город может быть недоступна
@@ -159,6 +245,12 @@ const YandexDeliveryCalculator = () => {
               </p>
               {result.details?.note && (
                 <p className="note">{result.details.note}</p>
+              )}
+              {result.service?.includes("(stub)") && (
+                <p className="stub-notice">
+                  ℹ️ Расчет выполнен в демонстрационном режиме. Для получения
+                  точной стоимости настройте API ключ Яндекс Доставки.
+                </p>
               )}
             </div>
           </div>

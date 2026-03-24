@@ -1,6 +1,7 @@
 const {
   calculateNextDayDelivery,
   getAvailableCities,
+  searchCities,
 } = require("../services/yandexDeliveryService");
 const { logError } = require("../utils/logger");
 
@@ -83,6 +84,31 @@ exports.checkAvailability = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Ошибка при проверке доступности",
+    });
+  }
+};
+
+/**
+ * Поиск городов по названию (Яндекс Карты Suggest API)
+ */
+exports.searchCitiesEndpoint = async (req, res) => {
+  const { query } = req.query;
+
+  if (!query || query.length < 2) {
+    return res.status(400).json({
+      message: "Параметр query должен содержать минимум 2 символа",
+    });
+  }
+
+  try {
+    const cities = await searchCities(query);
+    res.json(cities);
+  } catch (error) {
+    logError(error, "searchCitiesEndpoint");
+    res.status(500).json({
+      success: false,
+      message: "Ошибка при поиске городов",
+      error: error.message,
     });
   }
 };

@@ -9,14 +9,18 @@ export const getYandexCities = async () => {
     return response.data;
   } catch (error) {
     console.error("Failed to fetch Yandex cities:", error);
-    // Fallback cities
+    // Fallback cities - расширенный список
     return [
+      { code: "VOR", name: "Воронеж" },
       { code: "MOS", name: "Москва" },
       { code: "SPB", name: "Санкт-Петербург" },
-      { code: "VOR", name: "Воронеж" },
       { code: "EKB", name: "Екатеринбург" },
       { code: "NSK", name: "Новосибирск" },
       { code: "KZN", name: "Казань" },
+      { code: "NNG", name: "Нижний Новгород" },
+      { code: "SMR", name: "Самара" },
+      { code: "ROV", name: "Ростов-на-Дону" },
+      { code: "UFA", name: "Уфа" },
     ];
   }
 };
@@ -60,5 +64,44 @@ export const checkAvailability = async (city) => {
   } catch (error) {
     console.error("Failed to check availability:", error);
     return { available: false };
+  }
+};
+
+/**
+ * Поиск городов по названию (Яндекс Карты Suggest API)
+ * @param {string} query - поисковый запрос
+ */
+export const searchYandexCities = async (query) => {
+  try {
+    const response = await api.get("/yandex-delivery/search-cities", {
+      params: { query },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to search cities:", error);
+    // Fallback - локальный поиск
+    if (query && query.length >= 2) {
+      const fallbackCities = [
+        "Москва",
+        "Санкт-Петербург",
+        "Новосибирск",
+        "Екатеринбург",
+        "Казань",
+        "Нижний Новгород",
+        "Челябинск",
+        "Самара",
+        "Уфа",
+        "Ростов-на-Дону",
+        "Воронеж",
+        "Пермь",
+        "Волгоград",
+        "Краснодар",
+        "Саратов",
+      ];
+      return fallbackCities
+        .filter((name) => name.toLowerCase().includes(query.toLowerCase()))
+        .map((name) => ({ code: name.substring(0, 3).toUpperCase(), name }));
+    }
+    return [];
   }
 };
