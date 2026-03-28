@@ -1,112 +1,124 @@
 /* ===================================
    TAGS TAB (ADMIN)
    =================================== */
-.tt-tags-tab {
+.tags-tab {
   display: flex;
   flex-direction: column;
   gap: 2rem;
 }
 
-.tt-tags-tab .tt-tags-overview {
-  background: white;
+.tags-tab .tags-overview {
+  background: var(--color-primary);
+  border: 1px solid var(--border-color);
   padding: 1.5rem;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--shadow-color);
 }
 
-.tt-tags-tab .tt-tags-overview h3 {
+.tags-tab .tags-overview h3 {
   margin-top: 0;
   margin-bottom: 1rem;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
-.tt-tags-tab .tt-all-tags-list {
+.tags-tab .tags-overview .all-tags-list {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
-.tt-tags-tab .tt-global-tag {
-  background: #e8f5e9;
-  color: #2e7d32;
+.tags-tab .tags-overview .global-tag {
+  background: var(--color-secondary-light);
+  color: var(--color-secondary);
   padding: 0.5rem 1rem;
   border-radius: 20px;
   font-size: 0.9rem;
   font-weight: 500;
 }
 
-.tt-tags-tab .tt-no-tags {
-  color: #666;
+.tags-tab .tags-overview .no-tags {
+  color: var(--color-gray-500);
   font-style: italic;
 }
 
-.tt-tags-tab .tt-search-group {
+.tags-tab .search-group {
   margin-bottom: 1rem;
 }
 
-.tt-tags-tab .tt-products-tags-list {
-  background: white;
+.tags-tab .products-tags-list {
+  background: var(--color-primary);
+  border: 1px solid var(--border-color);
   padding: 1.5rem;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--shadow-color);
 }
 
-.tt-tags-tab .tt-products-tags-list h3 {
+.tags-tab .products-tags-list h3 {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: 0;
   margin-bottom: 1rem;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
-.tt-tags-tab .tt-products-tags-list h3 .tt-count {
-  background: #f0f0f0;
+.tags-tab .products-tags-list h3 .count {
+  background: var(--color-gray-100);
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
   font-size: 0.9rem;
   font-weight: normal;
 }
 
-.tt-tags-tab .tt-product-tag-item {
+.tags-tab .product-tag-item {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 1rem;
   padding: 1rem 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--color-gray-200);
 }
 
-.tt-tags-tab .tt-product-tag-item:last-child {
+.tags-tab .product-tag-item:last-child {
   border-bottom: none;
 }
 
-.tt-tags-tab .tt-product-remains {
-  color: #666;
+.tags-tab .product-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.tags-tab .product-remains {
+  color: var(--color-gray-500);
   font-size: 0.9rem;
 }
 
-.tt-tags-tab .tt-product-tags {
+.tags-tab .product-tags {
   width: 100%;
   gap: 0.5rem;
   min-width: 200px;
   margin-bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
 }
 
-.tt-tags-tab .tt-product-tags .tt-tag {
-  padding: 0.3rem 0.6rem;
+.tags-tab .product-tags .tag {
+  padding: 0.4rem 0.8rem;
   border-radius: 16px;
   font-size: 0.75rem;
   font-weight: 500;
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  background: var(--color-secondary-light);
+  color: var(--color-secondary);
 }
 
-.tt-tags-tab .tt-remove-tag-btn {
+.tags-tab .remove-tag-btn {
   background: transparent;
   border: none;
-  color: #2e7d32;
+  color: var(--color-secondary);
   font-size: 1.2rem;
   line-height: 1;
   cursor: pointer;
@@ -120,93 +132,93 @@
   transition: all 0.2s;
 }
 
-.tt-tags-tab .tt-remove-tag-btn:hover {
-  background: rgba(46, 125, 50, 0.2);
-  color: #1b5e20;
+.tags-tab .remove-tag-btn:hover {
+  background: var(--color-secondary-light);
+  color: var(--color-secondary-dark);
 }
 
-.tt-tags-tab .tt-add-tag-form {
+.tags-tab .add-tag-form {
   display: flex;
   gap: 0.5rem;
   margin-left: auto;
 }
 
-.tt-tags-tab .tt-new-tag-input {
+.tags-tab .new-tag-input {
   padding: 0.5rem 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 0.9rem;
   width: 150px;
 }
 
-.tt-tags-tab .tt-tag-input-wrapper {
+.tags-tab .tag-input-wrapper {
   position: relative;
   width: 150px;
 }
 
-.tt-tags-tab .tt-tag-input-wrapper .tt-new-tag-input {
+.tags-tab .tag-input-wrapper .new-tag-input {
   padding: 0.5rem 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 0.9rem;
   width: 100%;
   box-sizing: border-box;
 }
 
-.tt-tags-tab .tt-tag-input-wrapper .tt-new-tag-input:focus {
+.tags-tab .tag-input-wrapper .new-tag-input:focus {
   outline: none;
-  border-color: #2e7d32;
+  border-color: var(--color-brand);
 }
 
-.tt-tags-tab .tt-tag-dropdown {
+.tags-tab .tag-input-wrapper .tag-dropdown {
   position: absolute;
   top: 100%;
   left: 0;
   right: 0;
-  background: white;
-  border: 1px solid #ddd;
+  background: var(--color-white);
+  border: 1px solid var(--border-color);
   border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px var(--shadow-dark);
   max-height: 200px;
   overflow-y: auto;
   z-index: 100;
   margin-top: 4px;
 }
 
-.tt-tags-tab .tt-tag-dropdown-item {
+.tags-tab .tag-input-wrapper .tag-dropdown-item {
   padding: 0.5rem 0.75rem;
   cursor: pointer;
   transition: background 0.2s;
-  color: #333;
+  color: var(--color-gray-700);
   font-size: 0.9rem;
 }
 
-.tt-tags-tab .tt-tag-dropdown-item:hover {
-  background: #e8f5e9;
+.tags-tab .tag-input-wrapper .tag-dropdown-item:hover {
+  background: var(--color-secondary-light);
 }
 
-.tt-tags-tab .tt-tag-dropdown-item.create-new {
-  background: #f0f7f0;
-  color: #2e7d32;
+.tags-tab .tag-input-wrapper .tag-dropdown-item.create-new {
+  background: var(--color-secondary-light);
+  color: var(--color-secondary);
   font-weight: 600;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--border-color);
 }
 
-.tt-tags-tab .tt-tag-dropdown-item.create-new:hover {
-  background: #d4edda;
+.tags-tab .tag-input-wrapper .tag-dropdown-item.create-new:hover {
+  background: var(--color-secondary);
 }
 
-.tt-tags-tab .tt-tag-dropdown-empty {
+.tags-tab .tag-input-wrapper .tag-dropdown-empty {
   padding: 0.75rem;
-  color: #999;
+  color: var(--color-gray-400);
   text-align: center;
   font-size: 0.9rem;
   font-style: italic;
 }
 
-.tt-tags-tab .tt-add-tag-btn {
-  background: #2e7d32;
-  color: white;
+.tags-tab .add-tag-btn {
+  background: var(--color-brand);
+  color: var(--color-white);
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 4px;
@@ -217,35 +229,36 @@
   white-space: nowrap;
 }
 
-.tt-tags-tab .tt-add-tag-btn:hover:not(:disabled) {
-  background: #1b5e20;
+.tags-tab .add-tag-btn:hover:not(:disabled) {
+  background: var(--color-brand-dark);
+  color: var(--color-white);
 }
 
-.tt-tags-tab .tt-add-tag-btn:disabled {
-  background: #ccc;
+.tags-tab .add-tag-btn:disabled {
+  background: var(--color-gray-400);
   cursor: not-allowed;
 }
 
 @media (max-width: 768px) {
-  .tt-tags-tab .tt-product-tag-item {
+  .tags-tab .product-tag-item {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .tt-tags-tab .tt-product-info {
+  .tags-tab .product-info {
     width: 100%;
   }
 
-  .tt-tags-tab .tt-product-tags {
+  .tags-tab .product-tags {
     width: 100%;
   }
 
-  .tt-tags-tab .tt-add-tag-form {
+  .tags-tab .add-tag-form {
     width: 100%;
     margin-left: 0;
   }
 
-  .tt-tags-tab .tt-new-tag-input {
+  .tags-tab .new-tag-input {
     flex: 1;
   }
 }

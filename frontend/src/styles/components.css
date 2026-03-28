@@ -1,27 +1,29 @@
+@import "./colors.css";
+
 /* ===================================
-   BREADCRUMBS
-   =================================== */
+    BREADCRUMBS
+    =================================== */
 .breadcrumbs {
   margin-bottom: 1rem;
   font-size: 0.9rem;
 }
 
 .breadcrumbs a {
-  color: #666;
+  color: var(--breadcrumb-default);
   text-decoration: none;
 }
 
 .breadcrumbs a:hover {
-  color: #2e7d32;
+  color: var(--link-hover);
 }
 
 .breadcrumbs span {
-  color: #333;
+  color: var(--breadcrumb-current);
 }
 
 /* ===================================
-   PRODUCT TAGS
-   =================================== */
+    PRODUCT TAGS
+    =================================== */
 .product-tags {
   display: flex;
   flex-wrap: wrap;
@@ -30,51 +32,72 @@
 }
 
 .product-tags .tag {
-  background: #e8f5e9;
-  color: #2e7d32;
-  padding: 0.25rem 0.6rem;
+  background: var(--product-tag-bg);
+  color: var(--product-tag-text);
+  padding: 0.4rem 0.6rem;
   border-radius: 16px;
   font-size: 0.8rem;
   font-weight: 500;
+  line-height: 1;
 }
 
 /* ===================================
-   GRAM CONTROLS
-   =================================== */
+    GRAM CONTROLS
+    =================================== */
 .gram-controls {
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: unset;
-  /* border: 2px solid black; */
-  border-radius: 20px;
+  /* border-radius: 20px; */
   overflow: hidden;
 }
 
 .gram-btn {
-  height: 100%;
-  padding: 0 0.4rem;
-  background: #2e7d32;
+  z-index: 7777;
+  height: 70%;
+  padding: 0.5rem 0.8rem;
+  /* background: var(--color-secondary-light); */
+  background-color: var(--color-brand-light);
   font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.2s;
-  color: white;
+  color: var(--color-secondary-dark);
 }
 
 .gram-btn:hover:not(:disabled) {
-  background: #1b5e20;
+  background: var(--color-secondary);
+  color: var(--color-brand);
 }
 
 .gram-btn:disabled {
-  opacity: 0.4;
+  /* opacity: 0.4; */
   cursor: not-allowed;
 }
 
+.gram-btn_minus {
+  margin-right: -0.4rem;
+  border-radius: 20px 0 0 20px;
+}
+
+.gram-btn_plus {
+  margin-left: -0.4rem;
+  border-radius: 0 20px 20px 0;
+}
+
 .gram-count {
+  z-index: 77777;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
   min-width: 50px;
   text-align: center;
   font-weight: 600;
   font-size: 0.95rem;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  background-color: white;
 }
 
 /* ===================================
@@ -84,13 +107,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #666;
+  color: var(--breadcrumb-default);
   line-height: 1;
 }
 
 /* ===================================
-   BUTTONS
-   =================================== */
+    BUTTONS
+    =================================== */
 .btn {
   padding: 10px 20px;
   border-radius: 4px;
@@ -99,32 +122,33 @@
 }
 
 .btn-primary {
-  background-color: #2e7d32;
-  color: white;
+  background-color: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
 }
 
 .btn-primary:hover {
-  background-color: #1b5e20;
+  background-color: var(--btn-primary-hover);
+  color: var(--btn-primary-text);
 }
 
 .btn-secondary {
-  background-color: #6c757d;
+  background-color: var(--btn-secondary-bg);
   color: white;
 }
 
 .btn-secondary:hover {
-  background-color: #545b62;
+  background-color: var(--btn-secondary-hover);
 }
 
 .btn-outline {
   background-color: transparent;
-  border: 1px solid #2e7d32;
-  color: #2e7d32;
+  border: 1px solid var(--btn-outline-border);
+  color: var(--btn-outline-text);
 }
 
 .btn-outline:hover {
-  background-color: #2e7d32;
-  color: white;
+  background-color: var(--btn-outline-hover-bg);
+  color: var(--btn-outline-hover-text);
 }
 
 .btn:disabled {
@@ -133,15 +157,15 @@
 }
 
 /* ===================================
-   MODAL STYLES
-   =================================== */
+    MODAL STYLES
+    =================================== */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--overlay-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -149,17 +173,18 @@
 }
 
 .modal-content {
-  background: white;
+  background: var(--color-primary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 2rem;
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 16px var(--shadow-dark);
 }
 
 .modal-content h2 {
   margin-bottom: 0;
-  color: #2e7d32;
+  color: var(--color-brand);
 }
 
 .modal-close {
@@ -170,7 +195,7 @@
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #666;
+  color: var(--breadcrumb-default);
 }
 
 .modal-actions {
@@ -201,7 +226,7 @@
 .form-group textarea {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 1rem;
   transition: border-color 0.3s;
@@ -210,7 +235,8 @@
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #2e7d32;
+  border-color: var(--input-focus-border);
+  box-shadow: 0 0 0 3px var(--input-focus-shadow);
 }
 
 .form-group textarea {
@@ -219,12 +245,12 @@
 }
 
 /* ===================================
-   SEARCH INPUT
-   =================================== */
+    SEARCH INPUT
+    =================================== */
 .search-input {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 1rem;
   transition: border-color 0.3s;
@@ -232,7 +258,8 @@
 
 .search-input:focus {
   outline: none;
-  border-color: #2e7d32;
+  border-color: var(--input-focus-border);
+  box-shadow: 0 0 0 3px var(--input-focus-shadow);
 }
 
 /* ===================================
@@ -242,26 +269,26 @@
   text-align: center;
   padding: 3rem;
   font-size: 1.2rem;
-  color: #666;
+  color: var(--breadcrumb-default);
 }
 
 .no-results {
   text-align: center;
   padding: 2rem;
-  color: #666;
+  color: var(--breadcrumb-default);
   font-size: 1rem;
 }
 
 .no-products {
   text-align: center;
   padding: 3rem;
-  color: #666;
+  color: var(--breadcrumb-default);
   font-size: 1.1rem;
 }
 
 /* ===================================
-   ORDER STATUS BADGES
-   =================================== */
+    ORDER STATUS BADGES
+    =================================== */
 .order-status {
   padding: 0.25rem 0.75rem;
   border-radius: 4px;
@@ -271,33 +298,33 @@
 }
 
 .status-ordered {
-  background: #fff3cd;
-  color: #856404;
+  background: var(--status-ordered-bg);
+  color: var(--status-ordered-text);
 }
 
 .status-paid {
-  background: #d1ecf1;
-  color: #0c5460;
+  background: var(--status-paid-bg);
+  color: var(--status-paid-text);
 }
 
 .status-shipping {
-  background: #cce5ff;
-  color: #004085;
+  background: var(--status-shipping-bg);
+  color: var(--status-shipping-text);
 }
 
 .status-completed {
-  background: #d4edda;
-  color: #155724;
+  background: var(--status-completed-bg);
+  color: var(--status-completed-text);
 }
 
 .status-cancelled {
-  background: #f8d7da;
-  color: #721c24;
+  background: var(--status-cancelled-bg);
+  color: var(--status-cancelled-text);
 }
 
 .status-cart {
-  background: #e0e0e0;
-  color: #555;
+  background: var(--status-cart-bg);
+  color: var(--status-cart-text);
 }
 
 /* ===================================
@@ -312,7 +339,7 @@
 
 .product-name {
   font-weight: 600;
-  color: #333;
+  color: var(--breadcrumb-current);
 }
 
 /* ===================================
@@ -325,15 +352,15 @@
 .city-input {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color-light);
   border-radius: 4px;
   font-size: 14px;
 }
 
 .city-input:focus {
   outline: none;
-  border-color: #2e7d32;
-  box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.1);
+  border-color: var(--input-focus-border);
+  box-shadow: 0 0 0 2px var(--input-focus-shadow);
 }
 
 .search-loading {
@@ -349,10 +376,10 @@
   top: 100%;
   left: 0;
   right: 0;
-  background: #fff;
-  border: 1px solid #ccc;
+  background: var(--color-white);
+  border: 1px solid var(--border-color-light);
   border-radius: 4px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px var(--shadow-color);
   z-index: 10;
   max-height: 250px;
   overflow-y: auto;
@@ -366,7 +393,7 @@
 }
 
 .city-option:hover {
-  background: #f5f5f5;
+  background: var(--color-gray-100);
 }
 
 .city-option:first-child {
@@ -380,13 +407,13 @@
 .popular-cities {
   margin-top: 8px;
   font-size: 13px;
-  color: #666;
+  color: var(--breadcrumb-default);
 }
 
 .popular-city-btn {
   background: none;
   border: none;
-  color: #2e7d32;
+  color: var(--color-brand);
   cursor: pointer;
   padding: 2px 6px;
   font-size: 13px;
@@ -394,16 +421,16 @@
 }
 
 .popular-city-btn:hover {
-  color: #1b5e20;
+  color: var(--color-brand-dark);
   text-decoration: underline;
 }
 
 /* ===================================
-   ERROR & SUCCESS MESSAGES
-   =================================== */
+    ERROR & SUCCESS MESSAGES
+    =================================== */
 .error-message {
-  color: #d32f2f;
-  background: #ffebee;
+  color: var(--error-text);
+  background: var(--error-bg);
   padding: 0.75rem;
   border-radius: 4px;
   margin-bottom: 1rem;
@@ -411,8 +438,8 @@
 }
 
 .success-message {
-  color: #2e7d32;
-  background: #e8f5e9;
+  color: var(--success-text);
+  background: var(--success-bg);
   padding: 0.75rem;
   border-radius: 4px;
   margin-bottom: 1rem;
@@ -425,8 +452,8 @@
 .tag-btn,
 .tag-filter-btn {
   padding: 0.5rem 1rem;
-  border: 1px solid #ddd;
-  background: #f5f5f5;
+  border: 1px solid var(--border-color);
+  background: var(--color-gray-100);
   border-radius: 20px;
   font-size: 0.9rem;
   cursor: pointer;
@@ -435,13 +462,13 @@
 
 .tag-btn:hover,
 .tag-filter-btn:hover {
-  border-color: #2e7d32;
-  background: #e8f5e9;
+  border-color: var(--color-brand);
+  background: var(--color-secondary-light);
 }
 
 .tag-btn.active,
 .tag-filter-btn.active {
-  background: #2e7d32;
-  color: white;
-  border-color: #2e7d32;
+  background: var(--tag-active-bg);
+  color: var(--tag-active-text);
+  border-color: var(--tag-active-border);
 }

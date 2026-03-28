@@ -20,7 +20,7 @@
 .pp-product-page .pp-main-media {
   border-radius: 12px;
   overflow: hidden;
-  background: #f8f8f8;
+  background: var(--color-gray-100);
   margin-bottom: 1rem;
   aspect-ratio: 1 / 1;
   display: flex;
@@ -41,7 +41,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #888;
+  color: var(--color-gray-500);
   font-size: 1.2rem;
 }
 
@@ -57,7 +57,7 @@
   border-radius: 8px;
   border: 2px solid transparent;
   padding: 0;
-  background: #f0f0f0;
+  background: var(--color-gray-100);
   cursor: pointer;
   overflow: hidden;
   display: flex;
@@ -66,7 +66,7 @@
 }
 
 .pp-product-page .pp-thumbnail.active {
-  border-color: #4a6fa5;
+  border-color: var(--color-secondary);
 }
 
 .pp-product-page .pp-thumbnail img {
@@ -80,6 +80,9 @@
 }
 
 .pp-product-page .pp-product-info {
+  padding: 1rem;
+  background: var(--color-gray-100);
+  border-radius: 12px;
   flex: 1;
   min-width: 300px;
 }
@@ -87,7 +90,7 @@
 .pp-product-page .pp-product-title {
   font-size: 2.5rem;
   margin-bottom: 0.5rem;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .pp-product-page .pp-product-price {
@@ -100,14 +103,14 @@
 
 .pp-product-page .pp-price-value {
   font-weight: bold;
-  color: #2c5530;
+  color: var(--color-cta);
   font-size: 1.8rem;
 }
 
 .pp-product-page .pp-product-description {
   margin-bottom: 2.5rem;
   line-height: 1.6;
-  color: #444;
+  color: var(--color-text-secondary);
 }
 
 .pp-product-page .pp-product-description h3 {
@@ -116,7 +119,7 @@
 }
 
 .pp-product-page .pp-gram-selection {
-  background: #f9f9f9;
+  /* background: var(--color-gray-100); */
   border-radius: 12px;
   margin-bottom: 2rem;
 }
@@ -135,27 +138,38 @@
 
 .pp-product-page .pp-gram-btn {
   padding: 0.7rem;
+  background: var(--color-secondary-light);
+  color: var(--color-secondary-dark);
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .pp-product-page .pp-gram-btn.minus,
 .pp-product-page .pp-gram-btn.minus50 {
-  /* padding: 0 0 0 1rem; */
   border-radius: 50% 0 0 50%;
-  color: #d32f2f;
 }
 
 .pp-product-page .pp-gram-btn.plus,
 .pp-product-page .pp-gram-btn.plus50 {
-  /* padding: 0 1rem 0 0; */
   border-radius: 0 50% 50% 0;
-  color: #2c5530;
+}
+
+.pp-product-page .pp-gram-btn:hover:not(:disabled) {
+  background: var(--color-secondary);
+  color: var(--color-white);
+}
+
+.pp-product-page .pp-gram-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: var(--color-secondary-light);
+  color: var(--color-secondary-dark);
 }
 
 .pp-product-page .pp-gram-display {
   display: flex;
   align-items: center;
-  background: white;
-  border: 1px solid #ccc;
+  background: var(--color-white);
   padding: 0.5rem 1rem;
 }
 
@@ -166,6 +180,7 @@
   text-align: center;
   outline: none;
   -moz-appearance: textfield;
+  background-color: transparent;
 }
 
 .pp-product-page .pp-gram-display input::-webkit-outer-spin-button,
@@ -176,11 +191,11 @@
 
 .pp-product-page .pp-gram-hint {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--color-gray-500);
 }
 
 .pp-product-page .pp-purchase-section {
-  background: #f0f7f0;
+  background: var(--color-primary-subtle);
   padding: 1.5rem;
   border-radius: 12px;
 }
@@ -195,11 +210,11 @@
 
 .pp-product-page .pp-total-price strong {
   font-size: 2rem;
-  color: #2c5530;
+  color: var(--color-cta);
 }
 
 .pp-product-page .pp-total-grams {
-  color: #666;
+  color: var(--color-gray-500);
   font-size: 1rem;
 }
 
@@ -223,26 +238,27 @@
 }
 
 .pp-product-page .pp-btn-primary {
-  background: #4a6fa5;
-  color: white;
+  background: var(--color-brand);
+  color: var(--color-white);
 }
 
 .pp-product-page .pp-btn-primary:hover {
-  background: #3a5a8a;
+  background: var(--color-brand-dark);
+  color: var(--color-white);
 }
 
 .pp-product-page .pp-btn-secondary {
-  background: #6c757d;
-  color: white;
+  background: var(--btn-secondary-bg);
+  color: var(--color-white);
 }
 
 .pp-product-page .pp-btn-secondary:hover {
-  background: #5a6268;
+  background: var(--btn-secondary-hover);
 }
 
 .pp-product-page .pp-sampler-note {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--color-gray-500);
   margin-top: 0.5rem;
 }
 
@@ -254,7 +270,7 @@
 }
 
 .pp-product-page .pp-product-error {
-  color: #d32f2f;
+  color: var(--color-accent);
 }
 
 @media (max-width: 768px) {

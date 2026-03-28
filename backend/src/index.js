@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const morgan = require("morgan");
+const path = require("path");
 require("dotenv").config();
 const { logDBOperation, logHTTPRequest } = require("./utils/logger");
 
@@ -11,6 +12,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // HTTP request logging with morgan
 app.use(morgan("dev"));
@@ -65,7 +67,6 @@ app.get("/", (req, res) => {
 
 // Logs route (for debugging)
 const fs = require("fs");
-const path = require("path");
 app.get("/api/logs", (req, res) => {
   const logFile = path.join(__dirname, "../logs/app.log");
   if (!fs.existsSync(logFile)) {

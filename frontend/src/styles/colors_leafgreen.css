@@ -1,0 +1,96 @@
+/* ===================================
+   COLOR PALETTE - CSS VARIABLES
+   =================================== */
+:root {
+  /* Primary Colors - Background */
+  --color-primary: #f4f7f2; /* Очень светлый, «воздушный» серо-зеленый */
+  --color-primary-subtle: #e8ede6; /* Легкий подтон фона */
+
+  /* Brand Color - Main Accent */
+  --color-brand: #2c5e2e; /* Глубокий лесной зеленый - кнопки «В корзину», заголовки */
+  --color-brand-dark: #1f4220; /* Темный вариант для hover */
+  --color-brand-light: #3d7a3f; /* Светлый вариант для акцентов */
+
+  /* Secondary Color */
+  --color-secondary: #8fbc8f; /* Dark Sea Green - иконки, скидки, второстепенные кнопки */
+  --color-secondary-dark: #769e76; /* Темный вариант для hover */
+  --color-secondary-light: #e8f0e8; /* Светлый фон */
+
+  /* Text Colors */
+  --color-text-primary: #1f2a1e; /* Основной текст - почти черный с зеленым подтоном */
+  --color-text-secondary: #5a6b4e; /* Второстепенный текст - для описаний */
+
+  /* CTA Accent - Dynamic */
+  --color-cta: #e6b422; /* Золотисто-медовый - кнопка «Оформить заказ» */
+  --color-cta-dark: #c99d1b; /* Темный вариант для hover */
+  --color-cta-light: #f5e08a; /* Светлый вариант для фона */
+
+  /* Neutral Colors */
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #e0e0e0;
+  --color-gray-300: #ddd;
+  --color-gray-400: #ccc;
+  --color-gray-500: #666666;
+  --color-gray-600: #555555;
+  --color-gray-700: #333333;
+
+  /* Border & Shadow */
+  --border-color: #d0d8ce;
+  --border-color-light: #e0e8de;
+  --shadow-color: rgba(44, 94, 46, 0.1);
+  --shadow-dark: rgba(44, 94, 46, 0.15);
+  --overlay-color: rgba(0, 0, 0, 0.5);
+
+  /* Component Specific Colors */
+  --header-bg: var(--color-brand);
+  --footer-bg: var(--color-brand);
+  --btn-primary-bg: var(--color-brand);
+  --btn-primary-hover: var(--color-brand-dark);
+  --btn-primary-text: var(--color-white);
+  --btn-secondary-bg: var(--color-secondary);
+  --btn-secondary-hover: var(--color-secondary-dark);
+  --btn-outline-border: var(--color-brand);
+  --btn-outline-text: var(--color-brand);
+  --btn-outline-hover-bg: var(--color-brand);
+  --btn-outline-hover-text: var(--color-white);
+  --gram-btn-bg: var(--color-brand);
+  --gram-btn-hover: var(--color-brand-dark);
+  --gram-btn-text: var(--color-white);
+  --tag-active-bg: var(--color-brand);
+  --tag-active-text: var(--color-white);
+  --tag-active-border: var(--color-brand);
+  --product-tag-bg: var(--color-secondary-light);
+  --product-tag-text: var(--color-secondary-dark);
+  --status-ordered-bg: var(--color-secondary-light);
+  --status-ordered-text: var(--color-secondary-dark);
+  --status-paid-bg: var(--color-cta-light);
+  --status-paid-text: var(--color-cta-dark);
+  --status-shipping-bg: var(--color-secondary-light);
+  --status-shipping-text: var(--color-secondary-dark);
+  --status-completed-bg: var(--color-secondary-light);
+  --status-completed-text: var(--color-secondary-dark);
+  --status-cancelled-bg: #fde8e8;
+  --status-cancelled-text: #dc5656;
+  --status-cart-bg: var(--color-gray-200);
+  --status-cart-text: var(--color-gray-600);
+  --error-bg: #fde8e8;
+  --error-text: #dc5656;
+  --success-bg: var(--color-secondary-light);
+  --success-text: var(--color-secondary-dark);
+  --modal-title: var(--color-brand);
+  --input-focus-border: var(--color-secondary);
+  --input-focus-shadow: rgba(143, 188, 143, 0.2);
+  --link-hover: var(--color-secondary-dark);
+  --breadcrumb-default: var(--color-text-secondary);
+  --breadcrumb-current: var(--color-text-primary);
+  --profile-link-bg: rgba(255, 255, 255, 0.15);
+  --profile-link-hover: rgba(255, 255, 255, 0.25);
+  --admin-link-bg: var(--color-cta);
+  --admin-link-hover: var(--color-cta-dark);
+  --btn-login-border: var(--color-white);
+  --btn-login-text: var(--color-white);
+  --btn-login-hover-bg: var(--color-white);
+  --btn-login-hover-text: var(--color-brand);
+}

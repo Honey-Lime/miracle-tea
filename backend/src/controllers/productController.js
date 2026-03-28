@@ -25,8 +25,23 @@ exports.getProductById = async (req, res) => {
 
 // Create a new product (admin only)
 exports.createProduct = async (req, res) => {
-  const { name, content, description, price, cost, remains, tags } = req.body;
+  const { name, content, description, price, cost, remains, tags, images } =
+    req.body;
   try {
+    // Преобразуем images в правильный формат если это массив строк
+    let formattedImages = images || [];
+    if (
+      Array.isArray(images) &&
+      images.length > 0 &&
+      typeof images[0] === "string"
+    ) {
+      formattedImages = images.map((url, index) => ({
+        url,
+        type: "image",
+        order: index,
+      }));
+    }
+
     const product = new Product({
       name,
       content,
@@ -35,6 +50,7 @@ exports.createProduct = async (req, res) => {
       cost,
       remains,
       tags: tags || [],
+      images: formattedImages,
     });
     const savedProduct = await product.save();
     res.status(201).json(savedProduct);
@@ -50,6 +66,17 @@ exports.updateProduct = async (req, res) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+
+    // Преобразуем images в правильный формат если это массив строк
+    if (req.body.images && Array.isArray(req.body.images)) {
+      req.body.images = req.body.images.map((img, index) => {
+        if (typeof img === "string") {
+          return { url: img, type: "image", order: index };
+        }
+        return { ...img, order: index };
+      });
+    }
+
     Object.assign(product, req.body);
     const updatedProduct = await product.save();
     res.json(updatedProduct);

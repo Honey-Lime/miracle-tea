@@ -3,13 +3,13 @@
    =================================== */
 .ep-edit-page h1 {
   margin-bottom: 2rem;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .ep-edit-page .ep-tabs {
   display: flex;
   gap: 0;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 2px solid var(--color-gray-200);
   margin-bottom: 2rem;
 }
 
@@ -21,23 +21,24 @@
   cursor: pointer;
   font-size: 1rem;
   font-weight: 500;
-  color: #666;
+  color: var(--color-gray-500);
   transition: all 0.3s;
 }
 
 .ep-edit-page .ep-tab:hover {
-  color: #2e7d32;
-  background: rgba(46, 125, 50, 0.05);
+  color: var(--color-brand);
+  background: var(--color-secondary-light);
 }
 
 .ep-edit-page .ep-tab.active {
-  color: #2e7d32;
-  border-bottom-color: #2e7d32;
+  color: var(--color-brand);
+  border-bottom-color: var(--color-brand);
 }
 
 .ep-edit-page .ep-tab-content {
-  background: white;
+  background: var(--color-primary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--shadow-color);
 }

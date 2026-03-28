@@ -3,7 +3,7 @@
    =================================== */
 .op-orders-page h1 {
   margin-bottom: 2rem;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .op-orders-page .op-loading,
@@ -14,12 +14,12 @@
 }
 
 .op-orders-page .op-error {
-  color: #d32f2f;
+  color: #dc5656;
 }
 
 .op-orders-page .op-no-orders {
   text-align: center;
-  color: #666;
+  color: var(--color-gray-500);
   padding: 3rem;
 }
 
@@ -30,15 +30,16 @@
 }
 
 .op-orders-page .op-order-row {
-  background: white;
+  background: var(--color-primary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--shadow-color);
   padding: 1.5rem;
   transition: box-shadow 0.3s;
 }
 
 .op-orders-page .op-order-row:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 8px var(--shadow-dark);
 }
 
 .op-orders-page .op-order-header {
@@ -47,16 +48,16 @@
   align-items: center;
   margin-bottom: 1rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--color-gray-200);
 }
 
 .op-orders-page .op-order-date {
   font-weight: 600;
-  color: #2e7d32;
+  color: var(--color-brand);
 }
 
 .op-orders-page .op-order-customer {
-  color: #666;
+  color: var(--color-gray-500);
 }
 
 .op-orders-page .op-order-details {
@@ -73,7 +74,7 @@
 
 .op-orders-page .op-order-items li {
   padding: 0.25rem 0;
-  color: #555;
+  color: var(--color-gray-600);
 }
 
 .op-orders-page .op-order-summary {
@@ -91,8 +92,8 @@
 .op-orders-page .op-order-row-item.total {
   font-weight: bold;
   font-size: 1.1rem;
-  color: #2e7d32;
-  border-top: 1px solid #e0e0e0;
+  color: var(--color-cta);
+  border-top: 1px solid var(--border-color);
   padding-top: 0.5rem;
   margin-top: 0.5rem;
 }
@@ -100,23 +101,23 @@
 .op-orders-page .op-order-address {
   grid-column: 1 / -1;
   padding-top: 1rem;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--color-gray-200);
   margin-top: 1rem;
-  color: #555;
+  color: var(--color-gray-600);
 }
 
 .op-orders-page .op-order-actions {
   grid-column: 1 / -1;
   padding-top: 1rem;
   margin-top: 1rem;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--color-gray-200);
   display: flex;
   gap: 1rem;
 }
 
 .op-orders-page .op-btn-shipping {
-  background: #007bff;
-  color: white;
+  background: var(--color-brand);
+  color: var(--color-white);
   border: none;
   padding: 0.5rem 1.5rem;
   border-radius: 4px;
@@ -126,12 +127,12 @@
 }
 
 .op-orders-page .op-btn-shipping:hover {
-  background: #0056b3;
+  background: var(--color-brand-dark);
 }
 
 .op-orders-page .op-btn-paid {
-  background: #28a745;
-  color: white;
+  background: var(--color-secondary);
+  color: var(--color-white);
   border: none;
   padding: 0.5rem 1.5rem;
   border-radius: 4px;
@@ -141,7 +142,8 @@
 }
 
 .op-orders-page .op-btn-paid:hover {
-  background: #1e7e34;
+  background: var(--color-secondary-dark);
+  color: var(--color-white);
 }
 
 @media (max-width: 768px) {

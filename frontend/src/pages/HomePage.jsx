@@ -22,9 +22,9 @@ const HomePage = () => {
               <p>Попробуйте небольшое количество, чтобы оценить вкус.</p>
             </div>
             <div className="hp-benefit-card">
-              <div className="hp-benefit-icon">💰</div>
-              <h3>Цена не завышена</h3>
-              <p>Доставка не включена в стоимость, поэтому цена честная.</p>
+              <div className="hp-benefit-icon">✅</div>
+              <h3>Знак качества</h3>
+              <p>Чай только высокого качества. Каждый продигустирован лично.</p>
             </div>
             <div className="hp-benefit-card">
               <div className="hp-benefit-icon">🎁</div>

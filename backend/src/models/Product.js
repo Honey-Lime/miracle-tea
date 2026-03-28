@@ -34,6 +34,13 @@ const productSchema = new mongoose.Schema(
         type: String,
       },
     ],
+    images: [
+      {
+        url: { type: String, required: true },
+        type: { type: String, enum: ["image", "video"], default: "image" },
+        order: { type: Number, default: 0 },
+      },
+    ],
   },
   {
     timestamps: true,

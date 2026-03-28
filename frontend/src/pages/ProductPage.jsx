@@ -66,7 +66,7 @@ const ProductPage = () => {
 
   const pricePerGram = product.price / 100;
   const totalPrice = (pricePerGram * selectedGrams).toFixed(2);
-  const media = product.content || [];
+  const media = product.images || [];
   const isSamplerAvailable = product.remains >= 10;
   const hasSamplerInCart = cartItems.some(
     (item) => item.pid === product._id && item.isSampler === true,
@@ -82,14 +82,16 @@ const ProductPage = () => {
         <div className="pp-product-media">
           <div className="pp-main-media">
             {media.length > 0 ? (
-              media[activeMediaIndex].endsWith(".mp4") ||
-              media[activeMediaIndex].endsWith(".webm") ? (
-                <video controls src={`/uploads/${media[activeMediaIndex]}`} />
-              ) : (
-                <img
-                  src={`/uploads/${media[activeMediaIndex]}`}
-                  alt={product.name}
+              media[activeMediaIndex].type === "video" ? (
+                <video
+                  autoPlay
+                  muted
+                  playsInline
+                  loop
+                  src={media[activeMediaIndex].url}
                 />
+              ) : (
+                <img src={media[activeMediaIndex].url} alt={product.name} />
               )
             ) : (
               <div className="pp-no-media">Нет изображения</div>
@@ -105,10 +107,10 @@ const ProductPage = () => {
                   }`}
                   onClick={() => setActiveMediaIndex(idx)}
                 >
-                  {item.endsWith(".mp4") || item.endsWith(".webm") ? (
+                  {item.type === "video" ? (
                     <span>🎥</span>
                   ) : (
-                    <img src={`/uploads/${item}`} alt={`${idx}`} />
+                    <img src={item.url} alt={`${idx}`} />
                   )}
                 </button>
               ))}

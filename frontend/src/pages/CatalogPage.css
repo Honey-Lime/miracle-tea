@@ -8,27 +8,35 @@
 .cp-catalog-page h1 {
   text-align: center;
   margin-bottom: 0.5rem;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .cp-catalog-page .cp-price-note {
   text-align: start;
-  color: #666;
+  color: var(--breadcrumb-default);
   font-size: 0.9rem;
   margin-bottom: 2rem;
 }
 
 .cp-catalog-page .cp-products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 2rem;
 }
 
 .cp-catalog-page .cp-product-card {
+  padding: 1rem;
   background: transparent;
   overflow: hidden;
-  transition: transform 0.3s;
+  transition: 1s;
   cursor: pointer;
+  border-radius: 12px;
+  transition: 0.2s ease-in-out;
+}
+
+.cp-catalog-page .cp-product-card:hover {
+  background-color: #f0f7f5;
+  transform: scale(1.04);
 }
 
 .cp-catalog-page .cp-product-card:hover .cp-product-image {
@@ -37,38 +45,42 @@
 
 .cp-catalog-page .cp-product-image {
   height: auto;
-  background: #ffffff;
+  background: var(--color-white);
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   transition: 0.2s ease-in-out;
   aspect-ratio: 1 / 1;
+  overflow: hidden;
 }
 
 .cp-catalog-page .cp-product-image img {
+  width: 100%;
+  height: 100%;
   max-width: 100%;
   max-height: 100%;
   object-fit: cover;
 }
 
 .cp-catalog-page .cp-no-image {
-  color: #999;
+  color: var(--color-gray-400);
   font-size: 0.9rem;
 }
 
 .cp-catalog-page .cp-product-info {
-  padding: 0 1rem;
-  gap: 1rem;
+  padding: 0 1rem 1rem;
+  gap: 0.7rem;
   min-width: unset;
   display: flex;
+  justify-content: space-between;
   flex-direction: column;
-  min-height: 220px;
+  /* min-height: 220px; */
 }
 
 .cp-catalog-page .cp-product-info h2 {
   margin-bottom: 0;
-  color: #2e7d32;
+  color: var(--color-text-primary);
   align-self: center;
 }
 
@@ -76,7 +88,7 @@
   width: 100%;
   text-wrap: auto;
   text-align: start;
-  color: #666;
+  color: var(--breadcrumb-default);
   margin-bottom: 0;
   font-size: 0.95rem;
   min-height: 4.5rem;
@@ -101,7 +113,7 @@
 .cp-catalog-page .cp-price {
   display: inline-flex;
   text-align: center;
-  color: #d32f2f;
+  color: var(--color-cta);
   font-size: 1.4rem;
   font-weight: 700;
   margin: unset;
@@ -111,27 +123,97 @@
   display: flex;
   align-items: center;
   font-size: 0.9rem;
-  color: gray;
+  color: var(--color-gray-500);
+}
+
+.cp-catalog-page .product-tags {
+  margin: unset;
 }
 
 .cp-catalog-page .cp-cart-order {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  align-self: center;
+  width: fit-content;
+  transform: scale(1.3);
+}
+
+/* Gram control buttons */
+.cp-catalog-page .gram-controls {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow: hidden;
+}
+
+.cp-catalog-page .gram-btn {
+  /* background: var(--gram-btn-bg); */
+  color: var(--gram-btn-text);
+  border: none;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cp-catalog-page .gram-btn:hover:not(:disabled) {
+  background: var(--gram-btn-hover-bg);
+}
+
+.cp-catalog-page .gram-btn:disabled {
+  /* background: var(--gram-btn-disabled-bg); */
+  color: var(--gram-btn-disabled-text);
+  cursor: not-allowed;
+}
+
+.cp-catalog-page .gram-count {
+  background: var(--gram-value-bg);
+  color: var(--gram-value-text);
+  /* padding: 0.5rem 1rem; */
+  font-size: 0.9rem;
+  font-weight: 600;
+  min-width: 3.5rem;
+  text-align: center;
+  transition: background 0.2s ease;
+  aspect-ratio: 1/1;
+}
+
+.cp-catalog-page .gram-controls:hover .gram-count {
+  background: var(--gram-value-hover-bg);
+}
+
+/* Add to cart button */
+.cp-catalog-page .cp-add-to-cart-btn {
+  display: flex;
+  justify-content: center;
   width: 100%;
+  padding: 2.5rem 0 0.25rem 0;
+  margin-top: -2.7rem;
+  font-size: 0.95rem;
+  border-radius: 18px;
+  background: var(--cart-btn-bg);
+  color: var(--cart-btn-text);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cp-catalog-page .cp-add-to-cart-btn:hover:not(:disabled) {
+  background: var(--cart-btn-hover-bg);
+  box-shadow: var(--cart-btn-hover-shadow);
+}
+
+.cp-catalog-page .cp-add-to-cart-btn:disabled {
+  background: var(--cart-btn-disabled-bg);
+  color: var(--cart-btn-disabled-text);
+  cursor: not-allowed;
 }
 
 .cp-catalog-page .cp-gram-controls {
   gap: 0;
   display: flex;
   flex-direction: row;
-}
-
-.cp-catalog-page .cp-add-to-cart-btn {
-  width: fit-content;
-  padding: 0.7rem;
-  font-size: 0.95rem;
-  margin-top: auto;
-  border-radius: 50%;
 }
 
 .cp-catalog-page .cp-tags-filter {
@@ -143,8 +225,8 @@
 
 .cp-catalog-page .cp-tag-filter-btn {
   padding: 0.5rem 1rem;
-  border: 1px solid #ddd;
-  background: #f5f5f5;
+  border: 1px solid var(--border-color);
+  background: var(--color-gray-100);
   border-radius: 20px;
   cursor: pointer;
   font-size: 0.9rem;
@@ -152,18 +234,18 @@
 }
 
 .cp-catalog-page .cp-tag-filter-btn:hover {
-  background: #e0e0e0;
+  background: var(--color-secondary-light);
 }
 
 .cp-catalog-page .cp-tag-filter-btn.active {
-  background: #2e7d32;
+  background: var(--color-secondary);
   color: white;
-  border-color: #2e7d32;
+  border-color: var(--color-secondary);
 }
 
 .cp-catalog-page .cp-no-products {
   text-align: center;
   padding: 3rem;
-  color: #666;
+  color: var(--breadcrumb-default);
   font-size: 1.1rem;
 }

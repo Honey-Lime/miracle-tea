@@ -2,12 +2,12 @@
    YANDEX DELIVERY CALCULATOR COMPONENT
    =================================== */
 .ydc-calculator {
-  background: #fff;
+  background: var(--color-primary);
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px var(--shadow-color);
   margin: 30px 0;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border-color);
 }
 
 .ydc-calculator .ydc-header {
@@ -25,7 +25,7 @@
 
 .ydc-calculator .ydc-header h3 {
   margin: 0;
-  color: #333;
+  color: var(--color-text-primary);
   font-size: 1.5rem;
 }
 
@@ -50,14 +50,14 @@
 .ydc-calculator .ydc-form-group label {
   font-weight: 600;
   margin-bottom: 8px;
-  color: #333;
+  color: var(--color-gray-700);
 }
 
 .ydc-calculator .ydc-form-group select,
 .ydc-calculator .ydc-form-group input[type="number"],
 .ydc-calculator .ydc-form-group input[type="text"] {
   padding: 12px 15px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color-light);
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.3s;
@@ -66,8 +66,8 @@
 .ydc-calculator .ydc-form-group select:focus,
 .ydc-calculator .ydc-form-group input[type="number"]:focus {
   outline: none;
-  border-color: #ffcc00;
-  box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.2);
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 3px rgba(169, 208, 92, 0.15);
 }
 
 .ydc-calculator .ydc-weight-input {
@@ -80,7 +80,7 @@
   flex: 1;
   height: 8px;
   border-radius: 4px;
-  background: #e0e0e0;
+  background: var(--color-gray-200);
   outline: none;
   -webkit-appearance: none;
 }
@@ -90,7 +90,7 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #ffcc00;
+  background: var(--color-primary);
   cursor: pointer;
 }
 
@@ -98,13 +98,13 @@
   font-weight: bold;
   min-width: 60px;
   text-align: center;
-  color: #333;
+  color: var(--color-gray-700);
 }
 
 .ydc-calculator .ydc-weight-hint,
 .ydc-calculator .ydc-hint {
   font-size: 0.9rem;
-  color: #777;
+  color: var(--color-gray-500);
   margin-top: 5px;
 }
 
@@ -115,8 +115,8 @@
 }
 
 .ydc-calculator .ydc-calculate-btn {
-  background: #ffcc00;
-  color: #000;
+  background: var(--color-brand);
+  color: var(--color-white);
   border: none;
   padding: 15px 25px;
   border-radius: 8px;
@@ -128,48 +128,48 @@
 }
 
 .ydc-calculator .ydc-calculate-btn:hover {
-  background: #ffdb4d;
+  background: var(--color-brand-dark);
   transform: translateY(-2px);
 }
 
 .ydc-calculator .ydc-calculate-btn:disabled {
-  background: #ccc;
+  background: var(--color-gray-400);
   cursor: not-allowed;
   transform: none;
 }
 
 .ydc-calculator .ydc-error-message {
-  background: #ffebee;
-  color: #c62828;
+  background: var(--color-accent-light);
+  color: var(--color-accent);
   padding: 12px 15px;
   border-radius: 8px;
-  border-left: 4px solid #c62828;
+  border-left: 4px solid var(--color-accent);
   margin-top: 15px;
 }
 
 .ydc-calculator .ydc-result {
-  background: #f1f8e9;
+  background: var(--color-primary-subtle);
   border-radius: 8px;
   padding: 20px;
   margin-top: 20px;
-  border-left: 4px solid #8bc34a;
+  border-left: 4px solid var(--color-brand);
 }
 
 .ydc-calculator .ydc-result h4 {
   margin-top: 0;
-  color: #2e7d32;
+  color: var(--color-brand);
 }
 
 .ydc-calculator .ydc-price {
   font-size: 2.5rem;
   font-weight: bold;
-  color: #333;
+  color: var(--color-gray-700);
   margin: 15px 0;
 }
 
 .ydc-calculator .ydc-details {
   margin-top: 15px;
-  color: #555;
+  color: var(--color-gray-600);
 }
 
 .ydc-calculator .ydc-details p {
@@ -178,7 +178,7 @@
 
 .ydc-calculator .ydc-note {
   font-style: italic;
-  color: #777;
+  color: var(--color-gray-500);
   font-size: 0.9rem;
 }
 
@@ -195,18 +195,18 @@
 .ydc-calculator .ydc-calculator-info {
   margin-top: 30px;
   padding-top: 20px;
-  border-top: 1px solid #eee;
-  color: #666;
+  border-top: 1px solid var(--color-gray-200);
+  color: var(--color-gray-600);
   font-size: 0.95rem;
 }
 
 .ydc-calculator .ydc-brand {
   margin-top: 15px;
-  color: #333;
+  color: var(--color-gray-700);
 }
 
 .ydc-calculator .ydc-brand a {
-  color: #ffcc00;
+  color: var(--color-brand);
   text-decoration: none;
   font-weight: 600;
 }
@@ -216,11 +216,11 @@
 }
 
 .ydc-calculator .ydc-placeholder {
-  background: #f5f5f5;
+  background: var(--color-gray-100);
   padding: 20px;
   border-radius: 8px;
   text-align: center;
-  color: #777;
+  color: var(--color-gray-500);
   margin-top: 20px;
 }
 
@@ -234,15 +234,15 @@
 .ydc-calculator .ydc-city-input {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color-light);
   border-radius: 4px;
   font-size: 14px;
 }
 
 .ydc-calculator .ydc-city-input:focus {
   outline: none;
-  border-color: #ffcc00;
-  box-shadow: 0 0 0 2px rgba(255, 204, 0, 0.1);
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 2px rgba(169, 208, 92, 0.1);
 }
 
 .ydc-calculator .ydc-search-loading {
@@ -258,10 +258,10 @@
   top: 100%;
   left: 0;
   right: 0;
-  background: #fff;
-  border: 1px solid #ccc;
+  background: var(--color-white);
+  border: 1px solid var(--border-color-light);
   border-radius: 4px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px var(--shadow-color);
   z-index: 10;
   max-height: 250px;
   overflow-y: auto;
@@ -275,7 +275,7 @@
 }
 
 .ydc-calculator .ydc-city-option:hover {
-  background: #f5f5f5;
+  background: var(--color-gray-100);
 }
 
 .ydc-calculator .ydc-city-option:first-child {
@@ -289,13 +289,13 @@
 .ydc-calculator .ydc-popular-cities {
   margin-top: 8px;
   font-size: 13px;
-  color: #666;
+  color: var(--color-gray-600);
 }
 
 .ydc-calculator .ydc-popular-city-btn {
   background: none;
   border: none;
-  color: #ffcc00;
+  color: var(--color-brand);
   cursor: pointer;
   padding: 2px 6px;
   font-size: 13px;
@@ -303,7 +303,7 @@
 }
 
 .ydc-calculator .ydc-popular-city-btn:hover {
-  color: #e6b800;
+  color: var(--color-brand-dark);
   text-decoration: underline;
 }
 

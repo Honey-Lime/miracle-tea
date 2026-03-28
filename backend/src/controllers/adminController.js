@@ -2,6 +2,8 @@ const Order = require("../models/Order");
 const Product = require("../models/Product");
 const Tag = require("../models/Tag");
 const { logError } = require("../utils/logger");
+const path = require("path");
+const fs = require("fs");
 
 // Get all orders with status except "cart"
 exports.getAllOrders = async (req, res) => {
@@ -49,7 +51,23 @@ exports.updateOrderStatus = async (req, res) => {
 // Add new product
 exports.addProduct = async (req, res) => {
   try {
-    const { name, content, description, price, cost, remains, tags } = req.body;
+    const { name, content, description, price, cost, remains, tags, images } =
+      req.body;
+
+    // Преобразуем images в правильный формат если это массив строк
+    let formattedImages = images || [];
+    if (
+      Array.isArray(images) &&
+      images.length > 0 &&
+      typeof images[0] === "string"
+    ) {
+      formattedImages = images.map((url, index) => ({
+        url,
+        type: "image",
+        order: index,
+      }));
+    }
+
     const product = new Product({
       name,
       content,
@@ -58,6 +76,7 @@ exports.addProduct = async (req, res) => {
       cost,
       remains,
       tags: tags || [],
+      images: formattedImages,
     });
     await product.save();
     res.status(201).json({ message: "Product added successfully", product });
@@ -141,19 +160,30 @@ exports.createTag = async (req, res) => {
 exports.addTagToProduct = async (req, res) => {
   const { productId, tag } = req.body;
   try {
-    // Сначала создаем тег если его нет
-    let tagDoc = await Tag.findOne({ name: tag.trim() });
+    const trimmedTag = tag.trim();
+
+    // Проверяем существует ли тег, если нет - создаем
+    let tagDoc = await Tag.findOne({ name: trimmedTag });
     if (!tagDoc) {
-      tagDoc = new Tag({ name: tag.trim() });
-      await tagDoc.save();
+      try {
+        tagDoc = new Tag({ name: trimmedTag });
+        await tagDoc.save();
+      } catch (createError) {
+        // Если тег уже был создан другим запросом (race condition)
+        if (createError.code === 11000) {
+          tagDoc = await Tag.findOne({ name: trimmedTag });
+        } else {
+          throw createError;
+        }
+      }
     }
 
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(404).json({ message: "Товар не найден" });
     }
-    if (!product.tags.includes(tag.trim())) {
-      product.tags.push(tag.trim());
+    if (!product.tags.includes(trimmedTag)) {
+      product.tags.push(trimmedTag);
       await product.save();
     }
     res.json(product);
@@ -175,5 +205,118 @@ exports.removeTagFromProduct = async (req, res) => {
     res.json(product);
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+};
+
+// Update product
+exports.updateProduct = async (req, res) => {
+  try {
+    const { name, content, description, price, cost, remains, tags, images } =
+      req.body;
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: "Товар не найден" });
+    }
+
+    product.name = name || product.name;
+    product.content = content || product.content;
+    product.description = description || product.description;
+    product.price = price !== undefined ? price : product.price;
+    product.cost = cost !== undefined ? cost : product.cost;
+    product.remains = remains !== undefined ? remains : product.remains;
+    product.tags = tags || product.tags;
+    product.images = images !== undefined ? images : product.images;
+
+    const updatedProduct = await product.save();
+    res.json(updatedProduct);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Delete product
+exports.deleteProduct = async (req, res) => {
+  try {
+    const product = await Product.findByIdAndDelete(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: "Товар не найден" });
+    }
+    res.json({ message: "Товар удален" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Upload product images/videos
+exports.uploadProductMedia = async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: "Файлы не загружены" });
+    }
+
+    const files = req.files.map((file) => ({
+      url: `/uploads/products/${file.filename}`,
+      type: file.mimetype.startsWith("video/") ? "video" : "image",
+      order: Date.now(), // Уникальный порядок для сортировки
+    }));
+
+    res.json({ files });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Reorder product images
+exports.reorderProductImages = async (req, res) => {
+  try {
+    const { images } = req.body;
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: "Товар не найден" });
+    }
+
+    // images - массив с новым порядком
+    product.images = images.map((img, index) => ({
+      ...img,
+      order: index,
+    }));
+
+    await product.save();
+    res.json(product);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Delete product image
+exports.deleteProductImage = async (req, res) => {
+  try {
+    const { imageIndex } = req.body;
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: "Товар не найден" });
+    }
+
+    if (!product.images[imageIndex]) {
+      return res.status(404).json({ message: "Изображение не найдено" });
+    }
+
+    // Удаляем файл с диска
+    const imagePath = path.join(
+      __dirname,
+      "../../",
+      product.images[imageIndex].url,
+    );
+    if (fs.existsSync(imagePath)) {
+      fs.unlinkSync(imagePath);
+    }
+
+    // Удаляем из массива
+    product.images.splice(imageIndex, 1);
+    await product.save();
+
+    res.json({ message: "Изображение удалено", product });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

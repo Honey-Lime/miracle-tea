@@ -1,50 +1,51 @@
 /* ===================================
    SUPPLY TAB (ADMIN)
    =================================== */
-.st-supply-tab {
+.supply-tab {
   display: flex;
   flex-direction: column;
   gap: 2rem;
 }
 
-.st-supply-tab .st-search-group {
+.supply-tab .search-group {
   display: flex;
   gap: 1rem;
   margin-bottom: 1rem;
 }
 
-.st-supply-tab .st-search-input {
+.supply-tab .search-input {
   flex: 1;
 }
 
-.st-supply-tab .st-search-results {
-  background: #f9f9f9;
+.supply-tab .search-results {
+  background: var(--color-primary);
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   padding: 0;
 }
 
-.st-supply-tab .st-search-results h3 {
+.supply-tab .search-results h3 {
   margin: 0;
   font-size: 1rem;
-  color: #333;
+  color: var(--color-text-primary);
   padding: 0.5rem 0.75rem;
-  background: #f0f0f0;
+  background: var(--color-primary-subtle);
   border-radius: 4px 4px 0 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.st-supply-tab .st-search-results h3 .st-count {
+.supply-tab .search-results h3 .count {
   font-weight: 600;
-  color: #666;
+  color: var(--color-gray-500);
   font-size: 0.85rem;
-  background: #e0e0e0;
+  background: var(--color-gray-200);
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
 }
 
-.st-supply-tab .st-results-list {
+.supply-tab .results-list {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -53,91 +54,91 @@
   gap: 0;
 }
 
-.st-supply-tab .st-result-item {
+.supply-tab .result-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.25rem 0.5rem;
-  background: white;
+  background: var(--color-white);
   border-radius: 0;
   cursor: pointer;
   transition: all 0.3s;
   border: none;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--color-gray-200);
   box-shadow: none;
   height: 2.5rem;
 }
 
-.st-supply-tab .st-result-item:hover {
-  background: #f9f9f9;
+.supply-tab .result-item:hover {
+  background: var(--color-gray-100);
 }
 
-.st-supply-tab .st-result-item.selected {
-  background: #e8f5e9;
+.supply-tab .result-item.selected {
+  background: var(--color-accent-light);
 }
 
-.st-supply-tab .st-product-name {
+.supply-tab .product-name {
   font-weight: 500;
-  color: #333;
+  color: var(--color-gray-700);
   font-size: 0.9rem;
 }
 
-.st-supply-tab .st-product-info {
+.supply-tab .product-info {
   min-height: unset;
   text-align: right;
-  color: #888;
+  color: var(--color-gray-500);
   font-size: 0.75rem;
   white-space: nowrap;
   margin-left: auto;
   padding-left: 1rem;
 }
 
-.st-supply-tab .st-add-stock-section {
-  background: #f9f9f9;
+.supply-tab .add-stock-section {
+  background: var(--color-primary-subtle);
   border-radius: 4px;
   padding: 1.5rem;
-  border: 2px solid #2e7d32;
+  border: 2px solid var(--color-brand);
 }
 
-.st-supply-tab .st-add-stock-section h3 {
+.supply-tab .add-stock-section h3 {
   margin: 0 0 1rem 0;
-  color: #2e7d32;
+  color: var(--color-brand);
 }
 
-.st-supply-tab .st-selected-product {
+.supply-tab .selected-product {
   margin-bottom: 1rem;
   padding: 0.75rem;
-  background: white;
+  background: var(--color-white);
   border-radius: 4px;
 }
 
-.st-supply-tab .st-quantity-group {
+.supply-tab .quantity-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   margin-bottom: 1rem;
 }
 
-.st-supply-tab .st-quantity-group label {
+.supply-tab .quantity-group label {
   font-weight: 500;
-  color: #333;
+  color: var(--color-gray-700);
 }
 
-.st-supply-tab .st-quantity-input {
+.supply-tab .quantity-input {
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 1rem;
 }
 
-.st-supply-tab .st-quantity-input:focus {
+.supply-tab .quantity-input:focus {
   outline: none;
-  border-color: #2e7d32;
+  border-color: var(--color-brand);
 }
 
-.st-supply-tab .st-btn-add-stock {
-  background: #ff9800;
-  color: white;
+.supply-tab .btn-add-stock {
+  background: var(--color-brand);
+  color: var(--color-white);
   border: none;
   padding: 0.75rem 2rem;
   border-radius: 4px;
@@ -147,13 +148,13 @@
   transition: all 0.3s;
 }
 
-.st-supply-tab .st-btn-add-stock:hover:not(:disabled) {
-  background: #f57c00;
+.supply-tab .btn-add-stock:hover:not(:disabled) {
+  background: var(--color-brand-dark);
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(255, 152, 0, 0.3);
+  box-shadow: 0 4px 8px rgba(26, 59, 93, 0.3);
 }
 
-.st-supply-tab .st-btn-add-stock:disabled {
-  background: #ccc;
+.supply-tab .btn-add-stock:disabled {
+  background: var(--color-gray-400);
   cursor: not-allowed;
 }

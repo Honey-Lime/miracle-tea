@@ -69,6 +69,18 @@ const CatalogPage = () => {
     navigate(`/product/${productId}`);
   };
 
+  // Получить первое изображение (не видео) для отображения в каталоге
+  const getFirstImage = (product) => {
+    if (!product.images || product.images.length === 0) return null;
+    // Если первый элемент - не видео, возвращаем его
+    if (product.images[0].type !== "video") {
+      return product.images[0];
+    }
+    // Иначе ищем первую фотографию
+    const firstPhoto = product.images.find((img) => img.type !== "video");
+    return firstPhoto || null;
+  };
+
   if (loading) return <div className="loading">Загрузка...</div>;
 
   return (
@@ -113,11 +125,8 @@ const CatalogPage = () => {
               onClick={(e) => handleCardClick(e, product._id)}
             >
               <div className="cp-product-image">
-                {product.content && product.content[0] ? (
-                  <img
-                    src={`/uploads/${product.content[0]}`}
-                    alt={product.name}
-                  />
+                {getFirstImage(product) ? (
+                  <img src={getFirstImage(product).url} alt={product.name} />
                 ) : (
                   <div className="cp-no-image">Нет изображения</div>
                 )}
@@ -147,7 +156,7 @@ const CatalogPage = () => {
                 <div className="cp-cart-order">
                   <div className="gram-controls">
                     <button
-                      className="gram-btn"
+                      className="gram-btn gram-btn_minus"
                       onClick={() =>
                         handleGramChange(product._id, -50, product.remains)
                       }
@@ -156,10 +165,10 @@ const CatalogPage = () => {
                       -50
                     </button>
                     <span className="gram-count">
-                      {gramCounts[product._id] || 50} г
+                      {gramCounts[product._id] || 50}г
                     </span>
                     <button
-                      className="gram-btn"
+                      className="gram-btn gram-btn_plus"
                       onClick={() =>
                         handleGramChange(product._id, 50, product.remains)
                       }

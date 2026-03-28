@@ -3,6 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import AddTeaTab from "./AddTeaTab";
 import SupplyTab from "./SupplyTab";
 import TagsTab from "./TagsTab";
+import ProductsTab from "./ProductsTab";
 
 const EditPage = () => {
   const [activeTab, setActiveTab] = useState("add");
@@ -29,11 +30,18 @@ const EditPage = () => {
         >
           Теги
         </button>
+        <button
+          className={`ep-tab ${activeTab === "products" ? "active" : ""}`}
+          onClick={() => setActiveTab("products")}
+        >
+          Товары
+        </button>
       </div>
       <div className="ep-tab-content">
         {activeTab === "add" && <AddTeaTab />}
         {activeTab === "supply" && <SupplyTab />}
         {activeTab === "tags" && <TagsTab />}
+        {activeTab === "products" && <ProductsTab />}
       </div>
     </div>
   );
