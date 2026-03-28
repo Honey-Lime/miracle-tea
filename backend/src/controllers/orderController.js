@@ -5,7 +5,7 @@ const { logError } = require("../utils/logger");
 
 // Create a new order
 exports.createOrder = async (req, res) => {
-  const { list, delivery, userId } = req.body;
+  const { list, delivery } = req.body;
 
   try {
     // Validate products and calculate total
@@ -46,17 +46,18 @@ exports.createOrder = async (req, res) => {
     );
 
     const order = new Order({
-      userId: userId || null,
+      userId: req.userId || null,
       list: listWithPrices,
       delivery,
       totalPrice,
+      status: "ordered",
     });
 
     const savedOrder = await order.save();
 
     // Update user's total and delivery history if logged in
-    if (userId) {
-      const user = await User.findById(userId);
+    if (req.userId) {
+      const user = await User.findById(req.userId);
       if (user) {
         user.total += totalPrice;
         user.delivery.last = delivery.address;
@@ -328,6 +329,35 @@ exports.updateOrder = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
     Object.assign(order, req.body);
+    const updatedOrder = await order.save();
+    res.json(updatedOrder);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Update order status specifically
+exports.updateOrderStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const validStatuses = [
+      "ordered",
+      "paid",
+      "shipping",
+      "completed",
+      "cancelled",
+    ];
+
+    if (!status || !validStatuses.includes(status)) {
+      return res.status(400).json({ message: "Неверный статус заказа" });
+    }
+
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: "Заказ не найден" });
+    }
+
+    order.status = status;
     const updatedOrder = await order.save();
     res.json(updatedOrder);
   } catch (error) {

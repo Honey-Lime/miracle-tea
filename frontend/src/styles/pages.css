@@ -1,0 +1,24 @@
+/* ===================================
+   СТИЛИ СТРАНИЦ (ВЫСОКИЙ ПРИОРИТЕТ)
+   ===================================
+   Этот файл импортируется после index.css,
+   поэтому стили страниц имеют приоритет над
+   общими стилями из components.css
+   =================================== */
+
+/* Страницы */
+@import url("../pages/HomePage.css");
+@import url("../pages/CatalogPage.css");
+@import url("../pages/ProductPage.css");
+@import url("../pages/CartPage.css");
+@import url("../pages/CheckoutPage.css");
+@import url("../pages/ProfilePage.css");
+@import url("../pages/ThankYouPage.css");
+@import url("../pages/AdminPanel.css");
+
+/* Админ-панель */
+@import url("../pages/admin/AddTeaTab.css");
+@import url("../pages/admin/SupplyTab.css");
+@import url("../pages/admin/TagsTab.css");
+@import url("../pages/admin/OrdersPage.css");
+@import url("../pages/admin/EditPage.css");

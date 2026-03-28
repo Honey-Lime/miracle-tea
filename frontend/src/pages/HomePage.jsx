@@ -1,34 +1,33 @@
-import "./HomePage.css";
 import YandexDeliveryCalculator from "../components/YandexDeliveryCalculator";
 
 const HomePage = () => {
   return (
-    <div className="home-page">
-      <section className="hero">
+    <div className="hp-home-page">
+      <section className="hp-hero">
         <div className="container">
           <h1>Чудо чай</h1>
-          <p className="subtitle">
+          <p className="hp-subtitle">
             Здесь вы можете заказать качественный чай по лояльной цене
           </p>
         </div>
       </section>
 
-      <section className="benefits">
+      <section className="hp-benefits">
         <div className="container">
           <h2>Наши преимущества</h2>
-          <div className="benefits-grid">
-            <div className="benefit-card">
-              <div className="benefit-icon">🍃</div>
+          <div className="hp-benefits-grid">
+            <div className="hp-benefit-card">
+              <div className="hp-benefit-icon">🍃</div>
               <h3>Минимальный заказ 50г</h3>
               <p>Попробуйте небольшое количество, чтобы оценить вкус.</p>
             </div>
-            <div className="benefit-card">
-              <div className="benefit-icon">💰</div>
+            <div className="hp-benefit-card">
+              <div className="hp-benefit-icon">💰</div>
               <h3>Цена не завышена</h3>
               <p>Доставка не включена в стоимость, поэтому цена честная.</p>
             </div>
-            <div className="benefit-card">
-              <div className="benefit-icon">🎁</div>
+            <div className="hp-benefit-card">
+              <div className="hp-benefit-icon">🎁</div>
               <h3>Снимите пробу</h3>
               <p>Можно заказать пробники по 10г</p>
             </div>
@@ -36,22 +35,18 @@ const HomePage = () => {
         </div>
       </section>
 
-      <section className="delivery">
+      <section className="hp-delivery">
         <div className="container">
           <h2>Доставка</h2>
           <p>
             Мы находимся в Воронеже и осуществляем доставку через{" "}
-            <strong>Яндекс Доставку</strong>— сервис, который обеспечивает
-            быструю и надежную доставку по всей России. Теперь доступна новая
-            интеграция с <strong>Яндекс Доставкой Next Day Delivery</strong>,
-            позволяющая рассчитать стоимость доставки на следующий день в
-            крупные города России.
+            <strong>Яндекс Доставку</strong>.
           </p>
           <YandexDeliveryCalculator />
         </div>
       </section>
 
-      <section className="about">
+      <section className="hp-about">
         <div className="container">
           <h2>О нас</h2>
           <p>

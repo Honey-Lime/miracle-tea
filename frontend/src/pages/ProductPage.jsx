@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { getProduct } from "../services/productService";
-import "./ProductPage.css";
 
 const ProductPage = () => {
   const { id } = useParams();
@@ -58,11 +57,11 @@ const ProductPage = () => {
   };
 
   if (loading) {
-    return <div className="product-loading">Загрузка товара...</div>;
+    return <div className="pp-product-loading">Загрузка товара...</div>;
   }
 
   if (error || !product) {
-    return <div className="product-error">{error || "Товар не найден"}</div>;
+    return <div className="pp-product-error">{error || "Товар не найден"}</div>;
   }
 
   const pricePerGram = product.price / 100;
@@ -74,11 +73,14 @@ const ProductPage = () => {
   );
 
   return (
-    <div className="product-page">
-      <div className="product-container">
+    <div className="pp-product-page container">
+      <nav className="breadcrumbs">
+        <Link to="/catalog">Каталог</Link> / <span>{product.name}</span>
+      </nav>
+      <div className="pp-product-container">
         {/* Левая колонка: медиа */}
-        <div className="product-media">
-          <div className="main-media">
+        <div className="pp-product-media">
+          <div className="pp-main-media">
             {media.length > 0 ? (
               media[activeMediaIndex].endsWith(".mp4") ||
               media[activeMediaIndex].endsWith(".webm") ? (
@@ -90,15 +92,17 @@ const ProductPage = () => {
                 />
               )
             ) : (
-              <div className="no-media">Нет изображения</div>
+              <div className="pp-no-media">Нет изображения</div>
             )}
           </div>
           {media.length > 1 && (
-            <div className="media-thumbnails">
+            <div className="pp-media-thumbnails">
               {media.map((item, idx) => (
                 <button
                   key={idx}
-                  className={`thumbnail ${idx === activeMediaIndex ? "active" : ""}`}
+                  className={`pp-thumbnail ${
+                    idx === activeMediaIndex ? "active" : ""
+                  }`}
                   onClick={() => setActiveMediaIndex(idx)}
                 >
                   {item.endsWith(".mp4") || item.endsWith(".webm") ? (
@@ -113,76 +117,78 @@ const ProductPage = () => {
         </div>
 
         {/* Правая колонка: информация и покупка */}
-        <div className="product-info">
-          <h1 className="product-title">{product.name}</h1>
-          <div className="product-price">
-            <span className="price-value">
-              {(pricePerGram * 10).toFixed(2)} ₽/10г
-            </span>
-            <span className="remains">Остаток: {product.remains} г</span>
+        <div className="pp-product-info">
+          <h1 className="pp-product-title">{product.name}</h1>
+          {product.tags && product.tags.length > 0 && (
+            <div className="product-tags">
+              {product.tags.map((tag, index) => (
+                <span key={index} className="tag">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+          <div className="pp-product-price">
+            <span className="pp-price-value">{product.price} ₽/100г</span>
+            {product.remains < 250 && (
+              <span className="pp-remains">Остаток: {product.remains} г</span>
+            )}
           </div>
 
-          <div className="product-description">
+          <div className="pp-product-description">
             <h3>Описание</h3>
             <p>{product.description}</p>
           </div>
 
-          <div className="gram-selection">
+          <div className="pp-gram-selection">
             <h3>Выберите количество грамм</h3>
-            <div className="gram-controls">
+            <div className="pp-gram-controls">
               <button
-                className="gram-btn minus"
-                onClick={() => handleGramChange(-10)}
-                disabled={selectedGrams <= 50}
+                className="pp-gram-btn minus50"
+                onClick={() => handleGramChange(-50)}
+                disabled={selectedGrams - 50 < 50}
               >
-                –10 г
+                -50 г
               </button>
-              <div className="gram-display">
+              <div className="pp-gram-display">
                 <input
                   type="number"
                   min="50"
                   max={product.remains}
+                  step="50"
                   value={selectedGrams}
                   onChange={(e) => handleSetGrams(Number(e.target.value))}
                 />
                 <span> г</span>
               </div>
               <button
-                className="gram-btn plus"
-                onClick={() => handleGramChange(10)}
-                disabled={selectedGrams >= product.remains}
-              >
-                +10 г
-              </button>
-              <button
-                className="gram-btn plus50"
+                className="pp-gram-btn plus50"
                 onClick={() => handleGramChange(50)}
                 disabled={selectedGrams + 50 > product.remains}
               >
                 +50 г
               </button>
             </div>
-            <div className="gram-hint">
-              Минимальный заказ — 50 г. Шаг изменения — 10 г.
-            </div>
+            <div className="pp-gram-hint">Минимальный заказ — 50 г.</div>
           </div>
 
-          <div className="purchase-section">
-            <div className="total-price">
+          <div className="pp-purchase-section">
+            <div className="pp-total-price">
               <span>Итого:</span>
               <strong>{totalPrice} ₽</strong>
-              <span className="total-grams">({selectedGrams} г)</span>
+              <span className="pp-total-grams">({selectedGrams} г)</span>
             </div>
-            <div className="action-buttons">
+            <div className="pp-action-buttons">
               <button
-                className="btn btn-primary add-to-cart"
+                className="pp-btn pp-btn-primary"
                 onClick={() => handleAddToCart(false)}
                 disabled={selectedGrams > product.remains}
+                title="Добавить в корзину"
               >
-                Добавить в корзину
+                🛒
               </button>
               <button
-                className="btn btn-secondary sampler"
+                className="pp-btn pp-btn-secondary"
                 onClick={() => handleAddToCart(true)}
                 disabled={!isSamplerAvailable || hasSamplerInCart}
                 title={
@@ -194,7 +200,7 @@ const ProductPage = () => {
                 Хочу пробник (10 г)
               </button>
             </div>
-            <p className="sampler-note">
+            <p className="pp-sampler-note">
               * Пробник можно добавить только один раз для каждого вида чая.
             </p>
           </div>

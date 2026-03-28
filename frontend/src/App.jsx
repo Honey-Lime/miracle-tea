@@ -6,7 +6,9 @@ import CatalogPage from "./pages/CatalogPage";
 import ProductPage from "./pages/ProductPage";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
+import ThankYouPage from "./pages/ThankYouPage";
 import ProfilePage from "./pages/ProfilePage";
+import AdminPanel from "./pages/AdminPanel";
 import LoginModal from "./components/LoginModal";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
@@ -27,7 +29,9 @@ function App() {
                   <Route path="/product/:id" element={<ProductPage />} />
                   <Route path="/cart" element={<CartPage />} />
                   <Route path="/checkout" element={<CheckoutPage />} />
+                  <Route path="/thank-you" element={<ThankYouPage />} />
                   <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/admin/*" element={<AdminPanel />} />
                 </Routes>
               </main>
               <Footer />

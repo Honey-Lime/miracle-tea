@@ -1,71 +1,27 @@
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: white;
-  border-radius: 8px;
-  padding: 2rem;
-  width: 90%;
-  max-width: 400px;
+/* ===================================
+   LOGIN MODAL COMPONENT
+   =================================== */
+.lgn-modal-content {
   position: relative;
 }
 
-.modal-close {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #666;
-}
-
-.modal-content h2 {
+.lgn-modal-content h2 {
   margin-bottom: 1.5rem;
   color: #333;
 }
 
-.form-group {
-  margin-bottom: 1rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-.error {
+.lgn-modal-content .lgn-error {
   color: #d32f2f;
   margin-bottom: 1rem;
 }
 
-.toggle-mode {
+.lgn-modal-content .lgn-toggle-mode {
   margin-top: 1rem;
   text-align: center;
   color: #666;
 }
 
-.link-btn {
+.lgn-modal-content .lgn-link-btn {
   background: none;
   border: none;
   color: #2e7d32;
@@ -74,12 +30,33 @@
   margin-left: 0.5rem;
 }
 
-.btn-loading {
+.lgn-modal-content .lgn-forgot-password-btn {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  padding: 0;
+}
+
+.lgn-modal-content .lgn-form-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.lgn-modal-content .lgn-form-actions .btn {
+  flex-shrink: 0;
+  padding: 0.5rem 1rem;
+  min-width: auto;
+}
+
+.lgn-modal-content .lgn-btn-loading {
   position: relative;
   color: transparent;
 }
 
-.btn-loading::after {
+.lgn-modal-content .lgn-btn-loading::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -90,18 +67,51 @@
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-top-color: white;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: lgn-spin 0.8s linear infinite;
 }
 
-@keyframes spin {
+@keyframes lgn-spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-.hint {
+.lgn-modal-content .lgn-hint {
   display: block;
   margin-top: 4px;
   font-size: 0.85rem;
   color: #666;
+}
+
+.lgn-modal-content .lgn-phone-input-wrapper,
+.lgn-modal-content .lgn-code-input-wrapper {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.lgn-modal-content .lgn-phone-input-wrapper input,
+.lgn-modal-content .lgn-code-input-wrapper input {
+  flex: 1;
+}
+
+.lgn-modal-content .lgn-btn-sm {
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.lgn-modal-content .lgn-code-input {
+  text-align: center;
+  font-size: 1.2rem;
+  letter-spacing: 4px;
+  font-weight: bold;
+}
+
+.lgn-modal-content .lgn-success-message {
+  color: #2e7d32;
+  background: #e8f5e9;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
 }

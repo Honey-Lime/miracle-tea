@@ -29,6 +29,11 @@ const productSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    tags: [
+      {
+        type: String,
+      },
+    ],
   },
   {
     timestamps: true,

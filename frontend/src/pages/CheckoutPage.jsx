@@ -1,4 +1,5 @@
 import { useState, useContext, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
@@ -7,12 +8,12 @@ import {
   calculateYandexDelivery,
   searchYandexCities,
 } from "../services/yandexDeliveryService";
-import "./CheckoutPage.css";
 
 const CheckoutPage = () => {
   const { cartItems, totalPrice, clearCart } = useContext(CartContext);
   const { user } = useContext(AuthContext);
   const { addToast } = useToast();
+  const navigate = useNavigate();
   const [deliveryMethod, setDeliveryMethod] = useState("pickup");
   const [address, setAddress] = useState("");
   const [deliveryPrice, setDeliveryPrice] = useState(0);
@@ -36,13 +37,16 @@ const CheckoutPage = () => {
     const fetchCities = async () => {
       const citiesList = await getYandexCities();
       setCities(citiesList);
-      if (citiesList.length > 0) {
-        setSelectedCityName(citiesList[0].name);
-        setSearchQuery(citiesList[0].name);
-      }
     };
     fetchCities();
   }, []);
+
+  // Сбрасываем стоимость доставки при переключении на самовывоз
+  useEffect(() => {
+    if (deliveryMethod === "pickup") {
+      setDeliveryPrice(0);
+    }
+  }, [deliveryMethod]);
 
   // Поиск городов при вводе
   useEffect(() => {
@@ -111,19 +115,67 @@ const CheckoutPage = () => {
     }
   };
 
-  const handlePlaceOrder = () => {
-    // Заглушка: здесь будет отправка заказа на сервер
-    addToast("Заказ оформлен! (заглушка)", "success");
-    clearCart();
+  const handlePlaceOrder = async () => {
+    try {
+      const cartItemsWithDetails = cartItems.map((item) => ({
+        pid: item.pid,
+        count: item.count,
+        isSampler: item.isSampler,
+      }));
+
+      const deliveryAddress = {
+        city: deliveryMethod === "pickup" ? "Воронеж" : selectedCityName,
+        street: deliveryMethod === "pickup" ? "Самовывоз" : address,
+        fullAddress:
+          deliveryMethod === "pickup"
+            ? "Самовывоз"
+            : address
+            ? `${selectedCityName}, ${address}`
+            : selectedCityName,
+      };
+
+      const orderData = {
+        userId: user?._id,
+        list: cartItemsWithDetails,
+        delivery: {
+          address: deliveryAddress,
+          price: deliveryPrice,
+        },
+      };
+
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Ошибка при оформлении заказа");
+      }
+
+      const order = await response.json();
+      addToast("Заказ успешно оформлен!", "success");
+      await clearCart();
+
+      // Перенаправление на страницу благодарности с передачей orderId
+      navigate("/thank-you", { state: { orderId: order._id } });
+    } catch (error) {
+      addToast(error.message, "error");
+      console.error(error);
+    }
   };
 
   const totalWithDelivery = totalPrice + deliveryPrice;
 
   return (
-    <div className="checkout-page">
+    <div className="chp-checkout-page container">
       <h1>Оформление заказа</h1>
-      <div className="checkout-content">
-        <div className="order-summary">
+      <div className="chp-checkout-content">
+        <div className="chp-order-summary">
           <h2>Ваш заказ</h2>
           <ul>
             {cartItems.map((item) => (
@@ -133,15 +185,15 @@ const CheckoutPage = () => {
               </li>
             ))}
           </ul>
-          <div className="summary-total">
+          <div className="chp-summary-total">
             <strong>Сумма товаров: {totalPrice} ₽</strong>
             <br />
             <small>Общий вес: {totalWeight} г</small>
           </div>
         </div>
-        <div className="delivery-section">
+        <div className="chp-delivery-section">
           <h2>Доставка</h2>
-          <div className="delivery-method">
+          <div className="chp-delivery-method">
             <label>
               <input
                 type="radio"
@@ -150,6 +202,9 @@ const CheckoutPage = () => {
                 onChange={(e) => setDeliveryMethod(e.target.value)}
               />
               Самовывоз (бесплатно)
+              <div className="chp-pickup-address">
+                г. Воронеж, Героев Сибиряков 1 (Яндекс маркет)
+              </div>
             </label>
             <label>
               <input
@@ -162,11 +217,11 @@ const CheckoutPage = () => {
             </label>
           </div>
           {deliveryMethod === "cdek" && (
-            <div className="cdek-calculator">
+            <div className="chp-cdek-calculator">
               <h3>Калькулятор Яндекс Доставки</h3>
-              <div className="address-input">
+              <div className="chp-address-input">
                 <label>Город доставки</label>
-                <div className="city-search" ref={searchRef}>
+                <div className="chp-city-search" ref={searchRef}>
                   <input
                     type="text"
                     value={searchQuery}
@@ -175,16 +230,18 @@ const CheckoutPage = () => {
                       searchResults.length > 0 && setShowDropdown(true)
                     }
                     placeholder="Начните вводить название города"
-                    className="city-input"
+                    className="chp-city-input"
                     autoComplete="off"
                   />
-                  {isSearching && <span className="search-loading">⏳</span>}
+                  {isSearching && (
+                    <span className="chp-search-loading">⏳</span>
+                  )}
                   {showDropdown && searchResults.length > 0 && (
-                    <div className="city-dropdown">
+                    <div className="chp-city-dropdown">
                       {searchResults.map((city) => (
                         <div
                           key={city.code}
-                          className="city-option"
+                          className="chp-city-option"
                           onClick={() => handleCitySelect(city)}
                         >
                           {city.name}
@@ -194,13 +251,13 @@ const CheckoutPage = () => {
                   )}
                 </div>
                 {cities.length > 0 && !searchQuery && (
-                  <div className="popular-cities">
+                  <div className="chp-popular-cities">
                     <span>Популярные: </span>
                     {cities.slice(0, 5).map((city, index) => (
                       <button
                         key={city.code}
                         type="button"
-                        className="popular-city-btn"
+                        className="chp-popular-city-btn"
                         onClick={() => handleCitySelect(city)}
                       >
                         {city.name}
@@ -210,7 +267,7 @@ const CheckoutPage = () => {
                   </div>
                 )}
               </div>
-              <div className="address-input">
+              <div className="chp-address-input">
                 <label>Адрес доставки (улица, дом)</label>
                 <input
                   type="text"
@@ -219,7 +276,7 @@ const CheckoutPage = () => {
                   placeholder="Улица, дом, квартира"
                 />
               </div>
-              <div className="weight-info">
+              <div className="chp-weight-info">
                 <p>Вес заказа: {totalWeight} г</p>
               </div>
               <button
@@ -230,22 +287,22 @@ const CheckoutPage = () => {
                 {isCalculating ? "Расчет..." : "Рассчитать доставку"}
               </button>
               {deliveryPrice > 0 && (
-                <p className="delivery-result">
+                <p className="chp-delivery-result">
                   Стоимость доставки: <strong>{deliveryPrice} ₽</strong>
                 </p>
               )}
             </div>
           )}
         </div>
-        <div className="final-total">
+        <div className="chp-final-total">
           <h2>Итого к оплате</h2>
-          <div className="total-breakdown">
+          <div className="chp-total-breakdown">
             <div>Товары: {totalPrice} ₽</div>
             <div>Доставка: {deliveryPrice} ₽</div>
-            <div className="grand-total">Всего: {totalWithDelivery} ₽</div>
+            <div className="chp-grand-total">Всего: {totalWithDelivery} ₽</div>
           </div>
           <button
-            className="btn btn-primary btn-large"
+            className="btn btn-primary chp-btn-large"
             onClick={handlePlaceOrder}
           >
             Оплатить

@@ -1,22 +1,23 @@
-.product-page {
-  padding: 2rem 1rem;
-  max-width: 1200px;
-  margin: 0 auto;
+/* ===================================
+   PRODUCT PAGE
+   =================================== */
+.pp-product-page {
+  padding: 2rem 0;
 }
 
-.product-container {
+.pp-product-page .pp-product-container {
   display: flex;
   flex-wrap: wrap;
   gap: 3rem;
   margin-top: 2rem;
 }
 
-.product-media {
+.pp-product-page .pp-product-media {
   flex: 1;
   min-width: 300px;
 }
 
-.main-media {
+.pp-product-page .pp-main-media {
   border-radius: 12px;
   overflow: hidden;
   background: #f8f8f8;
@@ -27,14 +28,14 @@
   justify-content: center;
 }
 
-.main-media img,
-.main-media video {
+.pp-product-page .pp-main-media img,
+.pp-product-page .pp-main-media video {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
-.no-media {
+.pp-product-page .pp-no-media {
   width: 100%;
   height: 100%;
   display: flex;
@@ -44,13 +45,13 @@
   font-size: 1.2rem;
 }
 
-.media-thumbnails {
+.pp-product-page .pp-media-thumbnails {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
 }
 
-.thumbnail {
+.pp-product-page .pp-thumbnail {
   width: 60px;
   height: 60px;
   border-radius: 8px;
@@ -64,32 +65,32 @@
   justify-content: center;
 }
 
-.thumbnail.active {
+.pp-product-page .pp-thumbnail.active {
   border-color: #4a6fa5;
 }
 
-.thumbnail img {
+.pp-product-page .pp-thumbnail img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.thumbnail span {
+.pp-product-page .pp-thumbnail span {
   font-size: 1.5rem;
 }
 
-.product-info {
+.pp-product-page .pp-product-info {
   flex: 1;
   min-width: 300px;
 }
 
-.product-title {
+.pp-product-page .pp-product-title {
   font-size: 2.5rem;
   margin-bottom: 0.5rem;
   color: #333;
 }
 
-.product-price {
+.pp-product-page .pp-product-price {
   display: flex;
   align-items: center;
   gap: 1.5rem;
@@ -97,107 +98,94 @@
   font-size: 1.2rem;
 }
 
-.price-value {
+.pp-product-page .pp-price-value {
   font-weight: bold;
   color: #2c5530;
   font-size: 1.8rem;
 }
 
-.remains {
-  color: #666;
-  background: #f0f0f0;
-  padding: 0.3rem 0.8rem;
-  border-radius: 20px;
-}
-
-.product-description {
+.pp-product-page .pp-product-description {
   margin-bottom: 2.5rem;
   line-height: 1.6;
   color: #444;
 }
 
-.product-description h3 {
+.pp-product-page .pp-product-description h3 {
   margin-bottom: 0.8rem;
   font-size: 1.5rem;
 }
 
-.gram-selection {
+.pp-product-page .pp-gram-selection {
   background: #f9f9f9;
-  padding: 1.5rem;
   border-radius: 12px;
   margin-bottom: 2rem;
 }
 
-.gram-selection h3 {
+.pp-product-page .pp-gram-selection h3 {
   margin-top: 0;
   margin-bottom: 1rem;
 }
 
-.gram-controls {
+.pp-product-page .pp-gram-controls {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  flex-direction: row;
   margin-bottom: 1rem;
   flex-wrap: wrap;
 }
 
-.gram-btn {
-  padding: 0.7rem 1.2rem;
-  border: 1px solid #ccc;
-  background: white;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s;
+.pp-product-page .pp-gram-btn {
+  padding: 0.7rem;
 }
 
-.gram-btn:hover:not(:disabled) {
-  background: #eaeaea;
-}
-
-.gram-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.gram-btn.minus {
+.pp-product-page .pp-gram-btn.minus,
+.pp-product-page .pp-gram-btn.minus50 {
+  /* padding: 0 0 0 1rem; */
+  border-radius: 50% 0 0 50%;
   color: #d32f2f;
 }
 
-.gram-btn.plus,
-.gram-btn.plus50 {
+.pp-product-page .pp-gram-btn.plus,
+.pp-product-page .pp-gram-btn.plus50 {
+  /* padding: 0 1rem 0 0; */
+  border-radius: 0 50% 50% 0;
   color: #2c5530;
 }
 
-.gram-display {
+.pp-product-page .pp-gram-display {
   display: flex;
   align-items: center;
   background: white;
   border: 1px solid #ccc;
-  border-radius: 8px;
   padding: 0.5rem 1rem;
 }
 
-.gram-display input {
-  width: 80px;
+.pp-product-page .pp-gram-display input {
+  width: 3rem;
   border: none;
   font-size: 1.2rem;
   text-align: center;
   outline: none;
+  -moz-appearance: textfield;
 }
 
-.gram-hint {
+.pp-product-page .pp-gram-display input::-webkit-outer-spin-button,
+.pp-product-page .pp-gram-display input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.pp-product-page .pp-gram-hint {
   font-size: 0.9rem;
   color: #666;
 }
 
-.purchase-section {
+.pp-product-page .pp-purchase-section {
   background: #f0f7f0;
   padding: 1.5rem;
   border-radius: 12px;
 }
 
-.total-price {
+.pp-product-page .pp-total-price {
   display: flex;
   align-items: baseline;
   gap: 1rem;
@@ -205,24 +193,24 @@
   font-size: 1.5rem;
 }
 
-.total-price strong {
+.pp-product-page .pp-total-price strong {
   font-size: 2rem;
   color: #2c5530;
 }
 
-.total-grams {
+.pp-product-page .pp-total-grams {
   color: #666;
   font-size: 1rem;
 }
 
-.action-buttons {
+.pp-product-page .pp-action-buttons {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
   margin-bottom: 1rem;
 }
 
-.btn {
+.pp-product-page .pp-btn {
   padding: 1rem 2rem;
   border: none;
   border-radius: 8px;
@@ -234,61 +222,56 @@
   min-width: 200px;
 }
 
-.btn-primary {
+.pp-product-page .pp-btn-primary {
   background: #4a6fa5;
   color: white;
 }
 
-.btn-primary:hover {
+.pp-product-page .pp-btn-primary:hover {
   background: #3a5a8a;
 }
 
-.btn-secondary {
+.pp-product-page .pp-btn-secondary {
   background: #6c757d;
   color: white;
 }
 
-.btn-secondary:hover {
+.pp-product-page .pp-btn-secondary:hover {
   background: #5a6268;
 }
 
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.sampler-note {
+.pp-product-page .pp-sampler-note {
   font-size: 0.9rem;
   color: #666;
   margin-top: 0.5rem;
 }
 
-.product-loading,
-.product-error {
+.pp-product-page .pp-product-loading,
+.pp-product-page .pp-product-error {
   text-align: center;
   padding: 4rem;
   font-size: 1.5rem;
 }
 
-.product-error {
+.pp-product-page .pp-product-error {
   color: #d32f2f;
 }
 
 @media (max-width: 768px) {
-  .product-container {
+  .pp-product-page .pp-product-container {
     flex-direction: column;
     gap: 2rem;
   }
 
-  .product-title {
+  .pp-product-page .pp-product-title {
     font-size: 2rem;
   }
 
-  .gram-controls {
+  .pp-product-page .pp-gram-controls {
     justify-content: center;
   }
 
-  .btn {
+  .pp-product-page .pp-btn {
     min-width: 100%;
   }
 }

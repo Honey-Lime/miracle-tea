@@ -1,58 +1,94 @@
-.header {
+/* ===================================
+   HEADER COMPONENT
+   =================================== */
+.hdr-header {
   background-color: #2e7d32;
   color: white;
   padding: 1rem 0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.header-content {
+.hdr-header .hdr-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.logo h1 {
+.hdr-header .hdr-logo h1 {
   font-size: 2rem;
   margin-bottom: 0.25rem;
 }
 
-.logo .tagline {
+.hdr-header .hdr-logo .hdr-tagline {
   font-size: 0.9rem;
   opacity: 0.9;
 }
 
-.nav {
+.hdr-header .hdr-nav {
   display: flex;
   gap: 2rem;
   align-items: center;
 }
 
-.nav a {
+.hdr-header .hdr-nav a {
   color: white;
   font-weight: 500;
   transition: opacity 0.3s;
 }
 
-.nav a:hover {
+.hdr-header .hdr-nav a:hover {
   opacity: 0.8;
 }
 
-.btn-login {
+.hdr-header .hdr-btn-login {
   background: transparent;
   border: 1px solid white;
   color: white;
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: 50%;
   font-weight: 500;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
 }
 
-.btn-login:hover {
+.hdr-header .hdr-btn-login:hover {
   background: white;
   color: #2e7d32;
 }
 
-.profile-link {
+.hdr-header .hdr-profile-link {
   background: rgba(255, 255, 255, 0.2);
+  color: white;
   padding: 8px 16px;
   border-radius: 20px;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.hdr-header .hdr-profile-link:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.hdr-header .hdr-admin-link {
+  background: #ff9800;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.85rem;
+  transition: all 0.3s;
+}
+
+.hdr-header .hdr-admin-link:hover {
+  background: #f57c00;
+  transform: scale(1.05);
 }

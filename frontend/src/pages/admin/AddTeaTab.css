@@ -1,0 +1,61 @@
+/* ===================================
+   ADD TEA TAB (ADMIN)
+   =================================== */
+.att-add-tea-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.att-add-tea-form .att-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.att-add-tea-form .att-form-group textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.att-add-tea-form .att-form-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.att-add-tea-form .att-btn-submit {
+  background: #2e7d32;
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  align-self: flex-start;
+}
+
+.att-add-tea-form .att-btn-submit:hover:not(:disabled) {
+  background: #1b5e20;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(46, 125, 50, 0.3);
+}
+
+.att-add-tea-form .att-btn-submit:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.att-add-tea-form .att-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .att-add-tea-form .att-form-row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,38 +1,41 @@
-.hero {
+/* ===================================
+   HOME PAGE
+   =================================== */
+.hp-hero {
   background: linear-gradient(135deg, #2e7d32, #1b5e20);
   color: white;
   text-align: center;
   padding: 4rem 0;
 }
 
-.hero h1 {
+.hp-hero h1 {
   font-size: 3.5rem;
   margin-bottom: 1rem;
 }
 
-.subtitle {
+.hp-hero .hp-subtitle {
   font-size: 1.5rem;
   opacity: 0.9;
 }
 
-.benefits {
+.hp-benefits {
   padding: 4rem 0;
 }
 
-.benefits h2 {
+.hp-benefits h2 {
   text-align: center;
   margin-bottom: 3rem;
   font-size: 2.5rem;
   color: #333;
 }
 
-.benefits-grid {
+.hp-benefits .hp-benefits-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
 }
 
-.benefit-card {
+.hp-benefits .hp-benefit-card {
   background: white;
   border-radius: 12px;
   padding: 2rem;
@@ -41,33 +44,33 @@
   transition: transform 0.3s;
 }
 
-.benefit-card:hover {
+.hp-benefits .hp-benefit-card:hover {
   transform: translateY(-5px);
 }
 
-.benefit-icon {
+.hp-benefits .hp-benefit-icon {
   font-size: 3rem;
   margin-bottom: 1rem;
 }
 
-.benefit-card h3 {
+.hp-benefits .hp-benefit-card h3 {
   margin-bottom: 1rem;
   color: #2e7d32;
 }
 
-.delivery {
+.hp-delivery {
   background: #f5f5f5;
   padding: 4rem 0;
 }
 
-.delivery h2,
-.about h2 {
+.hp-delivery h2,
+.hp-about h2 {
   text-align: center;
   margin-bottom: 2rem;
   color: #333;
 }
 
-.delivery p {
+.hp-delivery p {
   max-width: 800px;
   margin: 0 auto 2rem;
   text-align: center;
@@ -75,7 +78,7 @@
   line-height: 1.6;
 }
 
-.delivery-calculator {
+.hp-delivery .hp-calculator {
   background: white;
   border-radius: 8px;
   padding: 2rem;
@@ -84,12 +87,12 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 }
 
-.delivery-calculator h3 {
+.hp-delivery .hp-calculator h3 {
   margin-bottom: 1rem;
   color: #2e7d32;
 }
 
-.placeholder {
+.hp-delivery .hp-placeholder {
   background: #eee;
   padding: 2rem;
   border-radius: 4px;
@@ -97,12 +100,12 @@
   color: #666;
 }
 
-.about {
+.hp-about {
   padding: 4rem 0;
   text-align: center;
 }
 
-.about a {
+.hp-about a {
   color: #2e7d32;
   font-weight: 600;
 }

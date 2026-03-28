@@ -1,7 +1,6 @@
 import { useContext } from "react";
 import { CartContext } from "../context/CartContext";
 import { Link } from "react-router-dom";
-import "./CartPage.css";
 
 const CartPage = () => {
   const { cartItems, totalPrice, updateQuantity, removeFromCart } =
@@ -11,7 +10,7 @@ const CartPage = () => {
 
   if (cartItems.length === 0) {
     return (
-      <div className="cart-page empty">
+      <div className="crt-cart-page crt-empty">
         <h1>Корзина пуста</h1>
         <p>Добавьте товары из каталога.</p>
         <Link to="/catalog" className="btn btn-primary">
@@ -22,22 +21,22 @@ const CartPage = () => {
   }
 
   return (
-    <div className="cart-page">
+    <div className="crt-cart-page">
       <h1>Корзина</h1>
-      <div className="cart-items">
+      <div className="crt-items">
         {cartItems.map((item) => (
-          <div key={`${item.pid}-${item.isSampler}`} className="cart-item">
-            <div className="item-info">
+          <div key={`${item.pid}-${item.isSampler}`} className="crt-item">
+            <div className="crt-item-info">
               <h3>
                 {item.name} {item.isSampler && "(Пробник 10г)"}
               </h3>
               <p>Цена: {(item.price * 10).toFixed(2)} ₽/10г</p>
             </div>
-            <div className="item-controls">
-              <div className="quantity">
+            <div className="crt-item-controls">
+              <div className="crt-quantity">
                 <button
                   onClick={() =>
-                    updateQuantity(item.pid, item.isSampler, item.count - 10)
+                    updateQuantity(item.pid, item.isSampler, item.count - 50)
                   }
                   disabled={item.isSampler || item.count <= 50}
                 >
@@ -48,18 +47,18 @@ const CartPage = () => {
                 </span>
                 <button
                   onClick={() =>
-                    updateQuantity(item.pid, item.isSampler, item.count + 10)
+                    updateQuantity(item.pid, item.isSampler, item.count + 50)
                   }
                   disabled={item.isSampler || item.count >= item.maxRemains}
                 >
                   +
                 </button>
               </div>
-              <div className="item-total">
+              <div className="crt-item-total">
                 {(item.price * item.count).toFixed(2)} ₽
               </div>
               <button
-                className="btn-remove"
+                className="crt-btn-remove"
                 onClick={() => removeFromCart(item.pid, item.isSampler)}
               >
                 Удалить
@@ -68,32 +67,34 @@ const CartPage = () => {
           </div>
         ))}
       </div>
-      <div className="cart-summary">
-        <div className="summary-row">
-          <span>Общий вес:</span>
-          <span>{totalGrams} г</span>
-        </div>
-        <div className="summary-row">
-          <span>Стоимость товаров:</span>
-          <span>{totalPrice} ₽</span>
-        </div>
-        <div className="summary-row total">
-          <span>Итого к оплате:</span>
-          <span>{totalPrice} ₽</span>
-        </div>
-        <div className="checkout-note">
-          {!canCheckout && (
-            <p className="warning">
-              Минимальный заказ 50 г. Добавьте ещё товаров.
-            </p>
-          )}
-          <Link
-            to="/checkout"
-            className={`btn btn-primary ${!canCheckout ? "disabled" : ""}`}
-            aria-disabled={!canCheckout}
-          >
-            Оформить заказ
-          </Link>
+      <div className="crt-summary">
+        <div className="crt-summary-inner">
+          <div className="crt-summary-row">
+            <span>Общий вес:</span>
+            <span>{totalGrams} г</span>
+          </div>
+          <div className="crt-summary-row">
+            <span>Стоимость товаров:</span>
+            <span>{totalPrice} ₽</span>
+          </div>
+          <div className="crt-summary-row total">
+            <span>Итого к оплате:</span>
+            <span>{totalPrice} ₽</span>
+          </div>
+          <div className="crt-checkout-note">
+            {!canCheckout && (
+              <p className="crt-warning">
+                Минимальный заказ 50 г. Добавьте ещё товаров.
+              </p>
+            )}
+            <Link
+              to="/checkout"
+              className={`btn btn-primary ${!canCheckout ? "disabled" : ""}`}
+              aria-disabled={!canCheckout}
+            >
+              Оформить заказ
+            </Link>
+          </div>
         </div>
       </div>
     </div>

@@ -1,38 +1,41 @@
-.footer {
+/* ===================================
+   FOOTER COMPONENT
+   =================================== */
+.ftr-footer {
   background-color: #1b5e20;
   color: white;
   padding: 2rem 0;
 }
 
-.footer-content {
+.ftr-footer .ftr-content {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 2rem;
   margin-bottom: 2rem;
 }
 
-.footer-section h3,
-.footer-section h4 {
+.ftr-footer .ftr-section h3,
+.ftr-footer .ftr-section h4 {
   margin-bottom: 1rem;
 }
 
-.footer-section p {
+.ftr-footer .ftr-section p {
   margin-bottom: 0.5rem;
   opacity: 0.9;
 }
 
-.footer-section a {
+.ftr-footer .ftr-section a {
   display: block;
   color: #ccc;
   margin-bottom: 0.5rem;
   transition: color 0.3s;
 }
 
-.footer-section a:hover {
+.ftr-footer .ftr-section a:hover {
   color: white;
 }
 
-.footer-bottom {
+.ftr-footer .ftr-bottom {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 1rem;
   text-align: center;

@@ -4,7 +4,6 @@ import {
   calculateYandexDelivery,
   searchYandexCities,
 } from "../services/yandexDeliveryService";
-import "./YandexDeliveryCalculator.css";
 
 const YandexDeliveryCalculator = () => {
   const [cities, setCities] = useState([]);
@@ -30,10 +29,6 @@ const YandexDeliveryCalculator = () => {
       try {
         const data = await getYandexCities();
         setCities(data);
-        if (data.length > 0) {
-          setSelectedCity(data[0].name);
-          setSearchQuery(data[0].name);
-        }
       } catch (err) {
         console.error("Ошибка загрузки городов:", err);
         setError("Не удалось загрузить список городов");
@@ -47,7 +42,6 @@ const YandexDeliveryCalculator = () => {
     if (searchQuery.length >= 2) {
       setIsSearching(true);
 
-      // Debounce поиск
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current);
       }
@@ -114,26 +108,11 @@ const YandexDeliveryCalculator = () => {
   };
 
   return (
-    <div className="yandex-delivery-calculator">
-      <div className="yandex-header">
-        <img
-          src="https://yastatic.net/s3/lavka-web/public/assets/logo_ya_market.svg"
-          alt="Яндекс Доставка"
-          className="yandex-logo"
-        />
-        <h3>Калькулятор Яндекс Доставки (Next Day Delivery)</h3>
-      </div>
-      <p className="description">
-        Рассчитайте стоимость доставки вашего заказа через{" "}
-        <strong>Яндекс Доставку Next Day Delivery</strong>. Доставка на
-        следующий день доступна в крупные города России. Отправка осуществляется
-        из Воронежа.
-      </p>
-
-      <div className="calculator-form">
-        <div className="form-group">
+    <div className="ydc-calculator">
+      <div className="ydc-form">
+        <div className="ydc-form-group">
           <label htmlFor="city">Город получения</label>
-          <div className="city-search" ref={searchRef}>
+          <div className="ydc-city-search" ref={searchRef}>
             <input
               id="city"
               type="text"
@@ -141,16 +120,16 @@ const YandexDeliveryCalculator = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
               placeholder="Начните вводить название города"
-              className="city-input"
+              className="ydc-city-input"
               autoComplete="off"
             />
-            {isSearching && <span className="search-loading">⏳</span>}
+            {isSearching && <span className="ydc-search-loading">⏳</span>}
             {showDropdown && searchResults.length > 0 && (
-              <div className="city-dropdown">
+              <div className="ydc-city-dropdown">
                 {searchResults.map((city) => (
                   <div
                     key={city.code}
-                    className="city-option"
+                    className="ydc-city-option"
                     onClick={() => handleCitySelect(city)}
                   >
                     {city.name}
@@ -160,13 +139,13 @@ const YandexDeliveryCalculator = () => {
             )}
           </div>
           {cities.length > 0 && !searchQuery && (
-            <div className="popular-cities">
+            <div className="ydc-popular-cities">
               <span>Популярные: </span>
               {cities.slice(0, 5).map((city, index) => (
                 <button
                   key={city.code}
                   type="button"
-                  className="popular-city-btn"
+                  className="ydc-popular-city-btn"
                   onClick={() => handleCitySelect(city)}
                 >
                   {city.name}
@@ -176,15 +155,15 @@ const YandexDeliveryCalculator = () => {
             </div>
           )}
           {!available && (
-            <p className="warning">
+            <p className="ydc-warning">
               Доставка в выбранный город может быть недоступна
             </p>
           )}
         </div>
 
-        <div className="form-group">
+        <div className="ydc-form-group">
           <label htmlFor="weight">Вес заказа (г)</label>
-          <div className="weight-input">
+          <div className="ydc-weight-input">
             <input
               id="weight"
               type="range"
@@ -194,14 +173,11 @@ const YandexDeliveryCalculator = () => {
               value={weight}
               onChange={(e) => setWeight(parseInt(e.target.value))}
             />
-            <span className="weight-value">{weight} г</span>
-          </div>
-          <div className="weight-hint">
-            Минимальный заказ 50 г. Обычный вес чая: 100–200 г.
+            <span className="ydc-weight-value">{weight} г</span>
           </div>
         </div>
 
-        <div className="form-group">
+        <div className="ydc-form-group">
           <label htmlFor="amount">Стоимость заказа (руб)</label>
           <input
             id="amount"
@@ -212,75 +188,33 @@ const YandexDeliveryCalculator = () => {
             onChange={(e) => setAmount(parseInt(e.target.value) || 0)}
             placeholder="0"
           />
-          <div className="hint">Укажите для расчета страховки</div>
         </div>
 
         <button
-          className="calculate-btn"
+          className="ydc-calculate-btn"
           onClick={handleCalculate}
           disabled={loading}
         >
           {loading ? "Рассчитываем..." : "Рассчитать доставку"}
         </button>
 
-        {error && <div className="error-message">{error}</div>}
+        {error && <div className="ydc-error-message">{error}</div>}
 
         {result && result.success && (
-          <div className="result">
-            <h4>Результат расчета</h4>
-            <p>
-              Доставка в <strong>{selectedCity}</strong> при весе{" "}
-              <strong>{weight} г</strong>:
-            </p>
-            <div className="price">
+          <div className="ydc-result">
+            <div className="ydc-price">
               {result.price} {result.currency}
             </div>
-            <div className="details">
-              <p>
-                <strong>Срок:</strong> {result.minDays}–{result.maxDays} рабочих
-                дня
-              </p>
-              <p>
-                <strong>Сервис:</strong> {result.service}
-              </p>
-              {result.details?.note && (
-                <p className="note">{result.details.note}</p>
-              )}
-              {result.service?.includes("(stub)") && (
-                <p className="stub-notice">
-                  ℹ️ Расчет выполнен в демонстрационном режиме. Для получения
-                  точной стоимости настройте API ключ Яндекс Доставки.
-                </p>
-              )}
-            </div>
+            <p>
+              <strong>Срок:</strong> {result.minDays}–{result.maxDays} рабочих
+              дня
+            </p>
           </div>
         )}
 
         {result && !result.success && (
-          <div className="error-message">
-            Не удалось рассчитать доставку. {result.message}
-          </div>
+          <div className="ydc-error-message">{result.message}</div>
         )}
-      </div>
-
-      <div className="calculator-info">
-        <p>
-          <strong>Примечание:</strong> Расчет является предварительным. Точная
-          стоимость будет определена при оформлении заказа. Для уточнения
-          информации свяжитесь с нами.
-        </p>
-        <p className="yandex-brand">
-          Интегрировано с <strong>Яндекс Доставкой Next Day Delivery</strong>.
-          Узнайте больше на{" "}
-          <a
-            href="https://dostavka.yandex.ru/next-day-delivery-corp/"
-            target="_blank"
-            rel="noreferrer"
-          >
-            официальном сайте
-          </a>
-          .
-        </p>
       </div>
     </div>
   );

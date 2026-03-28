@@ -19,8 +19,10 @@ export const ToastProvider = ({ children }) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
+  const showToast = addToast;
+
   return (
-    <ToastContext.Provider value={{ addToast }}>
+    <ToastContext.Provider value={{ addToast, showToast }}>
       {children}
       <div className="toast-container">
         {toasts.map((toast) => (

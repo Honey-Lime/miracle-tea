@@ -1,0 +1,251 @@
+/* ===================================
+   TAGS TAB (ADMIN)
+   =================================== */
+.tt-tags-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.tt-tags-tab .tt-tags-overview {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tt-tags-tab .tt-tags-overview h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.tt-tags-tab .tt-all-tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tt-tags-tab .tt-global-tag {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.tt-tags-tab .tt-no-tags {
+  color: #666;
+  font-style: italic;
+}
+
+.tt-tags-tab .tt-search-group {
+  margin-bottom: 1rem;
+}
+
+.tt-tags-tab .tt-products-tags-list {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tt-tags-tab .tt-products-tags-list h3 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.tt-tags-tab .tt-products-tags-list h3 .tt-count {
+  background: #f0f0f0;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: normal;
+}
+
+.tt-tags-tab .tt-product-tag-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.tt-tags-tab .tt-product-tag-item:last-child {
+  border-bottom: none;
+}
+
+.tt-tags-tab .tt-product-remains {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.tt-tags-tab .tt-product-tags {
+  width: 100%;
+  gap: 0.5rem;
+  min-width: 200px;
+  margin-bottom: 0;
+}
+
+.tt-tags-tab .tt-product-tags .tt-tag {
+  padding: 0.3rem 0.6rem;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.tt-tags-tab .tt-remove-tag-btn {
+  background: transparent;
+  border: none;
+  color: #2e7d32;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  width: 1em;
+  height: 1em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.tt-tags-tab .tt-remove-tag-btn:hover {
+  background: rgba(46, 125, 50, 0.2);
+  color: #1b5e20;
+}
+
+.tt-tags-tab .tt-add-tag-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.tt-tags-tab .tt-new-tag-input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  width: 150px;
+}
+
+.tt-tags-tab .tt-tag-input-wrapper {
+  position: relative;
+  width: 150px;
+}
+
+.tt-tags-tab .tt-tag-input-wrapper .tt-new-tag-input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tt-tags-tab .tt-tag-input-wrapper .tt-new-tag-input:focus {
+  outline: none;
+  border-color: #2e7d32;
+}
+
+.tt-tags-tab .tt-tag-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+  margin-top: 4px;
+}
+
+.tt-tags-tab .tt-tag-dropdown-item {
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.tt-tags-tab .tt-tag-dropdown-item:hover {
+  background: #e8f5e9;
+}
+
+.tt-tags-tab .tt-tag-dropdown-item.create-new {
+  background: #f0f7f0;
+  color: #2e7d32;
+  font-weight: 600;
+  border-top: 1px solid #ddd;
+}
+
+.tt-tags-tab .tt-tag-dropdown-item.create-new:hover {
+  background: #d4edda;
+}
+
+.tt-tags-tab .tt-tag-dropdown-empty {
+  padding: 0.75rem;
+  color: #999;
+  text-align: center;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.tt-tags-tab .tt-add-tag-btn {
+  background: #2e7d32;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.tt-tags-tab .tt-add-tag-btn:hover:not(:disabled) {
+  background: #1b5e20;
+}
+
+.tt-tags-tab .tt-add-tag-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .tt-tags-tab .tt-product-tag-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tt-tags-tab .tt-product-info {
+    width: 100%;
+  }
+
+  .tt-tags-tab .tt-product-tags {
+    width: 100%;
+  }
+
+  .tt-tags-tab .tt-add-tag-form {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .tt-tags-tab .tt-new-tag-input {
+    flex: 1;
+  }
+}

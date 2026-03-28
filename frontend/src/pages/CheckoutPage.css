@@ -1,185 +1,137 @@
-.checkout-page {
+/* ===================================
+   CHECKOUT PAGE
+   =================================== */
+.chp-checkout-page {
   padding: 2rem 0;
 }
 
-.checkout-page h1 {
+.chp-checkout-page h1 {
   margin-bottom: 2rem;
 }
 
-.checkout-content {
+.chp-checkout-page .chp-checkout-content {
   display: grid;
   grid-template-columns: 1fr;
   gap: 2rem;
 }
 
 @media (min-width: 992px) {
-  .checkout-content {
+  .chp-checkout-page .chp-checkout-content {
     grid-template-columns: 1fr 1fr;
   }
 }
 
-.order-summary,
-.delivery-section,
-.final-total {
+.chp-checkout-page .chp-order-summary,
+.chp-checkout-page .chp-delivery-section,
+.chp-checkout-page .chp-final-total {
   background: white;
   border-radius: 8px;
   padding: 2rem;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  width: 100%;
 }
 
-.order-summary h2,
-.delivery-section h2,
-.final-total h2 {
+.chp-checkout-page .chp-order-summary h2,
+.chp-checkout-page .chp-delivery-section h2,
+.chp-checkout-page .chp-final-total h2 {
   margin-bottom: 1.5rem;
   color: #2e7d32;
 }
 
-.order-summary ul {
+.chp-checkout-page .chp-order-summary ul {
   list-style: none;
   padding-left: 0;
   margin-bottom: 1.5rem;
 }
 
-.order-summary li {
+.chp-checkout-page .chp-order-summary li {
   padding: 0.5rem 0;
   border-bottom: 1px solid #eee;
 }
 
-.summary-total {
+.chp-checkout-page .chp-order-summary .chp-summary-total {
   text-align: right;
   font-size: 1.2rem;
 }
 
-.delivery-method {
+.chp-checkout-page .chp-delivery-method {
   display: flex;
   flex-direction: column;
   gap: 1rem;
   margin-bottom: 2rem;
 }
 
-.delivery-method label {
+.chp-checkout-page .chp-delivery-method label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
-.cdek-calculator {
+.chp-checkout-page .chp-pickup-address {
+  margin-left: 24px;
+  margin-top: 0.5rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.chp-checkout-page .chp-cdek-calculator {
   margin-top: 1.5rem;
   padding: 1.5rem;
   background: #f9f9f9;
   border-radius: 8px;
 }
 
-.address-input {
+.chp-checkout-page .chp-address-input {
   margin: 1rem 0;
 }
 
-.address-input label {
+.chp-checkout-page .chp-address-input label {
   display: block;
   margin-bottom: 0.5rem;
 }
 
-.address-input input {
+.chp-checkout-page .chp-address-input input {
   width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
 
-/* Стили для поиска городов */
-.city-search {
-  position: relative;
+.chp-checkout-page .chp-yandex-map-container {
+  margin: 1rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.city-input {
+.chp-checkout-page .chp-yandex-map {
   width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.city-input:focus {
-  outline: none;
-  border-color: #2e7d32;
-  box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.1);
-}
-
-.search-loading {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 14px;
-}
-
-.city-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  z-index: 10;
-  max-height: 250px;
-  overflow-y: auto;
-  margin-top: 4px;
-}
-
-.city-option {
-  padding: 10px 12px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.city-option:hover {
-  background: #f5f5f5;
-}
-
-.city-option:first-child {
-  border-radius: 4px 4px 0 0;
-}
-
-.city-option:last-child {
-  border-radius: 0 0 4px 4px;
-}
-
-.popular-cities {
-  margin-top: 8px;
-  font-size: 13px;
-  color: #666;
-}
-
-.popular-city-btn {
-  background: none;
+  height: 400px;
   border: none;
-  color: #2e7d32;
-  cursor: pointer;
-  padding: 2px 6px;
-  font-size: 13px;
-  transition: all 0.2s;
+  display: block;
 }
 
-.popular-city-btn:hover {
-  color: #1b5e20;
-  text-decoration: underline;
+@media (max-width: 768px) {
+  .chp-checkout-page .chp-yandex-map {
+    height: 300px;
+  }
 }
 
-.total-breakdown {
+.chp-checkout-page .chp-total-breakdown {
   margin-bottom: 2rem;
 }
 
-.total-breakdown div {
+.chp-checkout-page .chp-total-breakdown div {
   display: flex;
   justify-content: space-between;
   padding: 0.5rem 0;
   border-bottom: 1px solid #eee;
 }
 
-.grand-total {
+.chp-checkout-page .chp-grand-total {
   font-size: 1.5rem;
   font-weight: bold;
   color: #2e7d32;
@@ -187,7 +139,7 @@
   margin-top: 1rem;
 }
 
-.btn-large {
+.chp-checkout-page .chp-btn-large {
   width: 100%;
   padding: 15px;
   font-size: 1.2rem;

@@ -1,3 +1,5 @@
+@import url("./components.css");
+
 /* Reset and base styles */
 * {
   margin: 0;
@@ -25,7 +27,8 @@ button {
 }
 
 .container {
-  max-width: 1200px;
+  width: 100%;
+  max-width: 1224px;
   margin: 0 auto;
   padding: 0 20px;
 }
@@ -83,43 +86,6 @@ button {
 
 .gap-4 {
   gap: 1rem;
-}
-
-/* Button styles */
-.btn {
-  padding: 10px 20px;
-  border-radius: 4px;
-  font-weight: 600;
-  transition: background-color 0.3s;
-}
-
-.btn-primary {
-  background-color: #2e7d32;
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #1b5e20;
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-}
-
-.btn-secondary:hover {
-  background-color: #545b62;
-}
-
-.btn-outline {
-  background-color: transparent;
-  border: 1px solid #2e7d32;
-  color: #2e7d32;
-}
-
-.btn-outline:hover {
-  background-color: #2e7d32;
-  color: white;
 }
 
 /* Card */

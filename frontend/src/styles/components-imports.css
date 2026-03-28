@@ -1,0 +1,13 @@
+/* ===================================
+   ИМПОРТЫ СТИЛЕЙ КОМПОНЕНТОВ
+   ===================================
+   Этот файл импортирует стили компонентов.
+   Компоненты имеют средний приоритет:
+   - Выше чем components.css (общие стили)
+   - Ниже чем pages.css (стили страниц)
+   =================================== */
+
+@import url("../components/Header.css");
+@import url("../components/Footer.css");
+@import url("../components/LoginModal.css");
+@import url("../components/YandexDeliveryCalculator.css");

@@ -17,6 +17,7 @@ router.get("/my-orders", authMiddleware, orderController.getUserOrders);
 // Admin routes (to be protected with admin middleware)
 router.get("/", authMiddleware, orderController.getAllOrders);
 router.put("/:id", authMiddleware, orderController.updateOrder);
+router.put("/:id/status", authMiddleware, orderController.updateOrderStatus);
 router.delete("/:id", authMiddleware, orderController.deleteOrder);
 
 module.exports = router;

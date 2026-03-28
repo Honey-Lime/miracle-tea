@@ -25,7 +25,7 @@ exports.getProductById = async (req, res) => {
 
 // Create a new product (admin only)
 exports.createProduct = async (req, res) => {
-  const { name, content, description, price, cost, remains } = req.body;
+  const { name, content, description, price, cost, remains, tags } = req.body;
   try {
     const product = new Product({
       name,
@@ -34,6 +34,7 @@ exports.createProduct = async (req, res) => {
       price,
       cost,
       remains,
+      tags: tags || [],
     });
     const savedProduct = await product.save();
     res.status(201).json(savedProduct);
@@ -68,5 +69,49 @@ exports.deleteProduct = async (req, res) => {
     res.json({ message: "Product deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+// Get all unique tags
+exports.getAllTags = async (req, res) => {
+  try {
+    const tags = await Product.distinct("tags");
+    res.json(tags);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Add a new tag to a product
+exports.addTagToProduct = async (req, res) => {
+  const { productId, tag } = req.body;
+  try {
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    if (!product.tags.includes(tag)) {
+      product.tags.push(tag);
+      await product.save();
+    }
+    res.json(product);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Remove a tag from a product
+exports.removeTagFromProduct = async (req, res) => {
+  const { productId, tag } = req.body;
+  try {
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    product.tags = product.tags.filter((t) => t !== tag);
+    await product.save();
+    res.json(product);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 };

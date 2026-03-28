@@ -13,20 +13,27 @@ if not exist backend\.env (
 
 REM Проверка и запуск MongoDB
 echo Проверка MongoDB...
-where mongod >nul 2>&1
-if %errorlevel% equ 0 (
-    echo MongoDB найдена.
-    tasklist | findstr /i mongod >nul 2>&1
-    if %errorlevel% equ 0 (
-        echo MongoDB уже запущена, пропускаем запуск.
-    ) else (
-        echo Запуск MongoDB...
-        if not exist database mkdir database
-        start "MongoDB" cmd /k "mongod --dbpath ./database"
-    )
+echo Запуск MongoDB...
+if not exist database mkdir database
+REM Проверка наличия mongod.exe в стандартных путях
+set MONGOD_PATH=
+if exist "C:\Program Files\MongoDB\Server\7.0\bin\mongod.exe" set MONGOD_PATH=C:\Program Files\MongoDB\Server\7.0\bin\mongod.exe
+if exist "C:\Program Files\MongoDB\Server\6.0\bin\mongod.exe" set MONGOD_PATH=C:\Program Files\MongoDB\Server\6.0\bin\mongod.exe
+if exist "C:\Program Files\MongoDB\Server\5.0\bin\mongod.exe" set MONGOD_PATH=C:\Program Files\MongoDB\Server\5.0\bin\mongod.exe
+if "%MONGOD_PATH%"=="" set MONGOD_PATH=mongod
+
+REM Проверка на уже запущенный MongoDB
+tasklist /FI "IMAGENAME eq mongod.exe" 2>nul | find "mongod.exe" >nul 2>&1
+if %ERRORLEVEL%==0 (
+    echo MongoDB уже запущен. Пропускаем запуск.
 ) else (
-    echo MongoDB не найдена в PATH. Убедитесь, что MongoDB установлена и добавлена в PATH.
-    echo.
+    REM Останавливаем предыдущий процесс MongoDB если есть
+    taskkill /FI "WINDOWTITLE eq MongoDB" /T /F >nul 2>&1
+    timeout /t 1 /nobreak >nul
+
+    start "MongoDB" cmd /k "echo Запуск MongoDB... && echo Путь: %MONGOD_PATH% && echo. && %MONGOD_PATH% --dbpath ./database"
+    timeout /t 3 /nobreak >nul
+    echo MongoDB запущена в отдельном окне.
 )
 REM Запуск бэкенда в отдельном окне
 echo Запуск бэкенда...
@@ -43,6 +50,7 @@ cd ..
 echo.
 echo Все компоненты запущены в отдельных окнах.
 echo Окна:
+echo   - MongoDB (база данных)
 echo   - Backend (бэкенд, порт 5000)
 echo   - Frontend (фронтенд, порт 3000)
 echo.
@@ -55,5 +63,6 @@ echo Остановка процессов...
 taskkill /FI "WINDOWTITLE eq MongoDB" /T /F >nul 2>&1
 taskkill /FI "WINDOWTITLE eq Backend" /T /F >nul 2>&1
 taskkill /FI "WINDOWTITLE eq Frontend" /T /F >nul 2>&1
+taskkill /IM mongod.exe /F >nul 2>&1
 echo Процессы остановлены.
 pause

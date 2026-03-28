@@ -1,4 +1,4 @@
-import { createContext, useState, useContext } from "react";
+import { createContext, useState, useEffect, useContext } from "react";
 import axios from "axios";
 
 const AuthContext = createContext();
@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const isAdmin = user?.isAdmin || false;
 
   const login = async (phone, password, name) => {
     try {
@@ -41,7 +42,7 @@ export const AuthProvider = ({ children }) => {
   const closeLoginModal = () => setLoginModalOpen(false);
 
   // Проверка токена при загрузке
-  useState(() => {
+  useEffect(() => {
     if (token) {
       axios
         .get("/api/auth/profile", {
@@ -50,11 +51,12 @@ export const AuthProvider = ({ children }) => {
         .then((res) => setUser(res.data))
         .catch(() => logout());
     }
-  });
+  }, [token]);
 
   const value = {
     user,
     token,
+    isAdmin,
     login,
     logout,
     loginModalOpen,

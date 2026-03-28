@@ -1,58 +1,233 @@
-.profile-page {
+/* ===================================
+   PROFILE PAGE
+   =================================== */
+.prfp-profile-page {
   padding: 2rem 0;
 }
 
-.profile-page h1 {
+.prfp-profile-page h1 {
   margin-bottom: 2rem;
 }
 
-.profile-info {
+.prfp-profile-page .prfp-profile-info {
   background: white;
   border-radius: 8px;
   padding: 2rem;
   margin-bottom: 3rem;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  width: 100%;
 }
 
-.profile-info h2 {
+.prfp-profile-page .prfp-profile-info h2 {
   margin-bottom: 1rem;
   color: #2e7d32;
 }
 
-.profile-info p {
+.prfp-profile-page .prfp-profile-info p {
   margin-bottom: 0.5rem;
   font-size: 1.1rem;
 }
 
-.orders {
+.prfp-profile-page .prfp-orders {
   background: white;
   border-radius: 8px;
   padding: 2rem;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  width: 100%;
 }
 
-.orders h2 {
+.prfp-profile-page .prfp-orders h2 {
   margin-bottom: 1.5rem;
   color: #2e7d32;
 }
 
-.orders-table {
+.prfp-profile-page .prfp-orders-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.orders-table th,
-.orders-table td {
+.prfp-profile-page .prfp-orders-table th,
+.prfp-profile-page .prfp-orders-table td {
   padding: 1rem;
   text-align: left;
   border-bottom: 1px solid #eee;
 }
 
-.orders-table th {
+.prfp-profile-page .prfp-orders-table th {
   background: #f9f9f9;
   font-weight: 600;
 }
 
-.orders-table tr:hover {
+.prfp-profile-page .prfp-orders-table tr:hover {
   background: #f5f5f5;
+}
+
+.prfp-profile-page .prfp-profile-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+/* Статусы заказов */
+.prfp-profile-page .prfp-order-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  display: inline-block;
+}
+
+.prfp-profile-page .prfp-status-ordered {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.prfp-profile-page .prfp-status-paid {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.prfp-profile-page .prfp-status-shipping {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.prfp-profile-page .prfp-status-completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.prfp-profile-page .prfp-status-cancelled {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.prfp-profile-page .prfp-status-cart {
+  background: #e0e0e0;
+  color: #555;
+}
+
+.prfp-profile-page .prfp-order-row-clickable {
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.prfp-profile-page .prfp-order-row-clickable:hover {
+  background: #e8f5e9;
+}
+
+/* Модальное окно просмотра заказа */
+.prfp-profile-page .prfp-order-modal {
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.prfp-profile-page .prfp-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.prfp-profile-page .prfp-modal-header h2 {
+  margin-bottom: 0;
+}
+
+.prfp-profile-page .prfp-modal-close {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #999;
+  line-height: 1;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.prfp-profile-page .prfp-modal-close:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.prfp-profile-page .prfp-modal-body {
+  margin-bottom: 1.5rem;
+}
+
+.prfp-profile-page .prfp-order-info-block,
+.prfp-profile-page .prfp-order-items-block,
+.prfp-profile-page .prfp-order-total-block {
+  margin-bottom: 1.5rem;
+}
+
+.prfp-profile-page .prfp-order-info-block h3,
+.prfp-profile-page .prfp-order-items-block h3 {
+  margin-bottom: 1rem;
+  color: #2e7d32;
+  font-size: 1.1rem;
+}
+
+.prfp-profile-page .prfp-order-info-block p {
+  margin-bottom: 0.5rem;
+}
+
+.prfp-profile-page .prfp-order-items-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prfp-profile-page .prfp-order-items-list li {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.prfp-profile-page .prfp-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.prfp-profile-page .prfp-item-name {
+  flex: 1;
+  color: #333;
+}
+
+.prfp-profile-page .prfp-item-quantity {
+  color: #666;
+  margin: 0 1rem;
+}
+
+.prfp-profile-page .prfp-item-price {
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.prfp-profile-page .prfp-order-total-block {
+  background: #f9f9f9;
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+.prfp-profile-page .prfp-total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+}
+
+.prfp-profile-page .prfp-total-row.grand-total {
+  border-top: 1px solid #ddd;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #2e7d32;
 }
