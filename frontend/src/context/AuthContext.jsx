@@ -5,6 +5,20 @@ const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
+const getErrorMessage = (error, fallbackMessage) => {
+  const message = error.response?.data?.message;
+
+  if (typeof message === "string" && message.trim()) {
+    return message;
+  }
+
+  if (!error.response) {
+    return "Не удалось связаться с сервером. Проверьте подключение к интернету.";
+  }
+
+  return fallbackMessage;
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
@@ -27,7 +41,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.message || "Ошибка входа",
+        message: getErrorMessage(error, "Не удалось выполнить вход"),
       };
     }
   };
@@ -44,7 +58,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.message || "Ошибка регистрации",
+        message: getErrorMessage(error, "Не удалось завершить регистрацию"),
       };
     }
   };

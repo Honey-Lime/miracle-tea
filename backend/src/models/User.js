@@ -19,6 +19,14 @@ const userSchema = new mongoose.Schema(
       unique: true,
       sparse: true,
       default: undefined,
+      set: (value) => {
+        if (value === null || value === undefined) {
+          return undefined;
+        }
+
+        const normalizedValue = String(value).trim();
+        return normalizedValue || undefined;
+      },
     },
     password: {
       type: String,

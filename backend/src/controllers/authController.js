@@ -25,6 +25,48 @@ const isAdminUser = (email) => {
 
 const normalizeEmail = (email = "") => email.trim().toLowerCase();
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+const normalizeName = (name = "") => name.trim();
+
+const getAuthErrorResponse = (error) => {
+  if (error?.code === 11000) {
+    const duplicatedField = Object.keys(error.keyPattern || error.keyValue || {})[0];
+
+    if (duplicatedField === "email") {
+      return {
+        status: 400,
+        message:
+          "Пользователь с таким email уже существует. Войдите в аккаунт.",
+      };
+    }
+
+    if (duplicatedField === "phone") {
+      return {
+        status: 400,
+        message:
+          "Не удалось сохранить номер телефона. Попробуйте снова или оставьте поле пустым.",
+      };
+    }
+
+    return {
+      status: 400,
+      message: "Пользователь с такими данными уже существует.",
+    };
+  }
+
+  if (error?.name === "ValidationError") {
+    const firstMessage = Object.values(error.errors || {})[0]?.message;
+
+    return {
+      status: 400,
+      message: firstMessage || "Проверьте корректность введённых данных.",
+    };
+  }
+
+  return {
+    status: 500,
+    message: "Внутренняя ошибка сервера. Попробуйте ещё раз позже.",
+  };
+};
 
 const buildAuthResponse = (user) => ({
   id: user._id,
@@ -83,13 +125,15 @@ exports.login = async (req, res) => {
       user: buildAuthResponse(user),
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    const { status, message } = getAuthErrorResponse(error);
+    res.status(status).json({ message });
   }
 };
 
 exports.register = async (req, res) => {
   const { email, password, name } = req.body;
   const normalizedEmail = normalizeEmail(email);
+  const normalizedName = normalizeName(name);
 
   if (!normalizedEmail) {
     return res.status(400).json({ message: "Email обязателен" });
@@ -99,7 +143,7 @@ exports.register = async (req, res) => {
     return res.status(400).json({ message: "Введите корректный email" });
   }
 
-  if (!name) {
+  if (!normalizedName) {
     return res.status(400).json({ message: "Имя обязательно для регистрации" });
   }
 
@@ -124,7 +168,7 @@ exports.register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({
-      name,
+      name: normalizedName,
       email: normalizedEmail,
       password: hashedPassword,
       isAdmin: isAdminUser(normalizedEmail),
@@ -138,7 +182,8 @@ exports.register = async (req, res) => {
       user: buildAuthResponse(user),
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    const { status, message } = getAuthErrorResponse(error);
+    res.status(status).json({ message });
   }
 };
 
