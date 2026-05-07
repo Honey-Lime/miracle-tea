@@ -35,8 +35,13 @@ const buildAuthResponse = (user) => ({
   isAdmin: user.isAdmin,
 });
 
-exports.registerOrLogin = async (req, res) => {
-  const { email, password, name } = req.body;
+const createAuthToken = (user) =>
+  jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
+
+exports.login = async (req, res) => {
+  const { email, password } = req.body;
   const normalizedEmail = normalizeEmail(email);
 
   if (!normalizedEmail) {
@@ -52,47 +57,81 @@ exports.registerOrLogin = async (req, res) => {
   }
 
   try {
-    let user = await User.findOne({ email: normalizedEmail });
+    const user = await User.findOne({ email: normalizedEmail });
 
-    if (user) {
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(400).json({ message: "Неверный email или пароль" });
-      }
+    if (!user) {
+      return res
+        .status(400)
+        .json({ message: "Пользователь не найден. Зарегистрируйтесь." });
+    }
 
-      const shouldBeAdmin = isAdminUser(user.email);
-      if (user.isAdmin !== shouldBeAdmin) {
-        user.isAdmin = shouldBeAdmin;
-        await user.save();
-      }
-    } else {
-      if (!name) {
-        return res
-          .status(400)
-          .json({ message: "Имя обязательно для регистрации" });
-      }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Неверный email или пароль" });
+    }
 
-      if (password.length < 6) {
-        return res
-          .status(400)
-          .json({ message: "Пароль должен быть не менее 6 символов" });
-      }
-
-      const hashedPassword = await bcrypt.hash(password, 10);
-      user = new User({
-        name,
-        email: normalizedEmail,
-        password: hashedPassword,
-        isAdmin: isAdminUser(normalizedEmail),
-      });
+    const shouldBeAdmin = isAdminUser(user.email);
+    if (user.isAdmin !== shouldBeAdmin) {
+      user.isAdmin = shouldBeAdmin;
       await user.save();
     }
 
-    const token = jwt.sign(
-      { userId: user._id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" },
-    );
+    const token = createAuthToken(user);
+
+    res.json({
+      token,
+      user: buildAuthResponse(user),
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.register = async (req, res) => {
+  const { email, password, name } = req.body;
+  const normalizedEmail = normalizeEmail(email);
+
+  if (!normalizedEmail) {
+    return res.status(400).json({ message: "Email обязателен" });
+  }
+
+  if (!isValidEmail(normalizedEmail)) {
+    return res.status(400).json({ message: "Введите корректный email" });
+  }
+
+  if (!name) {
+    return res.status(400).json({ message: "Имя обязательно для регистрации" });
+  }
+
+  if (!password) {
+    return res.status(400).json({ message: "Пароль обязателен" });
+  }
+
+  if (password.length < 6) {
+    return res
+      .status(400)
+      .json({ message: "Пароль должен быть не менее 6 символов" });
+  }
+
+  try {
+    const existingUser = await User.findOne({ email: normalizedEmail });
+
+    if (existingUser) {
+      return res.status(400).json({
+        message: "Пользователь с таким email уже существует. Войдите в аккаунт.",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({
+      name,
+      email: normalizedEmail,
+      password: hashedPassword,
+      isAdmin: isAdminUser(normalizedEmail),
+    });
+    await user.save();
+
+    const token = createAuthToken(user);
 
     res.json({
       token,

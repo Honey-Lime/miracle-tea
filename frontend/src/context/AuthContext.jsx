@@ -11,23 +11,40 @@ export const AuthProvider = ({ children }) => {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const isAdmin = user?.isAdmin || false;
 
-  const login = async (email, password, name) => {
+  const applyAuthResponse = (response) => {
+    const { token, user } = response.data;
+    localStorage.setItem("token", token);
+    setToken(token);
+    setUser(user);
+    setLoginModalOpen(false);
+  };
+
+  const login = async (email, password) => {
     try {
-      const response = await axios.post("/api/auth/login", {
-        email,
-        password,
-        name,
-      });
-      const { token, user } = response.data;
-      localStorage.setItem("token", token);
-      setToken(token);
-      setUser(user);
-      setLoginModalOpen(false);
+      const response = await axios.post("/api/auth/login", { email, password });
+      applyAuthResponse(response);
       return { success: true };
     } catch (error) {
       return {
         success: false,
         message: error.response?.data?.message || "Ошибка входа",
+      };
+    }
+  };
+
+  const register = async (email, password, name) => {
+    try {
+      const response = await axios.post("/api/auth/register", {
+        email,
+        password,
+        name,
+      });
+      applyAuthResponse(response);
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Ошибка регистрации",
       };
     }
   };
@@ -58,6 +75,7 @@ export const AuthProvider = ({ children }) => {
     token,
     isAdmin,
     login,
+    register,
     logout,
     loginModalOpen,
     openLoginModal,

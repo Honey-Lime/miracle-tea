@@ -6,7 +6,8 @@ import { forgotPassword, resetPassword } from "../services/authService";
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const LoginModal = () => {
-  const { loginModalOpen, closeLoginModal, login } = useContext(AuthContext);
+  const { loginModalOpen, closeLoginModal, login, register } =
+    useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -89,11 +90,9 @@ const LoginModal = () => {
     }
 
     setLoading(true);
-    const result = await login(
-      getNormalizedEmail(),
-      password,
-      isRegister ? name : undefined,
-    );
+    const result = isRegister
+      ? await register(getNormalizedEmail(), password, name)
+      : await login(getNormalizedEmail(), password);
     setLoading(false);
 
     if (!result.success) {

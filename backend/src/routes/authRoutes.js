@@ -3,8 +3,9 @@ const router = express.Router();
 const authController = require("../controllers/authController");
 const authMiddleware = require("../middleware/authMiddleware");
 
-// Public route: register or login
-router.post("/login", authController.registerOrLogin);
+// Public routes: login and register
+router.post("/login", authController.login);
+router.post("/register", authController.register);
 
 // Protected route: get profile
 router.get("/profile", authMiddleware, authController.getProfile);
