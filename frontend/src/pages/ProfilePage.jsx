@@ -124,7 +124,7 @@ const ProfilePage = () => {
       <h1>Личный кабинет</h1>
       <div className="prfp-profile-info">
         <h2>Привет, {user.name}!</h2>
-        <p>Телефон: {user.phone}</p>
+        <p>Email: {user.email}</p>
         <p>Общая сумма покупок: {user.total || 0} ₽</p>
         <div className="prfp-profile-actions">
           <button

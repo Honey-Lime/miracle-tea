@@ -5,18 +5,19 @@ const path = require("path");
 // Читаем .env вручную
 const envPath = path.join(__dirname, ".env");
 const envContent = fs.readFileSync(envPath, "utf8");
-const adminPhonesLine = envContent
+const adminEmailsLine = envContent
   .split("\n")
-  .find((line) => line.startsWith("ADMIN_PHONES="));
-const ADMIN_PHONES = adminPhonesLine
-  ? adminPhonesLine
+  .find((line) => line.startsWith("ADMIN_EMAILS="));
+const ADMIN_EMAILS = adminEmailsLine
+  ? adminEmailsLine
       .split("=")[1]
       .trim()
       .split(",")
-      .filter((p) => p.length > 0)
+      .map((email) => email.trim().toLowerCase())
+      .filter((email) => email.length > 0)
   : [];
 
-console.log("Админские номера из .env:", ADMIN_PHONES);
+console.log("Админские email из .env:", ADMIN_EMAILS);
 
 const User = require("./src/models/User");
 
@@ -30,19 +31,19 @@ async function checkAndUpdateAdmins() {
     await mongoose.connect(MONGODB_URI);
     console.log("MongoDB подключена");
 
-    // Находим всех пользователей с админскими номерами
-    const users = await User.find({ phone: { $in: ADMIN_PHONES } });
-    console.log("\nНайдено пользователей с админскими номерами:", users.length);
+    // Находим всех пользователей с админскими email
+    const users = await User.find({ email: { $in: ADMIN_EMAILS } });
+    console.log("\nНайдено пользователей с админскими email:", users.length);
 
     users.forEach((user) => {
       console.log(`\nПользователь: ${user.name}`);
-      console.log(`  Телефон: ${user.phone}`);
+      console.log(`  Email: ${user.email}`);
       console.log(`  isAdmin: ${user.isAdmin}`);
     });
 
-    // Обновляем права для всех пользователей с админскими номерами
+    // Обновляем права для всех пользователей с админскими email
     const updateResult = await User.updateMany(
-      { phone: { $in: ADMIN_PHONES }, isAdmin: false },
+      { email: { $in: ADMIN_EMAILS }, isAdmin: false },
       { $set: { isAdmin: true } },
     );
     console.log(`\nОбновлено пользователей: ${updateResult.modifiedCount}`);
@@ -51,7 +52,7 @@ async function checkAndUpdateAdmins() {
     const allAdmins = await User.find({ isAdmin: true });
     console.log("\nВсе админы в базе данных:");
     allAdmins.forEach((admin) => {
-      console.log(`  ${admin.name} - ${admin.phone}`);
+      console.log(`  ${admin.name} - ${admin.email}`);
     });
 
     process.exit(0);

@@ -11,10 +11,10 @@ export const AuthProvider = ({ children }) => {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const isAdmin = user?.isAdmin || false;
 
-  const login = async (phone, password, name) => {
+  const login = async (email, password, name) => {
     try {
       const response = await axios.post("/api/auth/login", {
-        phone,
+        email,
         password,
         name,
       });

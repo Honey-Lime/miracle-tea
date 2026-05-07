@@ -315,7 +315,7 @@ exports.getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find()
       .populate("list.pid")
-      .populate("userId", "name phone");
+      .populate("userId", "name email phone");
     res.json(orders);
   } catch (error) {
     res.status(500).json({ message: error.message });

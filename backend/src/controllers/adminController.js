@@ -9,7 +9,7 @@ const fs = require("fs");
 exports.getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find({ status: { $ne: "cart" } })
-      .populate("userId", "name phone")
+      .populate("userId", "name email phone")
       .populate("list.pid", "name price")
       .sort({ date: -1 });
     res.json(orders);

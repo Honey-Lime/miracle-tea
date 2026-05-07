@@ -106,7 +106,7 @@ const OrdersPage = () => {
                   </span>
                   <span className="op-order-customer">
                     {order.userId?.name || "Гость"} (
-                    {order.userId?.phone || "N/A"})
+                    {order.userId?.email || order.userId?.phone || "N/A"})
                   </span>
                   <span
                     className={`op-order-status ${getStatusClass(

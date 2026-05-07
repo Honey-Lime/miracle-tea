@@ -81,7 +81,7 @@ const productRoutes = require("./routes/productRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
-const smsRoutes = require("./routes/smsRoutes");
+const emailRoutes = require("./routes/emailRoutes");
 
 console.log("Routes imported");
 
@@ -90,7 +90,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/sms", smsRoutes);
+app.use("/api/email", emailRoutes);
 
 console.log("Routes registered");
 

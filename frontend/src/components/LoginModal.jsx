@@ -1,12 +1,13 @@
 import { useState, useContext, useEffect, useRef } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { formatPhone, extractPhoneDigits } from "../utils/formatPhone";
-import { sendSmsCode, verifySmsCode } from "../services/smsService";
+import { sendEmailCode, verifyEmailCode } from "../services/emailService";
 import { forgotPassword, resetPassword } from "../services/authService";
+
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const LoginModal = () => {
   const { loginModalOpen, closeLoginModal, login } = useContext(AuthContext);
-  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [isRegister, setIsRegister] = useState(false);
@@ -14,40 +15,37 @@ const LoginModal = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Состояния для SMS-верификации
-  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
   const [canResendAt, setCanResendAt] = useState(null);
   const [timeLeft, setTimeLeft] = useState(0);
   const timerRef = useRef(null);
 
-  // Состояния для восстановления пароля
   const [resetCodeSent, setResetCodeSent] = useState(false);
   const [resetCode, setResetCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [resetPhoneVerified, setResetPhoneVerified] = useState(false);
 
-  const handlePhoneChange = (e) => {
-    const raw = e.target.value;
-    const formatted = formatPhone(raw);
-    setPhone(formatted);
-    setPhoneVerified(false);
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+    setEmailVerified(false);
     setCodeSent(false);
   };
 
-  // Отправка кода подтверждения
+  const getNormalizedEmail = () => email.trim().toLowerCase();
+
   const handleSendCode = async () => {
     setError("");
-    const phoneDigits = extractPhoneDigits(phone);
-    if (phoneDigits.length < 10) {
-      setError("Введите корректный номер телефона");
+    const normalizedEmail = getNormalizedEmail();
+
+    if (!emailPattern.test(normalizedEmail)) {
+      setError("Введите корректный email");
       return;
     }
 
     setLoading(true);
     try {
-      const response = await sendSmsCode(phoneDigits);
+      const response = await sendEmailCode(normalizedEmail);
       setCodeSent(true);
       if (response.data.canResendAt) {
         setCanResendAt(new Date(response.data.canResendAt));
@@ -59,15 +57,14 @@ const LoginModal = () => {
     }
   };
 
-  // Проверка кода
   const handleVerifyCode = async () => {
     setError("");
-    const phoneDigits = extractPhoneDigits(phone);
+    const normalizedEmail = getNormalizedEmail();
 
     setLoading(true);
     try {
-      await verifySmsCode(phoneDigits, verificationCode);
-      setPhoneVerified(true);
+      await verifyEmailCode(normalizedEmail, verificationCode);
+      setEmailVerified(true);
     } catch (err) {
       setError(err.response?.data?.message || "Неверный код");
     } finally {
@@ -75,39 +72,35 @@ const LoginModal = () => {
     }
   };
 
-  // Основная отправка формы
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    // При регистрации сначала проверяем телефон
-    if (isRegister && !phoneVerified) {
+    if (isRegister && !emailVerified) {
       if (!codeSent) {
         await handleSendCode();
       }
       return;
     }
 
-    // Валидация пароля при регистрации
     if (isRegister && password.length < 6) {
       setError("Пароль должен быть не менее 6 символов");
       return;
     }
 
     setLoading(true);
-    const phoneDigits = extractPhoneDigits(phone);
     const result = await login(
-      phoneDigits,
+      getNormalizedEmail(),
       password,
       isRegister ? name : undefined,
     );
     setLoading(false);
+
     if (!result.success) {
       setError(result.message);
     }
   };
 
-  // Таймер обратного отсчёта для повторной отправки кода
   useEffect(() => {
     if (canResendAt && timeLeft > 0) {
       timerRef.current = setTimeout(() => {
@@ -120,7 +113,6 @@ const LoginModal = () => {
     return () => clearTimeout(timerRef.current);
   }, [timeLeft, canResendAt]);
 
-  // Обновление таймера при получении canResendAt
   useEffect(() => {
     if (canResendAt) {
       const now = new Date();
@@ -129,18 +121,18 @@ const LoginModal = () => {
     }
   }, [canResendAt]);
 
-  // Отправка кода для восстановления пароля
   const handleSendResetCode = async () => {
     setError("");
-    const phoneDigits = extractPhoneDigits(phone);
-    if (phoneDigits.length < 10) {
-      setError("Введите корректный номер телефона");
+    const normalizedEmail = getNormalizedEmail();
+
+    if (!emailPattern.test(normalizedEmail)) {
+      setError("Введите корректный email");
       return;
     }
 
     setLoading(true);
     try {
-      await forgotPassword(phoneDigits);
+      await forgotPassword(normalizedEmail);
       setResetCodeSent(true);
     } catch (err) {
       setError(err.response?.data?.message || "Ошибка отправки кода");
@@ -149,15 +141,12 @@ const LoginModal = () => {
     }
   };
 
-  // Проверка кода и установка нового пароля
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setError("");
 
-    const phoneDigits = extractPhoneDigits(phone);
-
     if (resetCode.length < 6) {
-      setError("Введите код из SMS");
+      setError("Введите код из письма");
       return;
     }
 
@@ -169,17 +158,16 @@ const LoginModal = () => {
     setLoading(true);
     try {
       await resetPassword({
-        phone: phoneDigits,
+        email: getNormalizedEmail(),
         code: resetCode,
         newPassword,
       });
       alert("Пароль успешно изменён. Теперь вы можете войти.");
       setIsForgotPassword(false);
-      setPhone("");
+      setEmail("");
       setResetCode("");
       setNewPassword("");
       setResetCodeSent(false);
-      setResetPhoneVerified(false);
     } catch (err) {
       setError(err.response?.data?.message || "Ошибка восстановления пароля");
     } finally {
@@ -187,10 +175,9 @@ const LoginModal = () => {
     }
   };
 
-  // Сброс состояния при закрытии модального окна
   useEffect(() => {
     if (!loginModalOpen) {
-      setPhoneVerified(false);
+      setEmailVerified(false);
       setCodeSent(false);
       setVerificationCode("");
       setCanResendAt(null);
@@ -199,7 +186,7 @@ const LoginModal = () => {
       setResetCodeSent(false);
       setResetCode("");
       setNewPassword("");
-      setResetPhoneVerified(false);
+      setError("");
     }
   }, [loginModalOpen]);
 
@@ -209,23 +196,23 @@ const LoginModal = () => {
     <div className="modal-overlay" onClick={closeLoginModal}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <button className="modal-close" onClick={closeLoginModal}>
-          ×
+          x
         </button>
         <h2>{isRegister ? "Регистрация" : "Вход"}</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Номер телефона</label>
+            <label>Email</label>
             <div className="phone-input-wrapper">
               <input
-                type="tel"
-                value={phone}
-                onChange={handlePhoneChange}
+                type="email"
+                value={email}
+                onChange={handleEmailChange}
                 required
-                placeholder="+7 (XXX) XXX-XX-XX"
-                disabled={phoneVerified}
+                placeholder="you@example.com"
+                disabled={emailVerified}
               />
             </div>
-            {isRegister && !phoneVerified && (
+            {isRegister && !emailVerified && (
               <button
                 type="button"
                 className="btn btn-secondary btn-sm"
@@ -235,9 +222,9 @@ const LoginModal = () => {
                 {codeSent ? "Отправлено" : "Получить код"}
               </button>
             )}
-            {isRegister && !phoneVerified && codeSent && (
+            {isRegister && !emailVerified && codeSent && (
               <div className="form-group">
-                <label>Код из SMS</label>
+                <label>Код из письма</label>
                 <div className="code-input-wrapper">
                   <input
                     type="text"
@@ -259,9 +246,7 @@ const LoginModal = () => {
               </div>
             )}
             {canResendAt && timeLeft > 0 && (
-              <small className="hint">
-                Повторная отправка через {timeLeft} сек.
-              </small>
+              <small className="hint">Повторная отправка через {timeLeft} сек.</small>
             )}
             {!canResendAt && codeSent && (
               <button
@@ -310,14 +295,14 @@ const LoginModal = () => {
 
           {error && <p className="error">{error}</p>}
 
-          {isRegister && phoneVerified && (
-            <p className="success-message">✓ Номер подтверждён</p>
+          {isRegister && emailVerified && (
+            <p className="success-message">✓ Email подтверждён</p>
           )}
 
           <button
             type="submit"
             className={`btn btn-primary ${loading ? "btn-loading" : ""}`}
-            disabled={loading || (isRegister && !phoneVerified)}
+            disabled={loading || (isRegister && !emailVerified)}
           >
             {loading ? "" : isRegister ? "Зарегистрироваться" : "Войти"}
           </button>
@@ -329,7 +314,7 @@ const LoginModal = () => {
             className="link-btn"
             onClick={() => {
               setIsRegister(!isRegister);
-              setPhoneVerified(false);
+              setEmailVerified(false);
               setCodeSent(false);
               setVerificationCode("");
               setError("");
@@ -340,7 +325,6 @@ const LoginModal = () => {
         </p>
       </div>
 
-      {/* Модальное окно восстановления пароля */}
       {isForgotPassword && (
         <div
           className="modal-overlay"
@@ -351,27 +335,26 @@ const LoginModal = () => {
               className="modal-close"
               onClick={() => setIsForgotPassword(false)}
             >
-              ×
+              x
             </button>
             <h3>Восстановление пароля</h3>
             <p className="hint">
               {!resetCodeSent
-                ? "Введите номер телефона, и мы отправим код в SMS"
-                : "Введите код из SMS и новый пароль"}
+                ? "Введите email, и мы отправим код в письме"
+                : "Введите код из письма и новый пароль"}
             </p>
 
             {!resetCodeSent ? (
-              // Шаг 1: ввод телефона и отправка кода
               <>
                 <div className="form-group">
-                  <label>Номер телефона</label>
+                  <label>Email</label>
                   <div className="phone-input-wrapper">
                     <input
-                      type="tel"
-                      value={phone}
-                      onChange={handlePhoneChange}
+                      type="email"
+                      value={email}
+                      onChange={handleEmailChange}
                       required
-                      placeholder="+7 (XXX) XXX-XX-XX"
+                      placeholder="you@example.com"
                     />
                     <button
                       type="button"
@@ -398,10 +381,9 @@ const LoginModal = () => {
                 </div>
               </>
             ) : (
-              // Шаг 2: ввод кода и нового пароля
               <form onSubmit={handleResetPassword}>
                 <div className="form-group">
-                  <label>Код из SMS</label>
+                  <label>Код из письма</label>
                   <div className="code-input-wrapper">
                     <input
                       type="text"

@@ -7,11 +7,13 @@ async function setAdmin() {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log("Connected to MongoDB");
 
-    const adminPhone = "79202115108";
-    const user = await User.findOne({ phone: adminPhone });
+    const adminEmail = process.env.ADMIN_EMAILS
+      ? process.env.ADMIN_EMAILS.split(",")[0].trim().toLowerCase()
+      : "";
+    const user = await User.findOne({ email: adminEmail });
 
     if (!user) {
-      console.log(`User with phone ${adminPhone} not found`);
+      console.log(`User with email ${adminEmail} not found`);
       mongoose.disconnect();
       return;
     }
@@ -21,7 +23,7 @@ async function setAdmin() {
     } else {
       user.isAdmin = true;
       await user.save();
-      console.log(`User ${user.name} (${user.phone}) is now an admin!`);
+      console.log(`User ${user.name} (${user.email}) is now an admin!`);
     }
 
     mongoose.disconnect();

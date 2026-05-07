@@ -2,10 +2,12 @@ const mongoose = require("mongoose");
 
 const smsCodeSchema = new mongoose.Schema(
   {
-    phone: {
+    email: {
       type: String,
       required: true,
       index: true,
+      lowercase: true,
+      trim: true,
     },
     code: {
       type: String,
