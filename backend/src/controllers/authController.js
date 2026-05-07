@@ -1,5 +1,5 @@
 const User = require("../models/User");
-const SmsCode = require("../models/SmsCode");
+const VerificationCode = require("../models/VerificationCode");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const {
@@ -161,7 +161,7 @@ exports.forgotPassword = async (req, res) => {
     const code = generateCode();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
-    await SmsCode.create({
+    await VerificationCode.create({
       email: normalizedEmail,
       code,
       expiresAt,
@@ -189,6 +189,10 @@ exports.forgotPassword = async (req, res) => {
         .json({ message: emailResult.error || "Ошибка отправки email" });
     }
 
+    console.log(
+      `[authController] Код восстановления пароля отправлен на ${normalizedEmail}`,
+    );
+
     res.json({ message: "Код подтверждения отправлен на email" });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -209,7 +213,7 @@ exports.resetPassword = async (req, res) => {
       return res.status(404).json({ message: "Пользователь не найден" });
     }
 
-    const emailCode = await SmsCode.findOne({
+    const emailCode = await VerificationCode.findOne({
       email: normalizedEmail,
       code,
       purpose: "password_reset",

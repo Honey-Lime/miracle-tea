@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const smsCodeSchema = new mongoose.Schema(
+const verificationCodeSchema = new mongoose.Schema(
   {
     email: {
       type: String,
@@ -16,7 +16,7 @@ const smsCodeSchema = new mongoose.Schema(
     expiresAt: {
       type: Date,
       required: true,
-      index: { expires: 0 }, // Автоматическое удаление после истечения
+      index: { expires: 0 },
     },
     isUsed: {
       type: Boolean,
@@ -30,7 +30,8 @@ const smsCodeSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    collection: "verificationcodes",
   },
 );
 
-module.exports = mongoose.model("SmsCode", smsCodeSchema);
+module.exports = mongoose.model("VerificationCode", verificationCodeSchema);

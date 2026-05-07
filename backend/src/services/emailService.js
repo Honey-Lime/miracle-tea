@@ -6,6 +6,7 @@ const createTransporter = async () => {
   try {
     nodemailer = require("nodemailer");
   } catch (error) {
+    console.error("[emailService] Пакет nodemailer не установлен");
     return null;
   }
 
@@ -15,6 +16,7 @@ const createTransporter = async () => {
   const pass = process.env.SMTP_PASS;
 
   if (!host || !user || !pass) {
+    console.error("[emailService] SMTP_HOST / SMTP_USER / SMTP_PASS не настроены");
     return null;
   }
 
@@ -58,6 +60,10 @@ exports.sendVerificationEmail = async (email, code, purpose = "registration") =>
   }
 
   try {
+    console.log(
+      `[emailService] Отправка письма на ${email}, purpose=${purpose}, from=${fromAddress}`,
+    );
+
     await transporter.sendMail({
       from: `${appName} <${fromAddress}>`,
       to: email,
@@ -65,15 +71,21 @@ exports.sendVerificationEmail = async (email, code, purpose = "registration") =>
       text: texts[purpose] || texts.registration,
     });
 
+    console.log(`[emailService] Письмо успешно отправлено на ${email}`);
+
     return { success: true };
   } catch (error) {
+    console.error(
+      `[emailService] Ошибка отправки письма на ${email}: ${error.message}`,
+    );
+
     if (process.env.NODE_ENV === "development") {
       console.log(`\n[emailService] DEV MODE: Код для ${email}: ${code}\n`);
     }
 
     return {
       success: false,
-      error: "Ошибка отправки email",
+      error: error.message || "Ошибка отправки email",
     };
   }
 };

@@ -1,4 +1,4 @@
-const SmsCode = require("../models/SmsCode");
+const VerificationCode = require("../models/VerificationCode");
 const {
   generateCode,
   sendVerificationEmail,
@@ -15,7 +15,7 @@ exports.sendCode = async (req, res) => {
   }
 
   try {
-    const existingCode = await SmsCode.findOne({
+    const existingCode = await VerificationCode.findOne({
       email,
       purpose: "registration",
       isUsed: false,
@@ -34,7 +34,7 @@ exports.sendCode = async (req, res) => {
     const code = generateCode();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
-    await SmsCode.create({
+    await VerificationCode.create({
       email,
       code,
       expiresAt,
@@ -44,8 +44,13 @@ exports.sendCode = async (req, res) => {
     const emailResult = await sendVerificationEmail(email, code, "registration");
 
     if (!emailResult.success) {
-      console.error("Email не отправлен:", emailResult.error);
+      console.error(`[emailController] Email не отправлен на ${email}: ${emailResult.error}`);
+      return res
+        .status(500)
+        .json({ message: emailResult.error || "Ошибка отправки письма" });
     }
+
+    console.log(`[emailController] Код регистрации отправлен на ${email}`);
 
     res.json({
       message: "Код отправлен",
@@ -66,7 +71,7 @@ exports.verifyCode = async (req, res) => {
   }
 
   try {
-    const emailCode = await SmsCode.findOne({
+    const emailCode = await VerificationCode.findOne({
       email,
       code,
       purpose: "registration",
