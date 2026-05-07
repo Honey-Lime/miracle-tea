@@ -13,9 +13,64 @@
   gap: 0.5rem;
 }
 
+.att-add-tea-form .att-form-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  letter-spacing: 0.02em;
+}
+
+.att-add-tea-form .att-form-group input,
+.att-add-tea-form .att-form-group textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: var(--color-text-primary);
+  background: var(--color-white);
+  transition: all 0.25s ease;
+  box-sizing: border-box;
+}
+
+.att-add-tea-form .att-form-group input::placeholder,
+.att-add-tea-form .att-form-group textarea::placeholder {
+  color: var(--color-gray-400);
+  font-style: italic;
+}
+
+.att-add-tea-form .att-form-group input:hover,
+.att-add-tea-form .att-form-group textarea:hover {
+  border-color: var(--color-secondary);
+}
+
+.att-add-tea-form .att-form-group input:focus,
+.att-add-tea-form .att-form-group textarea:focus {
+  outline: none;
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px var(--input-focus-shadow);
+  background: var(--color-primary);
+}
+
 .att-add-tea-form .att-form-group textarea {
   resize: vertical;
-  font-family: inherit;
+  min-height: 100px;
+  line-height: 1.5;
+}
+
+.att-add-tea-form .att-form-group input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.att-add-tea-form
+  .att-form-group
+  input[type="number"]::-webkit-outer-spin-button,
+.att-add-tea-form
+  .att-form-group
+  input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .att-add-tea-form .att-form-row {

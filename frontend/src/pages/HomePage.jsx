@@ -1,5 +1,3 @@
-import YandexDeliveryCalculator from "../components/YandexDeliveryCalculator";
-
 const HomePage = () => {
   return (
     <div className="hp-home-page">
@@ -32,17 +30,6 @@ const HomePage = () => {
               <p>Можно заказать пробники по 10г</p>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="hp-delivery">
-        <div className="container">
-          <h2>Доставка</h2>
-          <p>
-            Мы находимся в Воронеже и осуществляем доставку через{" "}
-            <strong>Яндекс Доставку</strong>.
-          </p>
-          <YandexDeliveryCalculator />
         </div>
       </section>
 

@@ -219,29 +219,58 @@
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
 }
 
 .form-group input,
 .form-group textarea {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-size: 1rem;
-  transition: border-color 0.3s;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: var(--color-text-primary);
+  background: var(--color-white);
+  transition: all 0.25s ease;
+  box-sizing: border-box;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: var(--color-gray-400);
+  font-style: italic;
+}
+
+.form-group input:hover,
+.form-group textarea:hover {
+  border-color: var(--color-secondary);
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: var(--input-focus-border);
+  border-color: var(--color-brand);
   box-shadow: 0 0 0 3px var(--input-focus-shadow);
 }
 
 .form-group textarea {
   resize: vertical;
-  font-family: inherit;
+  min-height: 80px;
+  line-height: 1.5;
+}
+
+.form-group input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.form-group input[type="number"]::-webkit-outer-spin-button,
+.form-group input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 /* ===================================
@@ -249,16 +278,28 @@
     =================================== */
 .search-input {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-size: 1rem;
-  transition: border-color 0.3s;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: var(--color-text-primary);
+  background: var(--color-white);
+  transition: all 0.25s ease;
+  box-sizing: border-box;
+}
+
+.search-input::placeholder {
+  color: var(--color-gray-400);
+  font-style: italic;
+}
+
+.search-input:hover {
+  border-color: var(--color-secondary);
 }
 
 .search-input:focus {
   outline: none;
-  border-color: var(--input-focus-border);
+  border-color: var(--color-brand);
   box-shadow: 0 0 0 3px var(--input-focus-shadow);
 }
 
@@ -351,16 +392,29 @@
 
 .city-input {
   width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--border-color-light);
-  border-radius: 4px;
-  font-size: 14px;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: var(--color-text-primary);
+  background: var(--color-white);
+  transition: all 0.25s ease;
+  box-sizing: border-box;
+}
+
+.city-input::placeholder {
+  color: var(--color-gray-400);
+  font-style: italic;
+}
+
+.city-input:hover {
+  border-color: var(--color-secondary);
 }
 
 .city-input:focus {
   outline: none;
-  border-color: var(--input-focus-border);
-  box-shadow: 0 0 0 2px var(--input-focus-shadow);
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px var(--input-focus-shadow);
 }
 
 .search-loading {

@@ -5,10 +5,7 @@ const Footer = () => {
         <div className="ftr-content">
           <div className="ftr-section">
             <h3>Чудо чай</h3>
-            <p>
-              Качественный чай по лояльной цене. Доставка по Воронежу и через
-              СДЭК.
-            </p>
+            <p>Качественный чай по лояльной цене.</p>
           </div>
           <div className="ftr-section">
             <h4>Контакты</h4>

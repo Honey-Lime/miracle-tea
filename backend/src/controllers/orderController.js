@@ -41,6 +41,7 @@ exports.createOrder = async (req, res) => {
           pid: item.pid,
           count: item.count,
           priceAtOrder: product.price / 100,
+          isSampler: item.isSampler || false,
         };
       }),
     );

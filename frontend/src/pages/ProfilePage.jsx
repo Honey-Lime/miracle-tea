@@ -301,10 +301,6 @@ const ProfilePage = () => {
                     {getStatusLabel(selectedOrder.status)}
                   </span>
                 </p>
-                <p>
-                  <strong>Адрес доставки:</strong>{" "}
-                  {selectedOrder.delivery?.address?.fullAddress || "Не указан"}
-                </p>
               </div>
               <div className="prfp-order-items-block">
                 <h3>Товары</h3>
@@ -338,12 +334,6 @@ const ProfilePage = () => {
                     )}
                   </span>
                 </div>
-                {selectedOrder.delivery?.price > 0 && (
-                  <div className="prfp-total-row">
-                    <span>Доставка:</span>
-                    <span>{formatPrice(selectedOrder.delivery.price)}</span>
-                  </div>
-                )}
                 <div className="prfp-total-row grand-total">
                   <span>Итого:</span>
                   <span>{formatPrice(selectedOrder.totalPrice)}</span>

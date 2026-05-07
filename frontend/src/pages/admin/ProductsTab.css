@@ -26,17 +26,29 @@
 }
 
 .products-tab .pt-search-input {
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
+  padding: 0.6rem 1rem;
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
   font-size: 0.9rem;
   width: 250px;
-  transition: border-color 0.2s;
+  color: var(--color-text-primary);
+  background: var(--color-white);
+  transition: all 0.25s ease;
+}
+
+.products-tab .pt-search-input::placeholder {
+  color: var(--color-gray-400);
+  font-style: italic;
+}
+
+.products-tab .pt-search-input:hover {
+  border-color: var(--color-secondary);
 }
 
 .products-tab .pt-search-input:focus {
   outline: none;
-  border-color: var(--color-secondary);
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px var(--input-focus-shadow);
 }
 
 .products-tab .pt-products-list {

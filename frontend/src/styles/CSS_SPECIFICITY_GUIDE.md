@@ -11,7 +11,6 @@
 | Header                   | `.hdr-` | `.hdr-header`, `.hdr-logo`, `.hdr-nav`                  |
 | Footer                   | `.ftr-` | `.ftr-footer`, `.ftr-content`, `.ftr-section`           |
 | LoginModal               | `.lgn-` | `.lgn-modal-content`, `.lgn-error`, `.lgn-form-actions` |
-| YandexDeliveryCalculator | `.ydc-` | `.ydc-calculator`, `.ydc-form`, `.ydc-city-input`       |
 
 ### Страницы (pages/)
 
@@ -21,7 +20,7 @@
 | CatalogPage  | `.cp-`   | `.cp-catalog-page`, `.cp-products-grid`, `.cp-product-card`        |
 | ProductPage  | `.pp-`   | `.pp-product-page`, `.pp-product-info`, `.pp-gram-controls`        |
 | CartPage     | `.crt-`  | `.crt-cart-page`, `.crt-items`, `.crt-item`                        |
-| CheckoutPage | `.chp-`  | `.chp-checkout-page`, `.chp-order-summary`, `.chp-delivery-method` |
+| CheckoutPage | `.chp-`  | `.chp-checkout-page`, `.chp-order-summary`, `.chp-final-total`     |
 | ProfilePage  | `.prfp-` | `.prfp-profile-page`, `.prfp-profile-info`, `.prfp-orders-table`   |
 | AdminPanel   | `.ap-`   | `.ap-admin-panel`, `.ap-admin-sidebar`, `.ap-sidebar-link`         |
 | ThankYouPage | `.typ-`  | `.typ-thank-you-page`, `.typ-thank-you-content`                    |

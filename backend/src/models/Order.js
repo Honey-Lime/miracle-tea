@@ -43,6 +43,10 @@ const orderSchema = new mongoose.Schema(
         type: Object,
         default: null,
       },
+      provider: {
+        type: String,
+        default: "eshop",
+      },
       price: {
         type: Number,
         default: 0,
@@ -50,6 +54,14 @@ const orderSchema = new mongoose.Schema(
       did: {
         type: String,
         default: "",
+      },
+      cdek: {
+        type: Object,
+        default: null,
+      },
+      cdekOrder: {
+        type: Object,
+        default: null,
       },
     },
     totalPrice: {

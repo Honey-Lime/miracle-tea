@@ -18,6 +18,14 @@ router.get("/products", adminController.getAllProducts);
 router.post("/products", adminController.addProduct);
 router.get("/products/search", adminController.searchProducts);
 router.put("/products/stock", adminController.addStock);
+
+// Tags (must be before /products/:id to avoid route conflict)
+router.get("/products/tags", adminController.getAllTags);
+router.post("/products/tags", adminController.createTag);
+router.delete("/products/tags", adminController.deleteTag);
+router.put("/products/add-tag", adminController.addTagToProduct);
+router.put("/products/remove-tag", adminController.removeTagFromProduct);
+
 router.put("/products/:id", adminController.updateProduct);
 router.delete("/products/:id", adminController.deleteProduct);
 
@@ -30,10 +38,7 @@ router.post(
 router.put("/products/:id/reorder-media", adminController.reorderProductImages);
 router.put("/products/:id/delete-media", adminController.deleteProductImage);
 
-// Tags
-router.get("/products/tags", adminController.getAllTags);
-router.post("/products/tags", adminController.createTag);
-router.put("/products/add-tag", adminController.addTagToProduct);
-router.put("/products/remove-tag", adminController.removeTagFromProduct);
+// Statistics
+router.get("/statistics", adminController.getStatistics);
 
 module.exports = router;

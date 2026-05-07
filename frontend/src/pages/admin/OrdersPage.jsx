@@ -139,20 +139,9 @@ const OrdersPage = () => {
                         ),
                       )}
                     </div>
-                    <div className="op-order-row-item">
-                      <strong>Стоимость доставки:</strong>{" "}
-                      {formatPrice(order.delivery?.price || 0)}
-                    </div>
                     <div className="op-order-row-item total">
                       <strong>Итого:</strong> {formatPrice(order.totalPrice)}
                     </div>
-                  </div>
-                  <div className="op-order-address">
-                    <strong>Адрес доставки:</strong>{" "}
-                    {order.delivery?.address?.fullAddress ||
-                      order.delivery?.address?.label ||
-                      order.delivery?.address?.data?.address ||
-                      "Не указан"}
                   </div>
                   <div className="op-order-actions">
                     {order.status === "paid" && (

@@ -208,6 +208,28 @@ exports.removeTagFromProduct = async (req, res) => {
   }
 };
 
+// Delete a tag globally (from Tag collection and all products)
+exports.deleteTag = async (req, res) => {
+  const { name } = req.body;
+  try {
+    if (!name || !name.trim()) {
+      return res.status(400).json({ message: "Название тега обязательно" });
+    }
+    const trimmedName = name.trim();
+    // Удаляем из коллекции Tag
+    await Tag.deleteOne({ name: trimmedName });
+    // Удаляем из всех продуктов
+    await Product.updateMany(
+      { tags: trimmedName },
+      { $pull: { tags: trimmedName } },
+    );
+    res.json({ message: "Тег удален" });
+  } catch (error) {
+    logError(error, "deleteTag");
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Update product
 exports.updateProduct = async (req, res) => {
   try {
@@ -317,6 +339,84 @@ exports.deleteProductImage = async (req, res) => {
 
     res.json({ message: "Изображение удалено", product });
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get statistics: average order value and per-product stats
+exports.getStatistics = async (req, res) => {
+  try {
+    // Get all non-cart orders
+    const orders = await Order.find({ status: { $ne: "cart" } })
+      .populate("list.pid", "name price")
+      .lean();
+
+    // Average order value
+    const totalOrders = orders.length;
+    const totalSum = orders.reduce(
+      (sum, order) => sum + (order.totalPrice || 0),
+      0,
+    );
+    const averageOrderValue = totalOrders > 0 ? totalSum / totalOrders : 0;
+
+    // Per-product statistics
+    const productStats = {};
+
+    for (const order of orders) {
+      for (const item of order.list) {
+        if (!item.pid) continue;
+
+        const productId = item.pid._id.toString();
+        const productName = item.pid.name;
+
+        if (!productStats[productId]) {
+          productStats[productId] = {
+            _id: productId,
+            name: productName,
+            totalGrams: 0,
+            orderIds: new Set(),
+            totalGramsExclSamplers: 0,
+            samplerGrams: 0,
+          };
+        }
+
+        const count = item.count || 0;
+        productStats[productId].totalGrams += count;
+
+        if (item.isSampler) {
+          productStats[productId].samplerGrams += count;
+        } else {
+          productStats[productId].orderIds.add(order._id.toString());
+          productStats[productId].totalGramsExclSamplers += count;
+        }
+      }
+    }
+
+    // Calculate average order size (excluding samplers)
+    const productStatsArray = Object.values(productStats).map((stat) => ({
+      _id: stat._id,
+      name: stat.name,
+      totalGrams: stat.totalGrams,
+      orderCount: stat.orderIds.size,
+      totalGramsExclSamplers: stat.totalGramsExclSamplers,
+      samplerCount: stat.samplerGrams,
+      avgOrderSize:
+        stat.orderIds.size > 0
+          ? stat.totalGramsExclSamplers / stat.orderIds.size
+          : 0,
+    }));
+
+    // Sort by total grams (descending)
+    productStatsArray.sort((a, b) => b.totalGrams - a.totalGrams);
+
+    res.json({
+      averageOrderValue,
+      totalOrders,
+      totalSum,
+      productStats: productStatsArray,
+    });
+  } catch (error) {
+    logError(error, "getStatistics");
     res.status(500).json({ message: error.message });
   }
 };

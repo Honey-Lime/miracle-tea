@@ -63,47 +63,10 @@
   color: var(--color-brand);
 }
 
-.hp-delivery {
-  background: var(--color-primary-subtle);
-  padding: 4rem 0;
-}
-
-.hp-delivery h2,
 .hp-about h2 {
   text-align: center;
   margin-bottom: 2rem;
   color: var(--color-text-primary);
-}
-
-.hp-delivery p {
-  max-width: 800px;
-  margin: 0 auto 2rem;
-  text-align: center;
-  font-size: 1.1rem;
-  line-height: 1.6;
-}
-
-.hp-delivery .hp-calculator {
-  background: var(--color-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 2rem;
-  max-width: 600px;
-  margin: 0 auto;
-  box-shadow: 0 4px 8px var(--shadow-color);
-}
-
-.hp-delivery .hp-calculator h3 {
-  margin-bottom: 1rem;
-  color: var(--color-brand);
-}
-
-.hp-delivery .hp-placeholder {
-  background: var(--color-gray-200);
-  padding: 2rem;
-  border-radius: 4px;
-  text-align: center;
-  color: var(--breadcrumb-default);
 }
 
 .hp-about {

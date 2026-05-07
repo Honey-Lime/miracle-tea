@@ -14,7 +14,6 @@ main.jsx
 │   ├── Header.css
 │   ├── Footer.css
 │   ├── LoginModal.css
-│   └── YandexDeliveryCalculator.css
 └── pages.css (высокий приоритет)
     ├── HomePage.css
     ├── CatalogPage.css
@@ -84,7 +83,6 @@ src/styles/
 - `Header.css`
 - `Footer.css`
 - `LoginModal.css`
-- `YandexDeliveryCalculator.css`
 
 **Приоритет:** Средний (переопределяет `components.css`, переопределяется страницами)
 

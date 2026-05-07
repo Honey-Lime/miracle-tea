@@ -16,10 +16,11 @@ const CatalogPage = () => {
       try {
         const response = await getProducts();
         setProducts(response.data);
-        // Инициализируем граммовку для каждого товара (50г по умолчанию)
+        // Инициализируем граммовку для каждого товара (100г по умолчанию)
         const initialGrams = {};
         response.data.forEach((product) => {
-          initialGrams[product._id] = 50;
+          initialGrams[product._id] =
+            product.remains < 100 ? product.remains : 100;
         });
         setGramCounts(initialGrams);
       } catch (error) {
@@ -41,10 +42,10 @@ const CatalogPage = () => {
 
   const handleGramChange = (productId, delta, maxRemains) => {
     setGramCounts((prev) => {
-      const currentGrams = prev[productId] || 50;
+      const currentGrams = prev[productId] || 100;
       const newGrams = currentGrams + delta;
-      if (newGrams < 50) {
-        return { ...prev, [productId]: 50 };
+      if (newGrams < 100) {
+        return { ...prev, [productId]: 100 };
       } else if (newGrams > maxRemains) {
         return { ...prev, [productId]: maxRemains };
       }
@@ -54,8 +55,8 @@ const CatalogPage = () => {
 
   const handleAddToCart = (product, grams) => {
     addToCart(product, grams, false);
-    // Сбрасываем граммовку до 50г после добавления
-    setGramCounts((prev) => ({ ...prev, [product._id]: 50 }));
+    // Сбрасываем граммовку до 100г после добавления
+    setGramCounts((prev) => ({ ...prev, [product._id]: 100 }));
   };
 
   const handleCardClick = (e, productId) => {
@@ -160,12 +161,12 @@ const CatalogPage = () => {
                       onClick={() =>
                         handleGramChange(product._id, -50, product.remains)
                       }
-                      disabled={(gramCounts[product._id] || 50) - 50 < 50}
+                      disabled={(gramCounts[product._id] || 100) - 50 < 100}
                     >
                       -50
                     </button>
                     <span className="gram-count">
-                      {gramCounts[product._id] || 50}г
+                      {gramCounts[product._id] || 100}г
                     </span>
                     <button
                       className="gram-btn gram-btn_plus"
@@ -173,7 +174,7 @@ const CatalogPage = () => {
                         handleGramChange(product._id, 50, product.remains)
                       }
                       disabled={
-                        (gramCounts[product._id] || 50) + 50 > product.remains
+                        (gramCounts[product._id] || 100) + 50 > product.remains
                       }
                     >
                       +50
@@ -182,9 +183,11 @@ const CatalogPage = () => {
                   <button
                     className="btn btn-primary cp-add-to-cart-btn"
                     onClick={() =>
-                      handleAddToCart(product, gramCounts[product._id] || 50)
+                      handleAddToCart(product, gramCounts[product._id] || 100)
                     }
-                    disabled={(gramCounts[product._id] || 50) > product.remains}
+                    disabled={
+                      (gramCounts[product._id] || 100) > product.remains
+                    }
                     title="Добавить в корзину"
                   >
                     🛒

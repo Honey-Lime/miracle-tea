@@ -14,10 +14,20 @@ const TagsTab = () => {
   const [tagSearchQuery, setTagSearchQuery] = useState("");
   const [showTagDropdown, setShowTagDropdown] = useState(false);
   const [activeProductId, setActiveProductId] = useState(null);
+  const [newTagName, setNewTagName] = useState("");
+  const [contextMenuTag, setContextMenuTag] = useState(null);
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = () => setContextMenuTag(null);
+    if (contextMenuTag) {
+      document.addEventListener("click", handleClickOutside);
+      return () => document.removeEventListener("click", handleClickOutside);
+    }
+  }, [contextMenuTag]);
 
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -137,21 +147,20 @@ const TagsTab = () => {
     );
   };
 
-  const handleCreateNewTag = async (productId, newTagName) => {
+  const handleCreateGlobalTag = async () => {
     if (!newTagName.trim()) {
       addToast("Введите название тега", "error");
       return;
     }
     try {
-      // Сначала создаем тег
       await axios.post(
         "/api/admin/products/tags",
         { name: newTagName.trim() },
         { headers: { Authorization: `Bearer ${token}` } },
       );
       addToast("Тег создан", "success");
-      // Затем добавляем его к продукту
-      await handleAddTag(productId, newTagName);
+      setAllTags((prev) => [...prev, newTagName.trim()]);
+      setNewTagName("");
     } catch (error) {
       if (error.response?.status === 400) {
         addToast(
@@ -161,6 +170,34 @@ const TagsTab = () => {
       } else {
         addToast("Ошибка создания тега", "error");
       }
+      console.error(error);
+    }
+  };
+
+  const handleDeleteTag = async (tagName) => {
+    try {
+      await axios.delete("/api/admin/products/tags", {
+        data: { name: tagName },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      addToast("Тег удален", "success");
+      setAllTags((prev) => prev.filter((t) => t !== tagName));
+      // Удаляем тег из всех продуктов локально
+      setProducts((prev) =>
+        prev.map((p) => ({
+          ...p,
+          tags: (p.tags || []).filter((t) => t !== tagName),
+        })),
+      );
+      setFilteredProducts((prev) =>
+        prev.map((p) => ({
+          ...p,
+          tags: (p.tags || []).filter((t) => t !== tagName),
+        })),
+      );
+      setContextMenuTag(null);
+    } catch (error) {
+      addToast("Ошибка удаления тега", "error");
       console.error(error);
     }
   };
@@ -178,12 +215,55 @@ const TagsTab = () => {
         ) : (
           <div className="all-tags-list">
             {allTags.map((tag, index) => (
-              <span key={index} className="global-tag">
+              <span
+                key={index}
+                className="global-tag"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setContextMenuTag(contextMenuTag === tag ? null : tag);
+                }}
+              >
                 {tag}
+                {contextMenuTag === tag && (
+                  <div
+                    className="tag-context-menu"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      type="button"
+                      className="context-menu-item delete"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteTag(tag);
+                      }}
+                    >
+                      Удалить
+                    </button>
+                  </div>
+                )}
               </span>
             ))}
           </div>
         )}
+        <div className="create-tag-form">
+          <input
+            type="text"
+            value={newTagName}
+            onChange={(e) => setNewTagName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleCreateGlobalTag();
+            }}
+            placeholder="Новый тег..."
+            className="new-tag-input"
+          />
+          <button
+            type="button"
+            className="add-tag-btn"
+            onClick={handleCreateGlobalTag}
+          >
+            Создать
+          </button>
+        </div>
       </div>
 
       <div className="search-group">
@@ -210,7 +290,6 @@ const TagsTab = () => {
               product={product}
               onAddTag={handleAddTag}
               onRemoveTag={handleRemoveTag}
-              onCreateNewTag={handleCreateNewTag}
               allTags={allTags}
               tagSearchQuery={tagSearchQuery}
               setTagSearchQuery={setTagSearchQuery}
@@ -231,7 +310,6 @@ const ProductTagItem = ({
   product,
   onAddTag,
   onRemoveTag,
-  onCreateNewTag,
   allTags,
   tagSearchQuery,
   setTagSearchQuery,
@@ -245,10 +323,6 @@ const ProductTagItem = ({
 
   const handleSelectTag = (tag) => {
     onAddTag(product._id, tag);
-  };
-
-  const handleCreateNew = () => {
-    onCreateNewTag(product._id, tagSearchQuery);
   };
 
   const handleInputFocus = () => {
@@ -296,7 +370,7 @@ const ProductTagItem = ({
             onChange={(e) => setTagSearchQuery(e.target.value)}
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
-            placeholder="Новый тег"
+            placeholder="Поиск тега..."
             className="new-tag-input"
           />
           {isActive && showTagDropdown && (
@@ -314,29 +388,12 @@ const ProductTagItem = ({
                     </div>
                   ),
                 )
-              ) : tagSearchQuery.trim() ? (
-                <div
-                  className="tag-dropdown-item create-new"
-                  onClick={handleCreateNew}
-                >
-                  + Создать тег "{tagSearchQuery}"
-                </div>
               ) : (
                 <div className="tag-dropdown-empty">Нет доступных тегов</div>
               )}
             </div>
           )}
         </div>
-        <button
-          type="button"
-          className="add-tag-btn"
-          onClick={() => {
-            setActiveProductId(product._id);
-            setShowTagDropdown(true);
-          }}
-        >
-          Добавить
-        </button>
       </div>
     </div>
   );

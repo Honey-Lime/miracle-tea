@@ -106,29 +106,57 @@
 
 .epm-form-group label {
   font-weight: 600;
-  color: var(--color-gray-700);
+  color: var(--color-text-primary);
   font-size: 0.9rem;
+  letter-spacing: 0.02em;
 }
 
 .epm-form-group input,
 .epm-form-group textarea {
   padding: 0.75rem 1rem;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
   font-size: 0.95rem;
   font-family: inherit;
-  transition: border-color 0.2s;
+  color: var(--color-text-primary);
+  background: var(--color-white);
+  transition: all 0.25s ease;
+  box-sizing: border-box;
+}
+
+.epm-form-group input::placeholder,
+.epm-form-group textarea::placeholder {
+  color: var(--color-gray-400);
+  font-style: italic;
+}
+
+.epm-form-group input:hover,
+.epm-form-group textarea:hover {
+  border-color: var(--color-secondary);
 }
 
 .epm-form-group input:focus,
 .epm-form-group textarea:focus {
   outline: none;
-  border-color: var(--color-secondary);
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px var(--input-focus-shadow);
+  background: var(--color-primary);
 }
 
 .epm-form-group textarea {
   resize: vertical;
   min-height: 80px;
+  line-height: 1.5;
+}
+
+.epm-form-group input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.epm-form-group input[type="number"]::-webkit-outer-spin-button,
+.epm-form-group input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .epm-form-row {
