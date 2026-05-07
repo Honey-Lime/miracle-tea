@@ -9,7 +9,7 @@ const ProductPage = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedGrams, setSelectedGrams] = useState(100);
+  const [selectedGrams, setSelectedGrams] = useState(50);
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
 
   useEffect(() => {
@@ -17,8 +17,8 @@ const ProductPage = () => {
       try {
         const response = await getProduct(id);
         setProduct(response.data);
-        // Корректировка начального значения, если остаток меньше 100г
-        if (response.data.remains < 100) {
+        // Корректировка начального значения, если остаток меньше 50г
+        if (response.data.remains < 50) {
           setSelectedGrams(response.data.remains);
         }
       } catch (err) {
@@ -34,8 +34,8 @@ const ProductPage = () => {
   const handleGramChange = (delta) => {
     if (!product) return;
     const newGrams = selectedGrams + delta;
-    if (newGrams < 100) {
-      setSelectedGrams(100);
+    if (newGrams < 50) {
+      setSelectedGrams(50);
     } else if (newGrams > product.remains) {
       setSelectedGrams(product.remains);
     } else {
@@ -49,13 +49,13 @@ const ProductPage = () => {
     // Проверка на пробник: ограничение 1 пробник каждого вида чая
     addToCart(product, grams, isSampler);
     if (!isSampler) {
-      setSelectedGrams(100); // сброс после добавления
+      setSelectedGrams(50); // сброс после добавления
     }
   };
 
   const handleSetGrams = (value) => {
     if (!product) return;
-    if (value < 100) value = 100;
+    if (value < 50) value = 50;
     if (value > product.remains) value = product.remains;
     setSelectedGrams(value);
   };
@@ -152,14 +152,14 @@ const ProductPage = () => {
               <button
                 className="pp-gram-btn minus50"
                 onClick={() => handleGramChange(-50)}
-                disabled={selectedGrams - 50 < 100}
+                disabled={selectedGrams - 50 < 50}
               >
                 -50 г
               </button>
               <div className="pp-gram-display">
                 <input
                   type="number"
-                  min="100"
+                  min="50"
                   max={product.remains}
                   step="50"
                   value={selectedGrams}
@@ -175,7 +175,7 @@ const ProductPage = () => {
                 +50 г
               </button>
             </div>
-            <div className="pp-gram-hint">Минимальный заказ — 100 г.</div>
+            <div className="pp-gram-hint">Минимальный заказ — 50 г.</div>
           </div>
 
           <div className="pp-purchase-section">

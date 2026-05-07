@@ -22,6 +22,11 @@ exports.createOrder = async (req, res) => {
           .status(400)
           .json({ message: `Insufficient stock for ${product.name}` });
       }
+      if (!item.isSampler && item.count < 50) {
+        return res
+          .status(400)
+          .json({ message: "Минимальное количество для чая — 50 г" });
+      }
       // Price per gram (price in DB is per 100g)
       const itemPrice = (product.price / 100) * item.count;
       totalPrice += itemPrice;
