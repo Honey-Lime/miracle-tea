@@ -3,7 +3,7 @@ const HomePage = () => {
     <div className="hp-home-page">
       <section className="hp-hero">
         <div className="container">
-          <h1>Чудо кофе</h1>
+          <h1>Чудо чай</h1>
           <p className="hp-subtitle">
             Здесь вы можете заказать качественный чай по лояльной цене
           </p>
