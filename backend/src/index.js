@@ -14,25 +14,44 @@ const PORT = process.env.PORT || 5000;
 // Чтение SSL-сертификатов
 let sslOptions = null;
 try {
+  const firstExistingPath = (candidates = []) =>
+    candidates.find((p) => p && fs.existsSync(p));
+
   // Важно: относительные пути в Node зависят от текущей рабочей директории процесса.
   // В PM2 она может отличаться, поэтому используем пути от src/ через __dirname.
-  const keyPath = process.env.SSL_KEY_PATH
-    ? process.env.SSL_KEY_PATH
-    : path.join(__dirname, "../ssl/certificate.key");
-  const certPath = process.env.SSL_CERT_PATH
-    ? process.env.SSL_CERT_PATH
-    : path.join(__dirname, "../ssl/certificate.crt");
-  const caPath = process.env.SSL_CA_PATH
-    ? process.env.SSL_CA_PATH
-    : path.join(__dirname, "../ssl/certificate_ca.crt");
+  // По умолчанию ожидаем сертификаты в backend/ssl/...
+  // Но если их положили рядом с index.js (backend/src/ssl/...), тоже попробуем.
+  const keyPath =
+    process.env.SSL_KEY_PATH ||
+    firstExistingPath([
+      path.join(__dirname, "../ssl/certificate.key"),
+      path.join(__dirname, "ssl/certificate.key"),
+    ]);
 
-  if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+  const certPath =
+    process.env.SSL_CERT_PATH ||
+    firstExistingPath([
+      path.join(__dirname, "../ssl/certificate.crt"),
+      path.join(__dirname, "ssl/certificate.crt"),
+    ]);
+
+  // CA bundle у провайдеров часто называется ca.crt
+  const caPath =
+    process.env.SSL_CA_PATH ||
+    firstExistingPath([
+      path.join(__dirname, "../ssl/certificate_ca.crt"),
+      path.join(__dirname, "../ssl/ca.crt"),
+      path.join(__dirname, "ssl/certificate_ca.crt"),
+      path.join(__dirname, "ssl/ca.crt"),
+    ]);
+
+  if (keyPath && certPath) {
     sslOptions = {
       key: fs.readFileSync(keyPath),
       cert: fs.readFileSync(certPath),
     };
 
-    if (fs.existsSync(caPath)) {
+    if (caPath) {
       sslOptions.ca = fs.readFileSync(caPath);
     }
 
