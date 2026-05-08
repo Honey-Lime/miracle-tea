@@ -14,21 +14,34 @@ const PORT = process.env.PORT || 5000;
 // Чтение SSL-сертификатов
 let sslOptions = null;
 try {
-  const keyPath = "./ssl/certificate.key";
-  const certPath = "./ssl/certificate.crt";
-  const caPath = "./ssl/certificate_ca.crt";
+  // Важно: относительные пути в Node зависят от текущей рабочей директории процесса.
+  // В PM2 она может отличаться, поэтому используем пути от src/ через __dirname.
+  const keyPath = process.env.SSL_KEY_PATH
+    ? process.env.SSL_KEY_PATH
+    : path.join(__dirname, "../ssl/certificate.key");
+  const certPath = process.env.SSL_CERT_PATH
+    ? process.env.SSL_CERT_PATH
+    : path.join(__dirname, "../ssl/certificate.crt");
+  const caPath = process.env.SSL_CA_PATH
+    ? process.env.SSL_CA_PATH
+    : path.join(__dirname, "../ssl/certificate_ca.crt");
 
-  if (keyPath && certPath) {
+  if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
     sslOptions = {
       key: fs.readFileSync(keyPath),
       cert: fs.readFileSync(certPath),
     };
-    if (caPath && fs.existsSync(caPath)) {
+
+    if (fs.existsSync(caPath)) {
       sslOptions.ca = fs.readFileSync(caPath);
     }
+
     console.log("SSL certificates loaded successfully");
   } else {
-    console.warn("SSL paths not provided, falling back to HTTP");
+    console.warn(
+      "SSL certificates not found, falling back to HTTP. Expected files:",
+      { keyPath, certPath },
+    );
   }
 } catch (err) {
   console.error("Failed to load SSL certificates:", err.message);
