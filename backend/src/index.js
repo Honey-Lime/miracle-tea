@@ -1,3 +1,5 @@
+const https = require("https");
+const fs = require("fs");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -8,6 +10,29 @@ const { logDBOperation, logHTTPRequest } = require("./utils/logger");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Чтение SSL-сертификатов
+let sslOptions = null;
+try {
+  const keyPath = "./ssl/certificate.key";
+  const certPath = "./ssl/certificate.crt";
+  const caPath = "./ssl/certificate_ca.crt";
+
+  if (keyPath && certPath) {
+    sslOptions = {
+      key: fs.readFileSync(keyPath),
+      cert: fs.readFileSync(certPath),
+    };
+    if (caPath && fs.existsSync(caPath)) {
+      sslOptions.ca = fs.readFileSync(caPath);
+    }
+    console.log("SSL certificates loaded successfully");
+  } else {
+    console.warn("SSL paths not provided, falling back to HTTP");
+  }
+} catch (err) {
+  console.error("Failed to load SSL certificates:", err.message);
+}
 
 // Middleware
 app.use(cors());
@@ -95,6 +120,28 @@ app.use("/api/email", emailRoutes);
 console.log("Routes registered");
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const startServer = () => {
+  if (sslOptions) {
+    // HTTPS сервер
+    const httpsPort = process.env.HTTPS_PORT || 443;
+    https.createServer(sslOptions, app).listen(httpsPort, () => {
+      console.log(`HTTPS server running on port ${httpsPort}`);
+    });
+    // Опционально: перенаправление HTTP → HTTPS (если нужно слушать и 80 порт)
+    const httpPort = process.env.HTTP_PORT || 80;
+    const httpApp = express();
+    httpApp.use((req, res) => {
+      res.redirect(`https://${req.headers.host}${req.url}`);
+    });
+    httpApp.listen(httpPort, () => {
+      console.log(`HTTP redirect server running on port ${httpPort}`);
+    });
+  } else {
+    // HTTP сервер (fallback)
+    app.listen(PORT, () => {
+      console.log(`HTTP server running on port ${PORT}`);
+    });
+  }
+};
+
+startServer();
