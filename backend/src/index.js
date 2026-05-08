@@ -91,7 +91,6 @@ app.get("/", (req, res) => {
 });
 
 // Logs route (for debugging)
-const fs = require("fs");
 app.get("/api/logs", (req, res) => {
   const logFile = path.join(__dirname, "../logs/app.log");
   if (!fs.existsSync(logFile)) {
