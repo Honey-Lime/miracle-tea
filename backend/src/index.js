@@ -11,9 +11,19 @@ const { logDBOperation, logHTTPRequest } = require("./utils/logger");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// В продакшене SSL обычно терминируется на nginx, а Node работает по HTTP за прокси.
+// Поэтому HTTPS в Node включаем только явно через ENABLE_HTTPS=true.
+const ENABLE_HTTPS = ["1", "true", "yes"].includes(
+  String(process.env.ENABLE_HTTPS || "").toLowerCase(),
+);
+
 // Чтение SSL-сертификатов
 let sslOptions = null;
 try {
+  if (!ENABLE_HTTPS) {
+    console.log("Node HTTPS disabled (ENABLE_HTTPS not set). Using HTTP server.");
+    sslOptions = null;
+  } else {
   const firstExistingPath = (candidates = []) =>
     candidates.find((p) => p && fs.existsSync(p));
 
@@ -61,6 +71,7 @@ try {
       "SSL certificates not found, falling back to HTTP. Expected files:",
       { keyPath, certPath },
     );
+  }
   }
 } catch (err) {
   console.error("Failed to load SSL certificates:", err.message);
