@@ -154,19 +154,25 @@ console.log("Routes registered");
 const startServer = () => {
   if (sslOptions) {
     // HTTPS сервер
-    const httpsPort = process.env.HTTPS_PORT || 443;
+    // Если включен SSL, но HTTPS_PORT не задан, логичнее уважать общий PORT,
+    // чтобы не пытаться занять 443 (который часто уже занят nginx/apache).
+    const httpsPort = process.env.HTTPS_PORT || PORT || 443;
     https.createServer(sslOptions, app).listen(httpsPort, () => {
       console.log(`HTTPS server running on port ${httpsPort}`);
     });
     // Опционально: перенаправление HTTP → HTTPS (если нужно слушать и 80 порт)
-    const httpPort = process.env.HTTP_PORT || 80;
-    const httpApp = express();
-    httpApp.use((req, res) => {
-      res.redirect(`https://${req.headers.host}${req.url}`);
-    });
-    httpApp.listen(httpPort, () => {
-      console.log(`HTTP redirect server running on port ${httpPort}`);
-    });
+    // В проде обычно 80/443 слушает nginx, поэтому включаем редирект-сервер
+    // только если явно задан HTTP_PORT.
+    const httpPort = process.env.HTTP_PORT;
+    if (httpPort) {
+      const httpApp = express();
+      httpApp.use((req, res) => {
+        res.redirect(`https://${req.headers.host}${req.url}`);
+      });
+      httpApp.listen(httpPort, () => {
+        console.log(`HTTP redirect server running on port ${httpPort}`);
+      });
+    }
   } else {
     // HTTP сервер (fallback)
     app.listen(PORT, () => {
