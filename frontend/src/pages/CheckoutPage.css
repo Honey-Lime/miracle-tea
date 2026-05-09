@@ -121,6 +121,12 @@
   margin: 0;
 }
 
+/* payment теперь выпадающий список; старые стили radio оставлены (безопасно),
+   но делаем select визуально консистентным с остальными контролами */
+.chp-checkout-page #checkout-payment-method {
+  width: 100%;
+}
+
 .chp-checkout-page .chp-total-breakdown div {
   gap: 1rem;
 }

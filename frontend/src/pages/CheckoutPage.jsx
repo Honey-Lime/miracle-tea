@@ -307,21 +307,18 @@ const CheckoutPage = () => {
             </div>
 
             <div className="chp-form-group">
-              <span className="chp-form-label">Способ оплаты</span>
-              <div className="chp-payment-options">
+              <label htmlFor="checkout-payment-method">Способ оплаты</label>
+              <select
+                id="checkout-payment-method"
+                value={paymentMethod}
+                onChange={(event) => setPaymentMethod(event.target.value)}
+              >
                 {PAYMENT_OPTIONS.map((option) => (
-                  <label key={option.value} className="chp-payment-option">
-                    <input
-                      type="radio"
-                      name="payment-method"
-                      value={option.value}
-                      checked={paymentMethod === option.value}
-                      onChange={(event) => setPaymentMethod(event.target.value)}
-                    />
-                    <span>{option.label}</span>
-                  </label>
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
                 ))}
-              </div>
+              </select>
             </div>
           </div>
         </div>
