@@ -82,11 +82,7 @@ const normalizeDeliveryData = (detail, fallbackCityName) => {
     0;
 
   const did =
-    detail.did ||
-    detail.deliveryId ||
-    detail.tariffId ||
-    detail.id ||
-    "";
+    detail.did || detail.deliveryId || detail.tariffId || detail.id || "";
 
   const normalizedPrice = Number(rawPrice) || 0;
 
@@ -108,11 +104,14 @@ const CheckoutPage = () => {
   const widgetRef = useRef(null);
 
   const [deliveryData, setDeliveryData] = useState(null);
-  const [selectedCityName, setSelectedCityName] = useState(DEFAULT_SETTLEMENT.name);
+  const [selectedCityName, setSelectedCityName] = useState(
+    DEFAULT_SETTLEMENT.name,
+  );
   const [paymentMethod, setPaymentMethod] = useState("card");
 
   const selectedCity =
-    CITY_OPTIONS.find((city) => city.name === selectedCityName) || DEFAULT_SETTLEMENT;
+    CITY_OPTIONS.find((city) => city.name === selectedCityName) ||
+    DEFAULT_SETTLEMENT;
 
   const cart = cartItems.map((item) => ({
     article: item.pid,
@@ -326,7 +325,7 @@ const CheckoutPage = () => {
         <div
           ref={widgetRef}
           id="eShopLogisticWidgetCart"
-          data-lazy-load="false"
+          data-lazy-load="true"
           data-key="685008-1634-1874"
         ></div>
 
@@ -342,8 +341,9 @@ const CheckoutPage = () => {
               <div>
                 <span>Оплата:</span>
                 <span>
-                  {PAYMENT_OPTIONS.find((option) => option.value === paymentMethod)
-                    ?.label || "Не выбрано"}
+                  {PAYMENT_OPTIONS.find(
+                    (option) => option.value === paymentMethod,
+                  )?.label || "Не выбрано"}
                 </span>
               </div>
               <div>
