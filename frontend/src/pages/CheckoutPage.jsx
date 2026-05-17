@@ -142,41 +142,6 @@ const CheckoutPage = () => {
           </div>
         </div>
 
-        <div className="chp-checkout-settings">
-          <h2>Параметры доставки и оплаты</h2>
-          <div className="chp-checkout-controls">
-            <div className="chp-form-group">
-              <label htmlFor="checkout-city">Город доставки</label>
-              <select
-                id="checkout-city"
-                value={selectedCityName}
-                onChange={(event) => setSelectedCityName(event.target.value)}
-              >
-                {CITY_OPTIONS.map((city) => (
-                  <option key={city.fias} value={city.name}>
-                    {city.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="chp-form-group">
-              <label htmlFor="checkout-payment-method">Способ оплаты</label>
-              <select
-                id="checkout-payment-method"
-                value={paymentMethod}
-                onChange={(event) => setPaymentMethod(event.target.value)}
-              >
-                {PAYMENT_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-
         <EShopLogistic
           DADATA_TOKEN={DADATA_TOKEN}
           ESHOPLOGISTIC_TOKEN={ESHOPLOGISTIC_TOKEN}

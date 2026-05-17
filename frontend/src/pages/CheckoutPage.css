@@ -17,7 +17,7 @@
 
 @media (min-width: 992px) {
   .chp-checkout-page .chp-checkout-content {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 }
 
