@@ -2,7 +2,7 @@ import { useContext, useState, useEffect } from "react";
 import ReactDadataBox from "react-dadata-box";
 
 const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN }) => {
-  const [ip, setIp] = useState(null);
+  // const [ip, setIp] = useState(null);
 
   const [data, setData] = useState({});
   const [loading, setLoading] = useState(true);
@@ -71,58 +71,37 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN }) => {
 
 
 
-  // фетчим все запросы
+  // фетчим основные запросы
   useEffect(() => {
 
     setLoading(true);
     customFetch("/client/state");
-    customFetch("/delivery/info");
+    // customFetch("/delivery/info");
     
     fetch("https://api.ipify.org?format=json")
       .then(res => res.json())
-      .then(data => {
-        setIp(data.ip);
+      .then(data => data.ip)
+      .then(ip => {
+        customFetch("/locality/geo", {ip: ip});
       })
       .catch(err => {
         setError(err.message);
-      });
+      })
 
   }, []);
 
 
-  useEffect(() => {
-
-    if(ip) {
-      customFetch("/locality/geo", {ip: ip});
-    }
-
-  }, [ip]);
-
-
-  // фетчим все запросы
-  useEffect(() => {
-
-    if (selectedCity && data.state)
-    Object.keys(services).forEach((service) => {
-      customFetch("/service/terminals", {service: service, settlement: selectedCity?.fias}, service);
-    });
-
-  }, [selectedCity, data.state]);
-
-
-  // получаем нужные данные
+  // получаем список доставщиков
   useEffect(() => {
 
     if (data.state) {
-      console.log(data.state.data.services);
-      
       setServices(data.state.data.services);
     }
 
   }, [data.state]);
 
 
-  // получаем нужные данные
+  // получаем город из гео
   useEffect(() => {
 
     // записываем город из геопоиска
@@ -138,15 +117,35 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN }) => {
   }, [data.geo]);
 
 
+  // фетчим сервисы доставки
+  useEffect(() => {
+
+    if (selectedCity && services) {
+      // console.log(selectedCity.fias);
+      // console.log(services);
+      // console.log();
+      
+      Object.keys(services).forEach((service) => {
+        // if(service != 'yandex') {
+          customFetch("/delivery/calculation", {to: selectedCity.fias, weight: 1, dimensions: '10*10*10', service: service, cache: false}, service);
+        // }
+      });
+
+      // customFetch("/delivery/calculation", {to: selectedCity.fias, weight: 1, service: 'yandex'}, 'yandex');
+    }
+
+  }, [selectedCity, services]);
+
+
   // снимаем загрузку
   useEffect(() => {
 
     // проверяем что все подгрузилось
-    if (data.state && data.info && data.terminals) {
+    if (data.calculation) {
       setLoading(false);
     }
 
-  }, [data.state, data.info, data.terminals]);
+  }, [data.calculation]);
 
 
 
@@ -156,12 +155,8 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN }) => {
 
   return (
     <div className="EShopLogistic">
-
-      {/* <div>IP - {ip}</div>
-      <div>geo - {Object.keys(data.geo.data).join(', ')}</div>
-      <div>geo - {data.geo.data.name}</div> */}
-
-
+      {/* <b>{Object.keys(data).join(', ')}</b> */}
+      {/* <pre>{JSON.stringify(data.state.data.services, null, 2)}</pre> */}
 
       <ReactDadataBox
         token={DADATA_TOKEN}
@@ -179,41 +174,16 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN }) => {
         </div>
       )}
 
-      <ul>
-        Ответ EShop
-        <br/>
-        {/* <b>{Object.keys(data).join(', ')}</b> */}
-        {/* <pre>{services.join(', ')}</pre> */}
-        {/* <pre>{JSON.stringify(data.state.data.services, null, 2)}</pre> */}
-        {/* <pre>{JSON.stringify(data.state.data.services, null, 2)}</pre> */}
-        {/* <pre>{JSON.stringify(data.terminals?.data, null, 2)}</pre> */}
-        {/* <pre>{JSON.stringify(data.info, null, 2)}</pre> */}
-      </ul>
       <div className="deliverySettings">
-        <ul>
-          {Object.values(data.terminals?.sdek.data).forEach((element) => {
-            (
-              <li>element</li>
+        {/* <ul>
+          {Object.values(data.calculation?.sdek?.data).map((element, index) => (
+              // <li key={index}>{JSON.stringify(element, null, 2)}</li>
+              <li key={index}>{element.address}</li>
             )
-          })}
-        </ul>
-        <b>{Object.keys(data.terminals.sdek).join(', ')}</b>
-        {/* <pre>{JSON.stringify(data.terminals.sdek.data, null, 2)}</pre> */}
-
-        {/* <select className="deliveryType" value={deliveryType} onChange={(e) => setDeliveryType(e.target.value)}>
-          <option value="">-- Выберите сервис --</option>
-          <option value="terminal">В пункт самовывоза</option>
-          <option value="door">До двери</option>
-        </select> */}
-
-        {/* <select className="deliveryService" value={deliveryService} onChange={(e) => setDeliveryService(e.target.value)}>
-          <option value="">-- Выберите сервис --</option>
-          {Object.entries(services).map(([key, service]) => (
-            <option key={key} value={key}>
-              {service.name}
-            </option>
-          ))}
-        </select> */}
+          )}
+        </ul> */}
+        <pre>{JSON.stringify(data.calculation.sdek, null, 2)}</pre>
+        <pre>{JSON.stringify(data.calculation.yandex, null, 2)}</pre>
 
       </div>
     </div>
