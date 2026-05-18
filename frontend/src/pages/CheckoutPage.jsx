@@ -7,6 +7,7 @@ import EShopLogistic from "../components/EShopLogistic";
 
 const DADATA_TOKEN = "eb5a9b17d07d3320d19d665bc0ade765f3f016d3";
 const ESHOPLOGISTIC_TOKEN = "df616893f983b20fed6ac71e5f6cb9f2";
+const YANDEX_API_KEY = "d748d3d0-760c-44fa-923c-d865d6017c60";
 
 const DEFAULT_SETTLEMENT = {
   name: "Воронеж",
@@ -145,6 +146,7 @@ const CheckoutPage = () => {
         <EShopLogistic
           DADATA_TOKEN={DADATA_TOKEN}
           ESHOPLOGISTIC_TOKEN={ESHOPLOGISTIC_TOKEN}
+          YANDEX_API_KEY={YANDEX_API_KEY}
         />
 
         <div className="chp-checkout-sidebar">
