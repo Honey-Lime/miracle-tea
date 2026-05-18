@@ -352,7 +352,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY }) =>
         {/* <pre>{JSON.stringify(data.state.data.services, null, 2)}</pre> */}
         {selectedCity && (
           <div style={{ marginTop: "10px" }}>
-            Код ФИАС: <code>{selectedCity.fias}</code> <br />
+            Код ФИАС: <code>{selectedCity.fias}</code><br />
           </div>
         )}
 
