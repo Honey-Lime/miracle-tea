@@ -18,4 +18,4 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
           script: |
-            /var/www/miracle-tea/deploy.sh
+            bash /var/www/miracle-tea/deploy.sh
