@@ -344,7 +344,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY }) =>
     document.querySelectorAll('.deliveryMethod').forEach(el => el.classList.remove('active'));
     e.currentTarget.classList.add('active');
 
-    setDeliveryAddress(null);
+    // setDeliveryAddress(null);
     deleteDeliveryAddressMarker();
 
     switch (type) {
@@ -814,19 +814,19 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY }) =>
             {Object.entries(data.calculation).map(([serviceKey, body]) => (
               // Для каждого сервиса создаём свою секцию (или просто группу элементов)
               <Fragment key={serviceKey}>
-                {body.data.terminal && (
+                {body?.data?.terminal && (
                   <li className="deliveryMethod" onClick={(e) => {
                     changeDeliveryMethod(e, serviceKey, 'terminal');
                     }}>
-                    <span>{data.state.data.services[serviceKey].name} до пункта выдачи: {body.data.terminal?.price?.value} {body.data.terminal?.price?.unit} - {body.data.terminal?.time?.value} {body.data.terminal?.time?.unit}</span>
+                    <span>{data.state.data.services[serviceKey].name} до пункта выдачи: {body?.data?.terminal?.price?.value} {body?.data?.terminal?.price?.unit} - {body?.data?.terminal?.time?.value} {body?.data?.terminal?.time?.unit}</span>
                   </li>
                 )}
 
-                {body.data.door && (
+                {body?.data?.door && (
                   <li className="deliveryMethod" onClick={(e) => {
                     changeDeliveryMethod(e, serviceKey, 'door');
                     }}>
-                    <span>{data.state.data.services[serviceKey].name} курьером: {body.data.door?.price?.value} {body.data.door?.price?.unit} - {body.data.door?.time?.value} {body.data.door?.time?.unit}</span>
+                    <span>{data.state.data.services[serviceKey].name} курьером: {body?.data?.door?.price?.value} {body?.data?.door?.price?.unit} - {body?.data?.door?.time?.value} {body?.data?.door?.time?.unit}</span>
                   </li>
                 )}
               </Fragment>
