@@ -388,7 +388,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY }) =>
                 <li>{data.state.data.services[serviceKey].name} курьером: {body.data.door.price.value + ' ' + body.data.door.price.unit} - {body.data.door.time.value + ' ' + body.data.door.time.unit}</li>
 
                 {Object.entries(body.data.terminals).map(([idx, terminal]) => (
-                  <pre key={`${serviceKey}-${idx}`}>
+                  <pre key={`${serviceKey}-${idx}`} style={{textWrap: 'wrap'}}>
 
                     {idx}: {JSON.stringify(terminal, null, 2)}
 
