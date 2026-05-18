@@ -1,9 +1,28 @@
+.EShopLogistic {
+  max-width: 100%;
+}
+
+.deliveryInfo {
+  display: flex;
+}
+
+.pointInfo {
+  width: 20%;
+  height: auto;
+  margin: 10px 0 10px 5px;
+  background-color: aquamarine;
+}
+
+#ymap {
+  width: 80%;
+  height: 50vh;
+  margin: 10px 5px 10px 0;
+  /* margin: auto; */
+}
+
 .ymap-marker {
   width: 1.5vw;
   height: 1.5vw;
   margin-left: -0.75vw;
   margin-top: -0.75vw;
-
-
-  /* border-radius: 50%; */
 }

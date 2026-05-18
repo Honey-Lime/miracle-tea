@@ -10,7 +10,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY }) =>
   const [services, setServices] = useState({});
 
   const [selectedCity, setSelectedCity] = useState(null);
-  const [selectedService, setSelectedService] = useState('Выберите способ доставки');
+  const [selectedService, setSelectedService] = useState(null);
   // const [deliveryType, setDeliveryType] = useState('');
 
   const mapRef = useRef(null);
@@ -208,10 +208,11 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY }) =>
     if(mapLoad && data.calculation) {
       Object.entries(data.calculation).map(([serviceKey, body]) => {
         Object.entries(body.data.terminals).map(([idx, terminal]) => {
-          createMarker(terminal.image, terminal.lon, terminal.lat, () => setSelectedService(terminal.code));
+          createMarker(terminal.image, terminal.lon, terminal.lat, () => setSelectedService(terminal));
         })
       });
     }    
+
   }, [data.calculation, mapLoad]);
 
 
@@ -343,7 +344,21 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY }) =>
           query={selectedCity?.value}
         />
 
-        <div ref={mapRef} style={{ width: "80%", height: "50vh", padding: "20px", margin: 'auto' }}></div>
+        <div className="deliveryInfo">
+          <div id={'ymap'} ref={mapRef}></div>
+          <ul className="pointInfo">
+            {selectedService && <>
+              {/* <li>{selectedService.is_postamat} {selectedService.is_postamat ? 'Постамат' : 'Пункт выдачи'} {selectedService.code}</li> */}
+              <li>Адрес: {selectedService.address}</li>
+              <li>Номер: {selectedService.phones}</li>
+              <li>Время работы: {selectedService.workTime}</li>
+              <li>Заметка: {selectedService.note}</li>
+              <li>Оплата: {selectedService.payment?.possible}</li>
+              <li>Методы оплаты: {selectedService.payment?.methods.join(', ')}</li>
+            </>}
+          </ul>
+        </div>
+        
 
         {/* <b>{Object.keys(data).join(', ')}</b> */}
 
@@ -359,7 +374,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY }) =>
         {data.calculation && 
         <div className="deliverySettings">
 
-          <b>{selectedService}</b>
+          {/* <b>{selectedService}</b> */}
 
           <ul className="deliveryCalculation">
             {Object.entries(data.calculation).map(([serviceKey, body]) => (
@@ -375,7 +390,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY }) =>
                 {Object.entries(body.data.terminals).map(([idx, terminal]) => (
                   <pre key={`${serviceKey}-${idx}`}>
 
-                    {/* {idx}: {JSON.stringify(terminal, null, 2)} */}
+                    {idx}: {JSON.stringify(terminal, null, 2)}
 
                   </pre>
                 ))}
