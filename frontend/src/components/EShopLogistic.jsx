@@ -344,17 +344,15 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY }) =>
     document.querySelectorAll('.deliveryMethod').forEach(el => el.classList.remove('active'));
     e.currentTarget.classList.add('active');
 
-    // setDeliveryAddress(null);
-    deleteDeliveryAddressMarker();
-
     switch (type) {
       case 'terminal':
         setAddressPickMode(false);
+        deleteDeliveryAddressMarker();
         break;
-    
+     
       case 'door':
         setAddressPickMode(true);
-        if(selectedCity) {
+        if (!deliveryAddress && selectedCity) {
           setDeliveryAddress({
             address: selectedCity.value,
             lon: selectedCity.lon,
@@ -523,8 +521,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY }) =>
     }
     if(mapLoad && data.state) {
       mapInstanceRef.current.setLocation({
-        center: [lon, lat],
-        zoom: 12,
+        center: [lon, lat]
       });
     }
   }, [selectedCity, mapLoad, data.state]);
