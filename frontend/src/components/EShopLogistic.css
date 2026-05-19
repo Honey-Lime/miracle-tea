@@ -2,6 +2,51 @@
   max-width: 100%;
 }
 
+.deliveryStatus,
+.deliveryLoading,
+.deliveryError,
+.deliveryModeHint {
+  margin: 10px 0;
+  padding: 10px 12px;
+}
+
+.deliveryStatus {
+  border: 1px solid #b8c4cc;
+  background-color: #f4f7f9;
+}
+
+.deliveryStatus--info {
+  border-color: #8fb3c9;
+  background-color: #eef7fc;
+}
+
+.deliveryStatus--success {
+  border-color: #87b794;
+  background-color: #edf8ef;
+}
+
+.deliveryStatus--error,
+.deliveryError {
+  border: 1px solid #d8a2a2;
+  background-color: #fff0f0;
+}
+
+.deliveryStatusHint {
+  margin-top: 6px;
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+.deliveryLoading {
+  border: 1px solid #d6d6d6;
+  background-color: #f8f8f8;
+}
+
+.deliveryModeHint {
+  border: 1px dashed #8fb3c9;
+  background-color: #f3fbff;
+}
+
 .submitDeliveryButton {
   padding: 10px;
   margin-top: auto;
@@ -34,6 +79,7 @@
 
 .deliveryInfo {
   display: flex;
+  gap: 5px;
 }
 
 .pointInfo {
@@ -42,6 +88,8 @@
   width: 30%;
   height: auto;
   margin: 10px 0 10px 5px;
+  padding: 12px;
+  gap: 8px;
 
   list-style: none;
 
@@ -52,7 +100,6 @@
   width: 70%;
   height: 50vh;
   margin: 10px 5px 10px 0;
-  /* margin: auto; */
 }
 
 .ymap-marker {
