@@ -27,6 +27,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
   const [deliveryAddress, setDeliveryAddress] = useState(null);
   const [lastUserAddress, setLastUserAddress] = useState(null);
   const [deliveryComment, setDeliveryComment] = useState("");
+  const [deliveryLoading, setDeliveryLoading] = useState({});
   const [output, setOutput] = useState(null);
 
   // Состояние интерфейса и загрузки.
@@ -295,6 +296,11 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ key: ESHOPLOGISTIC_TOKEN, ...props }),
       });
+      
+      setDeliveryLoading(prev => ({
+        ...prev,
+        [saveKey]: false
+      }));
 
       if (!response.ok) {
         console.error(`Ошибка ${dataKey}: ${response.status}`, props);
@@ -319,6 +325,11 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
       }
 
       const json = await response.json();
+
+      setDeliveryLoading(prev => ({
+        ...prev,
+        [saveKey]: true
+      }));
 
       if (saveKey) {
         setData((prev) => ({
@@ -904,6 +915,49 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
             query={deliveryAddress?.address || selectedCity?.value || ""}
           />
 
+          {data.calculation && (
+            <div className="deliverySettings">
+              <ul className="deliveryCalculation">
+                {Object.entries(data.calculation).map(([serviceKey, body]) => (
+                  <Fragment key={serviceKey}>
+                    {body?.data?.terminal && (
+                      <li
+                        className="deliveryMethod"
+                        onClick={(event) => {
+                          changeDeliveryMethod(event, serviceKey, "terminal");
+                        }}
+                      >
+                        <span>
+                          {data.state.data.services[serviceKey].name} до пункта выдачи: {body?.data?.terminal?.price?.value}{" "}
+                          {body?.data?.terminal?.price?.unit} - {body?.data?.terminal?.time?.value}{" "}
+                          {body?.data?.terminal?.time?.unit}
+                        </span>
+                      </li>
+                    )}
+
+                    {body?.data?.door && (
+                      <li
+                        className="deliveryMethod"
+                        onClick={(event) => {
+                          changeDeliveryMethod(event, serviceKey, "door");
+                        }}
+                      >
+                        <span>
+                          {data.state.data.services[serviceKey].name} курьером: {body?.data?.door?.price?.value}{" "}
+                          {body?.data?.door?.price?.unit} - {body?.data?.door?.time?.value}{" "}
+                          {body?.data?.door?.time?.unit}
+                        </span>
+                      </li>
+                    )}
+                  </Fragment>
+                ))}
+              </ul>
+              <div>{Object.values(deliveryLoading).some(status => status === false) && (
+                <div>Loading...</div>
+              )}</div>
+            </div>
+          )}
+
           <div className="deliveryInfo">
             <div id="ymap" ref={mapRef}></div>
 
@@ -949,45 +1003,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
             </ul>
           </div>
 
-          {data.calculation && (
-            <div className="deliverySettings">
-              <ul className="deliveryCalculation">
-                {Object.entries(data.calculation).map(([serviceKey, body]) => (
-                  <Fragment key={serviceKey}>
-                    {body?.data?.terminal && (
-                      <li
-                        className="deliveryMethod"
-                        onClick={(event) => {
-                          changeDeliveryMethod(event, serviceKey, "terminal");
-                        }}
-                      >
-                        <span>
-                          {data.state.data.services[serviceKey].name} до пункта выдачи: {body?.data?.terminal?.price?.value}{" "}
-                          {body?.data?.terminal?.price?.unit} - {body?.data?.terminal?.time?.value}{" "}
-                          {body?.data?.terminal?.time?.unit}
-                        </span>
-                      </li>
-                    )}
 
-                    {body?.data?.door && (
-                      <li
-                        className="deliveryMethod"
-                        onClick={(event) => {
-                          changeDeliveryMethod(event, serviceKey, "door");
-                        }}
-                      >
-                        <span>
-                          {data.state.data.services[serviceKey].name} курьером: {body?.data?.door?.price?.value}{" "}
-                          {body?.data?.door?.price?.unit} - {body?.data?.door?.time?.value}{" "}
-                          {body?.data?.door?.time?.unit}
-                        </span>
-                      </li>
-                    )}
-                  </Fragment>
-                ))}
-              </ul>
-            </div>
-          )}
 
           {output && (
             <div className="prooveDelivery">
