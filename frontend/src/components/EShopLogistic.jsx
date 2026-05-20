@@ -296,7 +296,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ key: ESHOPLOGISTIC_TOKEN, ...props }),
       });
-      
+
       setDeliveryLoading(prev => ({
         ...prev,
         [saveKey]: false
@@ -320,6 +320,11 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
           "Не удалось загрузить часть данных по доставке. Попробуйте выбрать другой способ или перезагрузить страницу.",
           true
         );
+
+        setDeliveryLoading(prev => ({
+          ...prev,
+          [saveKey]: true
+        }));
 
         return null;
       }
