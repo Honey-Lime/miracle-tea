@@ -14,7 +14,7 @@ const INITIAL_STATUS = {
   reloadRecommended: false,
 };
 
-const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY }) => {
+const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDeliveryConfirm }) => {
   // Основные данные API и справочники служб доставки.
   const [data, setData] = useState({});
   const [services, setServices] = useState({});
@@ -26,6 +26,8 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY }) =>
   const [addressPickMode, setAddressPickMode] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState(null);
   const [lastUserAddress, setLastUserAddress] = useState(null);
+  const [deliveryComment, setDeliveryComment] = useState("");
+  const [output, setOutput] = useState(null);
 
   // Состояние интерфейса и загрузки.
   const [loading, setLoading] = useState(true);
@@ -333,7 +335,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY }) =>
         }));
       }
 
-      return "ok";
+      return json;
     } catch (requestError) {
       console.error(`Network error ${api}:`, requestError);
 
@@ -473,9 +475,60 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY }) =>
     setSelectedMethod({ name: key, type });
   }
 
-  function handleDeliverySubmit() {
-    console.log(deliveryAddress);
-    console.log(selectedTerminal);
+  async function handleAddressSubmit() {
+    if (!selectedMethod) {
+      return;
+    }
+
+    let out = {};
+    out.service = selectedMethod.name;
+    out.type = selectedMethod.type;
+
+    switch (selectedMethod.type) {
+      case "terminal":
+        
+        out.isPostamat = selectedTerminal.is_postamat;
+        out.address = selectedTerminal.address;
+        out.code = selectedTerminal.code;
+        out.price = selectedTerminal.price.value;
+        out.unitPrice = selectedTerminal.price.unit;
+        out.time = selectedTerminal.time.value;
+        out.unitTime = selectedTerminal.time.unit;
+        out.payment = selectedTerminal.payment.methods;
+
+        break;
+
+      case "door": {
+
+        const recalculation = await customFetch(
+          "/delivery/calculation",
+          {
+            to: selectedCity.fias,
+            weight: 1,
+            service: selectedMethod.name,
+            address: deliveryAddress.address,
+          },
+          selectedMethod.name
+        );
+
+        if (!recalculation) {
+          return;
+        }
+
+        out.address = deliveryAddress.address;
+        out.price = recalculation.data.door.price.value;
+        out.unitPrice = recalculation.data.door.price.unit;
+        out.time = recalculation.data.door.time.value;
+        out.unitTime = recalculation.data.door.time.unit;
+
+        break;
+      }
+
+      default:
+        break;
+    }
+    setOutput(out);
+
     showStatus("delivery-confirmed", "success", "Адрес доставки подтверждён.");
   }
 
@@ -819,6 +872,15 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY }) =>
 
   const hasSelectedDelivery = selectedTerminal || (addressPickMode && deliveryAddress);
 
+  useEffect(() => {
+    const finalOutput = {
+      ...output,
+      comment: deliveryComment,
+    };
+
+    onDeliveryConfirm(finalOutput);
+  },[output]);
+
   return (
     <div className="EShopLogistic">
       {statusMessage?.text && (
@@ -880,7 +942,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY }) =>
               )}
 
               {hasSelectedDelivery && (
-                <div className="submitDeliveryButton" onClick={() => handleDeliverySubmit()}>
+                <div className="submitDeliveryButton" onClick={() => handleAddressSubmit()}>
                   Подтвердить адрес доставки
                 </div>
               )}
@@ -924,6 +986,27 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY }) =>
                   </Fragment>
                 ))}
               </ul>
+            </div>
+          )}
+
+          {output && (
+            <div className="prooveDelivery">
+              <img src={services[output.service].logo} alt={output.service} />
+              <div className="heading">{output.type == 'terminal' ? (output.isPostamat == true ? 'Постамат' : 'Пункт выдачи') : 'Курьер' } {services[output.service].name}</div>
+              <div className="address">{output.address}</div>
+
+              <div className="time">{output.time + ' ' + output.unitTime}</div>
+              <div className="price">{output.price + ' ' + output.unitPrice}</div>
+              <textarea
+                type="text"
+                value={deliveryComment}
+                onChange={(e) => setDeliveryComment(e.target.value)}
+                placeholder="Комментарий к доставке (укажите квартиру, подъезд, особенности адреса)"
+              />
+              <br/>
+              {/* <button className="submitDelivery" onClick={}>
+                Далее
+              </button> */}
             </div>
           )}
         </>

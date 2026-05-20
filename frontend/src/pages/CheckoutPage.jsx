@@ -9,57 +9,19 @@ const DADATA_TOKEN = "eb5a9b17d07d3320d19d665bc0ade765f3f016d3";
 const ESHOPLOGISTIC_TOKEN = "df616893f983b20fed6ac71e5f6cb9f2";
 const YANDEX_API_KEY = "d748d3d0-760c-44fa-923c-d865d6017c60";
 
-const DEFAULT_SETTLEMENT = {
-  name: "Воронеж",
-  fias: "5bf5ddff-6353-4a3d-80c4-6fb27f00c6c1",
-  services: ["sdek", "yandex"],
-};
 
-const CITY_OPTIONS = [
-  {
-    name: "Воронеж",
-    fias: "5bf5ddff-6353-4a3d-80c4-6fb27f00c6c1",
-    services: ["sdek", "yandex"],
-  },
-  {
-    name: "Москва",
-    fias: "c2deb16a-0330-4f05-821f-1d09c93331e6",
-    services: ["sdek", "yandex"],
-  },
-  {
-    name: "Санкт-Петербург",
-    fias: "c2f7c3f6-2f8f-40c4-9b7a-2e2aaf2b6fcb",
-    services: ["sdek", "yandex"],
-  },
-  {
-    name: "Казань",
-    fias: "8bcd3d3f-2b82-4f86-8c84-6e7e9c7c4d6b",
-    services: ["sdek", "yandex"],
-  },
-];
-
-const PAYMENT_OPTIONS = [
-  { value: "card", label: "Картой онлайн" },
-  { value: "cash", label: "Наличные" },
-  { value: "cashless", label: "Безналичный расчёт" },
-  { value: "prepay", label: "Предоплата" },
-  { value: "upon_receipt", label: "Оплата при получении" },
-];
+// const PAYMENT_OPTIONS = [
+//   { value: "card", label: "Картой онлайн" },
+// ];
 
 const CheckoutPage = () => {
   const { cartItems, totalPrice, clearCart } = useContext(CartContext);
   const { user, token, openLoginModal } = useContext(AuthContext);
   const { addToast } = useToast();
   const navigate = useNavigate();
+  const [deliveryData, setDeliveryData] = useState(null);
 
-  const [selectedCityName, setSelectedCityName] = useState(
-    DEFAULT_SETTLEMENT.name,
-  );
   const [paymentMethod, setPaymentMethod] = useState("card");
-
-  const selectedCity =
-    CITY_OPTIONS.find((city) => city.name === selectedCityName) ||
-    DEFAULT_SETTLEMENT;
 
   // Общий вес заказа в граммах (уже есть в компоненте)
   const totalWeight = cartItems.reduce((sum, item) => sum + item.count, 0);
@@ -89,7 +51,6 @@ const CheckoutPage = () => {
         list: cartItemsWithDetails,
         delivery: {
           address: {
-            city: selectedCity.name,
             details: null,
           },
           price: 0,
@@ -147,6 +108,10 @@ const CheckoutPage = () => {
           DADATA_TOKEN={DADATA_TOKEN}
           ESHOPLOGISTIC_TOKEN={ESHOPLOGISTIC_TOKEN}
           YANDEX_API_KEY={YANDEX_API_KEY}
+          onDeliveryConfirm={(outputData) => {
+            // console.log("Доставка из дочернего компонента:", outputData);
+            setDeliveryData(outputData);
+          }}
         />
 
         <div className="chp-checkout-sidebar">
@@ -154,23 +119,17 @@ const CheckoutPage = () => {
             <h2>Итого к оплате</h2>
             <div className="chp-total-breakdown">
               <div>Товары: {totalPrice} ₽</div>
-              <div>
-                <span>Город:</span>
-                <span>{selectedCity.name}</span>
-              </div>
+              <div>Доставка: {deliveryData?.price} ₽</div>
               <div>
                 <span>Оплата:</span>
                 <span>
-                  {PAYMENT_OPTIONS.find(
+                  Картой
+                  {/* {PAYMENT_OPTIONS.find(
                     (option) => option.value === paymentMethod,
-                  )?.label || "Не выбрано"}
+                  )?.label || "Не выбрано"} */}
                 </span>
               </div>
-              <div>
-                <span>Доставка:</span>
-                <span>Будет согласована после оформления</span>
-              </div>
-              <div className="chp-grand-total">Всего: {totalPrice} ₽</div>
+              <div className="chp-grand-total">Всего: {totalPrice + deliveryData?.price} ₽</div>
             </div>
 
             <button
