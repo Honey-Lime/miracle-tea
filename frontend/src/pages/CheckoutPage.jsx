@@ -118,8 +118,16 @@ const CheckoutPage = () => {
           <div className="chp-final-total">
             <h2>Итого к оплате</h2>
             <div className="chp-total-breakdown">
-              <div>Товары: {totalPrice} ₽</div>
-              <div>Доставка: {deliveryData?.price} ₽</div>
+              <div>
+                <span>Товары: </span>
+                <span>{totalPrice} ₽</span>
+              </div>
+              {deliveryData?.price && (
+                <div>
+                  <span>Доставка: </span>
+                  <span>{deliveryData?.price} ₽</span>
+                </div>
+              )}
               <div>
                 <span>Оплата:</span>
                 <span>
