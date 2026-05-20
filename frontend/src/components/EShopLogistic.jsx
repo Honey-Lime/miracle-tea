@@ -998,6 +998,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
               <div className="time">{output.time + ' ' + output.unitTime}</div>
               <div className="price">{output.price + ' ' + output.unitPrice}</div>
               <textarea
+                className="comment"
                 type="text"
                 value={deliveryComment}
                 onChange={(e) => setDeliveryComment(e.target.value)}
