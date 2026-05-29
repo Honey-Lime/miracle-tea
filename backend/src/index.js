@@ -268,8 +268,8 @@ app.post('/api/create-payment', async(req, res) => {
       Amount: Number(amount),
       OrderId: String(orderId),
       Description: `Оплата заказа ${orderId}`,
-      SuccessURL: 'https://чудочай.рф/thank-you',
-      FailURL: 'https://чудочай.рф/checkout',
+      // SuccessURL: 'https://чудочай.рф/thank-you',
+      // FailURL: 'https://чудочай.рф/checkout',
       NotificationURL: 'https://чудочай.рф/api/create-delivery-order'
 
       // Receipt: {
