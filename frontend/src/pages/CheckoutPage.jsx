@@ -42,6 +42,9 @@ const CheckoutPage = () => {
         isSampler: item.isSampler,
       }));
 
+      console.log('cartItemsWithDetails', cartItemsWithDetails);
+      
+
       const orderData = {
         customerType: user && token ? "user" : "guest",
         userId: user?.id || user?._id || null,
