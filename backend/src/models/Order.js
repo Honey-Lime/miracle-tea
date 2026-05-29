@@ -74,6 +74,24 @@ const orderSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    payment: {
+      paymentId: {
+        type: String,
+        default: "",
+      },
+      paymentUrl: {
+        type: String,
+        default: "",
+      },
+      status: {
+        type: String,
+        default: "created",
+      },
+      raw: {
+        type: Object,
+        default: null,
+      },
+    },
   },
   {
     timestamps: true,

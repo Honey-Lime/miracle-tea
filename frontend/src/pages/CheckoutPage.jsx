@@ -79,8 +79,8 @@ const CheckoutPage = () => {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
-          amount: 1000,
-          orderId: "777",
+          amount: Math.round((totalPrice + (deliveryData?.price || 0)) * 100),
+          orderId: order._id,
           deliveryData: deliveryData
         }),
       });
@@ -92,12 +92,19 @@ const CheckoutPage = () => {
       
       addToast("Заказ успешно оформлен!", "success");
       // await clearCart();
-      const paymentResponse = payment.json();
-      navigate(paymentResponse.paymentUrl, { 
-        state: { 
-          orderId: order._id, 
-          paymentId: paymentResponse.paymentId } 
-        });
+      const paymentResponse = await payment.json();
+       
+      sessionStorage.setItem(
+        "lastPayment",
+        JSON.stringify({
+          orderId: order._id,
+          paymentId: paymentResponse.paymentId,
+        })
+      );
+
+      window.location.href = paymentResponse.paymentUrl;
+
+
 
     } catch (error) {
       addToast(error.message, "error");

@@ -8,6 +8,7 @@ const path = require("path");
 require("dotenv").config();
 const { logDBOperation, logHTTPRequest } = require("./utils/logger");
 const crypto = require("crypto");
+const Order = require("./models/Order");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -194,10 +195,18 @@ app.post('/api/create-payment', async(req, res) => {
       });
     }
 
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({
+        error: "Заказ не найден",
+      });
+    }
+
     const paymentData = {
       TerminalKey: TERMINAL_KEY,
-      Amount: amount,
-      OrderId: orderId,
+      Amount: Number(amount),
+      OrderId: String(orderId),
       Description: `Оплата заказа ${orderId}`,
       NotificationURL: 'https://чудочай.рф/api/create-delivery-order'
 
@@ -247,6 +256,14 @@ app.post('/api/create-payment', async(req, res) => {
         details: result,
       });
     }
+
+    order.payment = {
+      paymentId: String(result.PaymentId || ""),
+      paymentUrl: result.PaymentURL || "",
+      status: "initialized",
+      raw: result,
+    };
+    await order.save();
 
     // Ответ сервера для React-приложения
     res.json({
