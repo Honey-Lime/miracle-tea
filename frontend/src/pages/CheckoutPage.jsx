@@ -47,12 +47,11 @@ const CheckoutPage = () => {
         userId: user?.id || user?._id || null,
         list: cartItemsWithDetails,
         delivery: {
-          address: {
-            details: null,
-          },
-          price: 0,
-          provider: "manual",
-          did: "",
+          address: deliveryData?.address || null,
+          price: deliveryData?.price || 0,
+          provider: deliveryData?.service || "eshop",
+          did: deliveryData?.code || "",
+          details: deliveryData,
         },
       };
 

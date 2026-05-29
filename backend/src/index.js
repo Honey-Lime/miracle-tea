@@ -162,17 +162,23 @@ const TERMINAL_KEY = "1778276759438DEMO";
 const TERMINAL_PASSWORD = "m#G#C$En4dhul5!!";
 
 function generateTBankToken(params, password) {
-  const tokenParams = {
-    ...params,
-    Password: password,
-  };
+  const tokenParams = { Password: password };
 
-  delete tokenParams.Token;
+  Object.entries(params).forEach(([key, value]) => {
+    if (
+      key !== "Token" &&
+      value !== undefined &&
+      value !== null &&
+      typeof value !== "object"
+    ) {
+      tokenParams[key] = value;
+    }
+  });
 
   const sortedKeys = Object.keys(tokenParams).sort();
 
   const tokenString = sortedKeys
-    .map((key) => tokenParams[key])
+    .map((key) => String(tokenParams[key]))
     .join("");
 
   return crypto
@@ -263,6 +269,15 @@ app.post('/api/create-payment', async(req, res) => {
       status: "initialized",
       raw: result,
     };
+
+    order.delivery = {
+      ...order.delivery,
+      address: deliveryData.address || order.delivery?.address || null,
+      price: Number(deliveryData.price || order.delivery?.price || 0),
+      provider: deliveryData.service || order.delivery?.provider || "eshop",
+      did: deliveryData.code || order.delivery?.did || "",
+      details: deliveryData,
+    };
     await order.save();
 
     // Ответ сервера для React-приложения
@@ -279,10 +294,37 @@ app.post('/api/create-payment', async(req, res) => {
 
 app.post('/api/create-delivery-order', async(req, res) => {
   try {
-    console.log(req.json());
-
     // Ответ сервера для банка
     res.status(200).send('OK');
+    
+    const notification = req.body || {};
+    const expectedToken = generateTBankToken(notification, TERMINAL_PASSWORD);
+
+    if (notification.Token !== expectedToken) {
+      console.error("Некорректный токен уведомления Т-Банка:", notification);
+      return res.status(200).send('OK');
+    }
+
+    const order = await Order.findById(notification.OrderId);
+
+    if (!order) {
+      console.error("Заказ из уведомления Т-Банка не найден:", notification.OrderId);
+      return res.status(200).send('OK');
+    }
+
+    order.payment = {
+      ...order.payment,
+      paymentId: String(notification.PaymentId || order.payment?.paymentId || ""),
+      status: notification.Status || order.payment?.status || "",
+      raw: notification,
+    };
+
+    if (notification.Success === true && notification.Status === "CONFIRMED") {
+      order.status = "paid";
+    }
+
+    await order.save();
+
   } catch (error) {
     console.error('Ошибка создания заказа доставки:', error.message);
     res.status(200).send('OK');

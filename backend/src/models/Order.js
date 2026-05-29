@@ -68,6 +68,10 @@ const orderSchema = new mongoose.Schema(
         type: Object,
         default: null,
       },
+      details: {
+        type: Object,
+        default: null,
+      },
     },
     totalPrice: {
       type: Number,
