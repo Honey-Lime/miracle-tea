@@ -204,6 +204,41 @@ async function restoreOrderProducts(order) {
   );
 }
 
+async function markOrderAsPaid(order, paymentUpdate = {}) {
+  const wasAlreadyPaid = order.status === "paid";
+
+  order.status = "paid";
+  order.payment = {
+    ...order.payment,
+    ...paymentUpdate,
+  };
+
+  if (order.userId && !wasAlreadyPaid) {
+    const user = await User.findById(order.userId);
+
+    if (user) {
+      user.total += order.totalPrice;
+      user.delivery.last = order.delivery?.address || null;
+      user.delivery.history.push({
+        date: new Date(),
+        order: order._id,
+      });
+      await user.save();
+    }
+
+    await Order.updateOne(
+      { userId: order.userId, status: "cart" },
+      { $set: { list: [], totalPrice: 0 } },
+    );
+  }
+
+  await order.save();
+}
+
+function isPaidTBankStatus(status) {
+  return ["CONFIRMED", "AUTHORIZED"].includes(status);
+}
+
 app.post('/api/create-payment', async(req, res) => {
   let order = null;
 
@@ -341,35 +376,15 @@ app.post('/api/create-delivery-order', async(req, res) => {
       return res.status(200).send('OK');
     }
 
-    order.payment = {
-      ...order.payment,
+    const paymentUpdate = {
       paymentId: String(notification.PaymentId || order.payment?.paymentId || ""),
       status: notification.Status || order.payment?.status || "",
       raw: notification,
     };
 
-    if (notification.Success === true && notification.Status === "CONFIRMED") {
-      const wasAlreadyPaid = order.status === "paid";
-      order.status = "paid";
-
-      if (order.userId && !wasAlreadyPaid) {
-        const user = await User.findById(order.userId);
-
-        if (user) {
-          user.total += order.totalPrice;
-          user.delivery.last = order.delivery?.address || null;
-          user.delivery.history.push({
-            date: new Date(),
-            order: order._id,
-          });
-          await user.save();
-        }
-
-        await Order.updateOne(
-          { userId: order.userId, status: "cart" },
-          { $set: { list: [], totalPrice: 0 } },
-        );
-      }
+    if (notification.Success === true && isPaidTBankStatus(notification.Status)) {
+      await markOrderAsPaid(order, paymentUpdate);
+      return res.status(200).send('OK');
     } else if (["REJECTED", "DEADLINE_EXPIRED", "CANCELED"].includes(notification.Status)) {
       if (order.status === "payment_pending") {
         await restoreOrderProducts(order);
@@ -377,6 +392,11 @@ app.post('/api/create-delivery-order', async(req, res) => {
         return res.status(200).send('OK');
       }
     }
+
+    order.payment = {
+      ...order.payment,
+      ...paymentUpdate,
+    };
 
     await order.save();
 
@@ -386,6 +406,65 @@ app.post('/api/create-delivery-order', async(req, res) => {
   } catch (error) {
     console.error('Ошибка создания заказа доставки:', error.message);
     res.status(200).send('OK');
+  }
+});
+
+app.post('/api/check-payment', async(req, res) => {
+  try {
+    const { orderId, paymentId } = req.body;
+
+    if (!orderId || !paymentId) {
+      return res.status(400).json({ error: "orderId и paymentId обязательны" });
+    }
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({ error: "Заказ не найден" });
+    }
+
+    const stateRequest = {
+      TerminalKey: TERMINAL_KEY,
+      PaymentId: String(paymentId),
+    };
+
+    stateRequest.Token = generateTBankToken(stateRequest, TERMINAL_PASSWORD);
+
+    const response = await fetch("https://securepay.tinkoff.ru/v2/GetState", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: JSON.stringify(stateRequest),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || result.Success === false) {
+      return res.status(400).json({
+        error: "Не удалось проверить статус оплаты",
+        details: result,
+      });
+    }
+
+    if (isPaidTBankStatus(result.Status)) {
+      await markOrderAsPaid(order, {
+        paymentId: String(result.PaymentId || paymentId),
+        status: result.Status,
+        raw: result,
+      });
+    }
+
+    res.json({
+      paid: isPaidTBankStatus(result.Status),
+      status: result.Status,
+      orderStatus: order.status,
+      raw: result,
+    });
+  } catch (error) {
+    console.error('Ошибка проверки платежа:', error.message);
+    res.status(500).json({ error: 'Не удалось проверить платеж' });
   }
 });
 
