@@ -58,24 +58,10 @@ exports.createOrder = async (req, res) => {
       list: listWithPrices,
       delivery,
       totalPrice,
-      status: "ordered",
+      status: "payment_pending",
     });
 
     const savedOrder = await order.save();
-
-    // Update user's total and delivery history if logged in
-    if (req.userId) {
-      const user = await User.findById(req.userId);
-      if (user) {
-        user.total += totalPrice;
-        user.delivery.last = delivery.address;
-        user.delivery.history.push({
-          date: new Date(),
-          order: savedOrder._id,
-        });
-        await user.save();
-      }
-    }
 
     res.status(201).json(savedOrder);
   } catch (error) {

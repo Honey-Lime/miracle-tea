@@ -8,7 +8,7 @@ const fs = require("fs");
 // Get all orders with status except "cart"
 exports.getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ status: { $ne: "cart" } })
+    const orders = await Order.find({ status: { $nin: ["cart", "payment_pending"] } })
       .populate("userId", "name email phone")
       .populate("list.pid", "name price")
       .sort({ date: -1 });

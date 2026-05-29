@@ -16,7 +16,7 @@ const YANDEX_API_KEY = "d748d3d0-760c-44fa-923c-d865d6017c60";
 // ];
 
 const CheckoutPage = () => {
-  const { cartItems, totalPrice, clearCart } = useContext(CartContext);
+  const { cartItems, totalPrice } = useContext(CartContext);
   const { user, token } = useContext(AuthContext);
   const { addToast } = useToast();
   const navigate = useNavigate();
@@ -100,7 +100,6 @@ const CheckoutPage = () => {
           paymentId: paymentResponse.paymentId,
         })
       );
-      await clearCart();
       window.location.href = paymentResponse.paymentUrl;
 
 

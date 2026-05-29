@@ -1,34 +1,34 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import axios from "axios";
+import { useCart } from "../context/CartContext";
 
 const ThankYouPage = () => {
   const location = useLocation();
+  const { clearCart } = useCart();
+  const clearStartedRef = useRef(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const updateOrderStatus = async () => {
+    if (clearStartedRef.current) {
+      return;
+    }
+
+    clearStartedRef.current = true;
+
+    const handleSuccessfulPaymentReturn = async () => {
       try {
-        const orderId = location.state?.orderId;
-        if (orderId) {
-          const token = localStorage.getItem("token");
-          await axios.put(
-            `/api/orders/${orderId}/status`,
-            { status: "paid" },
-            { headers: { Authorization: `Bearer ${token}` } },
-          );
-        }
+        await clearCart();
       } catch (err) {
-        console.error("Ошибка обновления статуса заказа:", err);
-        setError("Не удалось обновить статус заказа");
+        console.error("Ошибка очистки корзины:", err);
+        setError("Оплата прошла, но не удалось очистить корзину.");
       } finally {
         setLoading(false);
       }
     };
 
-    updateOrderStatus();
-  }, [location.state]);
+    handleSuccessfulPaymentReturn();
+  }, [clearCart, location.state]);
 
   if (loading) {
     return (

@@ -76,6 +76,27 @@ const OrdersPage = () => {
     return `${price.toLocaleString("ru-RU")} ₽`;
   };
 
+  const getDeliveryDetails = (order) => order.delivery?.details || {};
+
+  const getDeliveryAddress = (order) => {
+    const details = getDeliveryDetails(order);
+    const address = details.address || order.delivery?.address;
+
+    if (!address) return "Не указан";
+    if (typeof address === "string") return address;
+
+    return address.address || address.value || address.details || "Не указан";
+  };
+
+  const getDeliveryTypeLabel = (order) => {
+    const type = getDeliveryDetails(order).type;
+
+    if (type === "door") return "До двери";
+    if (type === "terminal") return "До пункта выдачи";
+
+    return "Не указан";
+  };
+
   if (loading) {
     return <div className="op-loading">Загрузка заказов...</div>;
   }
@@ -141,6 +162,39 @@ const OrdersPage = () => {
                     </div>
                     <div className="op-order-row-item total">
                       <strong>Итого:</strong> {formatPrice(order.totalPrice)}
+                    </div>
+                  </div>
+                  <div className="op-order-delivery">
+                    <strong>Доставка:</strong>
+                    <div className="op-delivery-grid">
+                      <div>
+                        <span>Адрес:</span>
+                        <strong>{getDeliveryAddress(order)}</strong>
+                      </div>
+                      <div>
+                        <span>Тип:</span>
+                        <strong>{getDeliveryTypeLabel(order)}</strong>
+                      </div>
+                      <div>
+                        <span>Стоимость доставки:</span>
+                        <strong>{formatPrice(order.delivery?.price || 0)}</strong>
+                      </div>
+                      <div>
+                        <span>Квартира:</span>
+                        <strong>{getDeliveryDetails(order).room || "Не указана"}</strong>
+                      </div>
+                      <div>
+                        <span>Имя:</span>
+                        <strong>{getDeliveryDetails(order).name || "Не указано"}</strong>
+                      </div>
+                      <div>
+                        <span>Телефон:</span>
+                        <strong>{getDeliveryDetails(order).phone || "Не указан"}</strong>
+                      </div>
+                      <div className="op-delivery-comment">
+                        <span>Комментарий:</span>
+                        <strong>{getDeliveryDetails(order).comment || "Нет комментария"}</strong>
+                      </div>
                     </div>
                   </div>
                   <div className="op-order-actions">

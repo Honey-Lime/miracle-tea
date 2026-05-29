@@ -9,6 +9,8 @@ require("dotenv").config();
 const { logDBOperation, logHTTPRequest } = require("./utils/logger");
 const crypto = require("crypto");
 const Order = require("./models/Order");
+const Product = require("./models/Product");
+const User = require("./models/User");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -187,7 +189,24 @@ function generateTBankToken(params, password) {
     .digest("hex");
 }
 
+async function restoreOrderProducts(order) {
+  if (!order?.list?.length) {
+    return;
+  }
+
+  await Promise.all(
+    order.list.map((item) =>
+      Product.updateOne(
+        { _id: item.pid },
+        { $inc: { remains: item.count } },
+      ),
+    ),
+  );
+}
+
 app.post('/api/create-payment', async(req, res) => {
+  let order = null;
+
   try {
     const {
       amount,
@@ -201,7 +220,7 @@ app.post('/api/create-payment', async(req, res) => {
       });
     }
 
-    const order = await Order.findById(orderId);
+    order = await Order.findById(orderId);
 
     if (!order) {
       return res.status(404).json({
@@ -214,6 +233,8 @@ app.post('/api/create-payment', async(req, res) => {
       Amount: Number(amount),
       OrderId: String(orderId),
       Description: `Оплата заказа ${orderId}`,
+      SuccessURL: 'https://чудочай.рф/thank-you',
+      FailURL: 'https://чудочай.рф/checkout',
       NotificationURL: 'https://чудочай.рф/api/create-delivery-order'
 
       // Receipt: {
@@ -239,6 +260,8 @@ app.post('/api/create-payment', async(req, res) => {
         Amount: paymentData.Amount,
         OrderId: paymentData.OrderId,
         Description: paymentData.Description,
+        SuccessURL: paymentData.SuccessURL,
+        FailURL: paymentData.FailURL,
         NotificationURL: paymentData.NotificationURL
       }, 
       TERMINAL_PASSWORD
@@ -257,6 +280,9 @@ app.post('/api/create-payment', async(req, res) => {
 
     if (!response.ok || result.Success === false) {
       console.error("Ошибка создания платежа при ответе банка:", result);
+      await restoreOrderProducts(order);
+      await Order.deleteOne({ _id: order._id });
+
       return res.status(400).json({
         error: "Ошибка создания платежа при ответе банка",
         details: result,
@@ -288,15 +314,18 @@ app.post('/api/create-payment', async(req, res) => {
     });
   } catch (error) {
     console.error('Ошибка создания платежа:', error.message);
+
+    if (order?.status === "payment_pending") {
+      await restoreOrderProducts(order);
+      await Order.deleteOne({ _id: order._id });
+    }
+
     res.status(500).json({ error: 'Не удалось инициировать платеж' });
   }
 });
 
 app.post('/api/create-delivery-order', async(req, res) => {
   try {
-    // Ответ сервера для банка
-    res.status(200).send('OK');
-    
     const notification = req.body || {};
     const expectedToken = generateTBankToken(notification, TERMINAL_PASSWORD);
 
@@ -320,10 +349,39 @@ app.post('/api/create-delivery-order', async(req, res) => {
     };
 
     if (notification.Success === true && notification.Status === "CONFIRMED") {
+      const wasAlreadyPaid = order.status === "paid";
       order.status = "paid";
+
+      if (order.userId && !wasAlreadyPaid) {
+        const user = await User.findById(order.userId);
+
+        if (user) {
+          user.total += order.totalPrice;
+          user.delivery.last = order.delivery?.address || null;
+          user.delivery.history.push({
+            date: new Date(),
+            order: order._id,
+          });
+          await user.save();
+        }
+
+        await Order.updateOne(
+          { userId: order.userId, status: "cart" },
+          { $set: { list: [], totalPrice: 0 } },
+        );
+      }
+    } else if (["REJECTED", "DEADLINE_EXPIRED", "CANCELED"].includes(notification.Status)) {
+      if (order.status === "payment_pending") {
+        await restoreOrderProducts(order);
+        await Order.deleteOne({ _id: order._id });
+        return res.status(200).send('OK');
+      }
     }
 
     await order.save();
+
+    // Ответ сервера для банка
+    res.status(200).send('OK');
 
   } catch (error) {
     console.error('Ошибка создания заказа доставки:', error.message);
