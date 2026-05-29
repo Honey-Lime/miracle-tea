@@ -92,7 +92,6 @@ const CheckoutPage = () => {
       }
       
       addToast("Заказ успешно оформлен!", "success");
-      // await clearCart();
       const paymentResponse = await payment.json();
        
       sessionStorage.setItem(
@@ -102,7 +101,7 @@ const CheckoutPage = () => {
           paymentId: paymentResponse.paymentId,
         })
       );
-
+      await clearCart();
       window.location.href = paymentResponse.paymentUrl;
 
 
