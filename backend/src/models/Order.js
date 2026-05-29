@@ -18,7 +18,7 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["cart", "payment_pending", "ordered", "paid", "shipping", "completed", "cancelled"],
+      enum: ["cart", "payment_pending", "created", "paid", "assembled", "shipped", "completed", "cancelled"],
       default: "cart",
     },
     list: [

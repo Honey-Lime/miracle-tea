@@ -23,9 +23,10 @@ exports.updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
     const validStatuses = [
-      "ordered",
+      "created",
       "paid",
-      "shipping",
+      "assembled",
+      "shipped",
       "completed",
       "cancelled",
     ];

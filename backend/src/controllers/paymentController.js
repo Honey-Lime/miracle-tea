@@ -56,7 +56,7 @@ exports.createPayment = async (req, res) => {
       list: listWithPrices,
       delivery,
       totalPrice,
-      status: "ordered",
+      status: "created",
     });
 
     const savedOrder = await order.save();
@@ -347,9 +347,10 @@ exports.updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
     const validStatuses = [
-      "ordered",
+      "created",
       "paid",
-      "shipping",
+      "assembled",
+      "shipped",
       "completed",
       "cancelled",
     ];

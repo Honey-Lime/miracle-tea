@@ -303,6 +303,31 @@ exports.getUserOrders = async (req, res) => {
   }
 };
 
+// Cancel user's order only after payment and before assembly.
+exports.cancelUserOrder = async (req, res) => {
+  try {
+    const order = await Order.findOne({
+      _id: req.params.id,
+      userId: req.userId,
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: "Заказ не найден" });
+    }
+
+    if (order.status !== "paid") {
+      return res.status(400).json({ message: "Отменить можно только оплаченный заказ до сборки" });
+    }
+
+    order.status = "cancelled";
+    const updatedOrder = await order.save();
+
+    res.json(updatedOrder);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Get all orders (admin)
 exports.getAllOrders = async (req, res) => {
   try {
@@ -335,9 +360,10 @@ exports.updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
     const validStatuses = [
-      "ordered",
+      "created",
       "paid",
-      "shipping",
+      "assembled",
+      "shipped",
       "completed",
       "cancelled",
     ];

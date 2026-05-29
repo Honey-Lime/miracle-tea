@@ -52,20 +52,22 @@ const OrdersPage = () => {
 
   const getStatusLabel = (status) => {
     const labels = {
-      ordered: "Заказан",
-      paid: "На сборке",
-      shipping: "В доставке",
-      completed: "Выполнен",
-      cancelled: "Отменён",
+      created: "Создан",
+      paid: "Оплачен",
+      assembled: "Собран",
+      shipped: "Отправлен",
+      completed: "Завершен",
+      cancelled: "Отменен",
     };
     return labels[status] || status;
   };
 
   const getStatusClass = (status) => {
     const classes = {
-      ordered: "op-status-ordered",
+      created: "op-status-created",
       paid: "op-status-paid",
-      shipping: "op-status-shipping",
+      assembled: "op-status-assembled",
+      shipped: "op-status-shipped",
       completed: "op-status-completed",
       cancelled: "op-status-cancelled",
     };
@@ -95,6 +97,14 @@ const OrdersPage = () => {
     if (type === "terminal") return "До пункта выдачи";
 
     return "Не указан";
+  };
+
+  const getDeliveryTime = (order) => {
+    const details = getDeliveryDetails(order);
+
+    if (!details.time) return "Не указано";
+
+    return `${details.time} ${details.unitTime || ""}`.trim();
   };
 
   if (loading) {
@@ -160,6 +170,10 @@ const OrdersPage = () => {
                         ),
                       )}
                     </div>
+                    <div className="op-order-row-item">
+                      <strong>Стоимость доставки:</strong>{" "}
+                      {formatPrice(order.delivery?.price || 0)}
+                    </div>
                     <div className="op-order-row-item total">
                       <strong>Итого:</strong> {formatPrice(order.totalPrice)}
                     </div>
@@ -180,6 +194,10 @@ const OrdersPage = () => {
                         <strong>{formatPrice(order.delivery?.price || 0)}</strong>
                       </div>
                       <div>
+                        <span>Время доставки:</span>
+                        <strong>{getDeliveryTime(order)}</strong>
+                      </div>
+                      <div>
                         <span>Квартира:</span>
                         <strong>{getDeliveryDetails(order).room || "Не указана"}</strong>
                       </div>
@@ -198,22 +216,36 @@ const OrdersPage = () => {
                     </div>
                   </div>
                   <div className="op-order-actions">
-                    {order.status === "paid" && (
-                      <button
-                        className="op-btn-shipping"
-                        onClick={() =>
-                          handleUpdateStatus(order._id, "shipping")
-                        }
-                      >
-                        Отправлен
-                      </button>
-                    )}
-                    {order.status === "ordered" && (
+                    {order.status === "created" && (
                       <button
                         className="op-btn-paid"
                         onClick={() => handleUpdateStatus(order._id, "paid")}
                       >
-                        Подтвердить оплату
+                        Оплачен
+                      </button>
+                    )}
+                    {order.status === "paid" && (
+                      <button
+                        className="op-btn-shipping"
+                        onClick={() => handleUpdateStatus(order._id, "assembled")}
+                      >
+                        Собран
+                      </button>
+                    )}
+                    {order.status === "assembled" && (
+                      <button
+                        className="op-btn-shipping"
+                        onClick={() => handleUpdateStatus(order._id, "shipped")}
+                      >
+                        Отправлен
+                      </button>
+                    )}
+                    {order.status === "shipped" && (
+                      <button
+                        className="op-btn-shipping"
+                        onClick={() => handleUpdateStatus(order._id, "completed")}
+                      >
+                        Завершен
                       </button>
                     )}
                   </div>

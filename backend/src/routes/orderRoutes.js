@@ -23,6 +23,7 @@ router.delete("/cart/clear", authMiddleware, orderController.clearCart);
 // Order creation is available both for authorized users and guests.
 router.post("/", optionalAuthMiddleware, orderController.createOrder);
 router.get("/my-orders", authMiddleware, orderController.getUserOrders);
+router.put("/:id/cancel", authMiddleware, orderController.cancelUserOrder);
 
 // Admin routes (to be protected with admin middleware)
 router.get("/", authMiddleware, orderController.getAllOrders);

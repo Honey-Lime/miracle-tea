@@ -1,6 +1,6 @@
 import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { getMyOrders } from "../services/orderService";
+import { cancelOrder, getMyOrders } from "../services/orderService";
 import { changePassword } from "../services/authService";
 
 const ProfilePage = () => {
@@ -21,24 +21,28 @@ const ProfilePage = () => {
 
   const getStatusLabel = (status) => {
     const labels = {
-      ordered: "Заказан",
-      paid: "На сборке",
-      shipping: "В доставке",
-      completed: "Выполнен",
-      cancelled: "Отменён",
+      created: "Создан",
+      paid: "Оплачен",
+      assembled: "Собран",
+      shipped: "Отправлен",
+      completed: "Завершен",
+      cancelled: "Отменен",
       cart: "Корзина",
+      payment_pending: "Ожидает оплаты",
     };
     return labels[status] || status;
   };
 
   const getStatusClass = (status) => {
     const classes = {
-      ordered: "prfp-status-ordered",
+      created: "prfp-status-ordered",
       paid: "prfp-status-paid",
-      shipping: "prfp-status-shipping",
+      assembled: "prfp-status-shipping",
+      shipped: "prfp-status-shipping",
       completed: "prfp-status-completed",
       cancelled: "prfp-status-cancelled",
       cart: "prfp-status-cart",
+      payment_pending: "prfp-status-cart",
     };
     return classes[status] || "";
   };
@@ -46,6 +50,29 @@ const ProfilePage = () => {
   const handleViewOrder = (order) => {
     setSelectedOrder(order);
     setOrderModalOpen(true);
+  };
+
+  const canCancelOrder = (order) => order.status === "paid";
+
+  const handleCancelOrder = async (orderId) => {
+    if (!window.confirm("Отменить заказ?")) {
+      return;
+    }
+
+    try {
+      const response = await cancelOrder(orderId);
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order._id === orderId ? { ...order, status: response.data.status } : order,
+        ),
+      );
+
+      if (selectedOrder?._id === orderId) {
+        setSelectedOrder((prev) => ({ ...prev, status: response.data.status }));
+      }
+    } catch (error) {
+      alert(error.response?.data?.message || "Не удалось отменить заказ");
+    }
   };
 
   const formatPrice = (price) => {
@@ -56,9 +83,9 @@ const ProfilePage = () => {
     if (user) {
       getMyOrders()
         .then((res) => {
-          // Исключаем заказы со статусом "cart" (активные корзины)
+          // Исключаем корзину и временные заказы, ожидающие подтверждения оплаты.
           const completedOrders = res.data.filter(
-            (order) => order.status !== "cart",
+            (order) => !["cart", "payment_pending"].includes(order.status),
           );
           setOrders(completedOrders);
           setLoading(false);
@@ -240,6 +267,7 @@ const ProfilePage = () => {
                 <th>Дата</th>
                 <th>Сумма</th>
                 <th>Статус</th>
+                <th>Действия</th>
               </tr>
             </thead>
             <tbody>
@@ -260,6 +288,16 @@ const ProfilePage = () => {
                     >
                       {getStatusLabel(order.status)}
                     </span>
+                  </td>
+                  <td onClick={(e) => e.stopPropagation()}>
+                    {canCancelOrder(order) && (
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => handleCancelOrder(order._id)}
+                      >
+                        Отменить заказ
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -347,6 +385,14 @@ const ProfilePage = () => {
               >
                 Закрыть
               </button>
+              {canCancelOrder(selectedOrder) && (
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => handleCancelOrder(selectedOrder._id)}
+                >
+                  Отменить заказ
+                </button>
+              )}
             </div>
           </div>
         </div>
