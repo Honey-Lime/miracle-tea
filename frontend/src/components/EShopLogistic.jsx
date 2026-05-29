@@ -1146,7 +1146,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
   // Этап 5. Финально проверяем контакты и передаём подтверждённую доставку в checkout.
   async function submitDelivery() {
     if (!output) {
-      console.log("NO OUTPUT");
+      // console.log("NO OUTPUT");
       return;
     }
 
@@ -1170,7 +1170,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
 
     if (Object.keys(nextErrors).length > 0) {
       showError("delivery-required-fields", "Заполните обязательные поля доставки.");
-      console.log("NEXT_ERRORS", nextErrors);
+      // console.log("NEXT_ERRORS", nextErrors);
       return;
     }
 

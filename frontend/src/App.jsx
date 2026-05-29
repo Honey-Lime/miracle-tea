@@ -13,6 +13,8 @@ import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import ThankYouPage from "./pages/ThankYouPage";
 import ProfilePage from "./pages/ProfilePage";
+import PersonalDataPolicyPage from "./pages/PersonalDataPolicyPage";
+import RefundPolicyPage from "./pages/RefundPolicyPage";
 import AdminPanel from "./pages/AdminPanel";
 import LoginModal from "./components/LoginModal";
 import { CartProvider } from "./context/CartContext";
@@ -39,6 +41,8 @@ function AppContent() {
               <Route path="/product/:id" element={<ProductPage />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/personal-data-policy" element={<PersonalDataPolicyPage />} />
+              <Route path="/refund-policy" element={<RefundPolicyPage />} />
               <Route path="/thank-you" element={<ThankYouPage />} />
               <Route path="/profile" element={<ProfilePage />} />
             </Routes>

@@ -58,6 +58,16 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    consents: {
+      personalData: {
+        type: Boolean,
+        default: false,
+      },
+      acceptedAt: {
+        type: Date,
+        default: null,
+      },
+    },
   },
   {
     timestamps: true,

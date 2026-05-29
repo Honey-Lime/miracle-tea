@@ -5,10 +5,16 @@ const { logError } = require("../utils/logger");
 
 // Create a new order
 exports.createOrder = async (req, res) => {
-  const { list, delivery } = req.body;
+  const { list, delivery, consents } = req.body;
   const customerType = req.userId ? "user" : "guest";
 
   try {
+    if (!consents?.personalData || !consents?.refundPolicy) {
+      return res.status(400).json({
+        message: "Перед оформлением заказа нужно принять политику обработки данных и политику возврата средств",
+      });
+    }
+
     // Validate products and calculate total
     let totalPrice = 0;
     for (const item of list) {
@@ -57,6 +63,11 @@ exports.createOrder = async (req, res) => {
       customerType,
       list: listWithPrices,
       delivery,
+      consents: {
+        personalData: true,
+        refundPolicy: true,
+        acceptedAt: consents.acceptedAt || new Date(),
+      },
       totalPrice,
       status: "payment_pending",
     });
@@ -294,9 +305,9 @@ exports.clearCart = async (req, res) => {
 // Get orders for a user
 exports.getUserOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ userId: req.userId }).populate(
-      "list.pid",
-    );
+    const orders = await Order.find({ userId: req.userId })
+      .populate("list.pid")
+      .sort({ date: -1 });
     res.json(orders);
   } catch (error) {
     res.status(500).json({ message: error.message });

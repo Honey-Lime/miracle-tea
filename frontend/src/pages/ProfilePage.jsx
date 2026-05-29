@@ -38,7 +38,7 @@ const ProfilePage = () => {
       created: "prfp-status-ordered",
       paid: "prfp-status-paid",
       assembled: "prfp-status-shipping",
-      shipped: "prfp-status-shipping",
+      shipped: "prfp-status-shipped",
       completed: "prfp-status-completed",
       cancelled: "prfp-status-cancelled",
       cart: "prfp-status-cart",

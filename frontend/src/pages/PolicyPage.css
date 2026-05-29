@@ -1,0 +1,35 @@
+.policy-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 0 3rem;
+  color: var(--color-text-primary);
+}
+
+.policy-page h1 {
+  margin-bottom: 1.5rem;
+  color: var(--color-brand);
+}
+
+.policy-page section {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--color-primary);
+  box-shadow: 0 4px 8px var(--shadow-color);
+}
+
+.policy-page h2 {
+  margin-bottom: 0.75rem;
+  color: var(--color-brand);
+  font-size: 1.25rem;
+}
+
+.policy-page p {
+  margin-bottom: 0.75rem;
+  line-height: 1.65;
+}
+
+.policy-page p:last-child {
+  margin-bottom: 0;
+}

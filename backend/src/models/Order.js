@@ -96,6 +96,20 @@ const orderSchema = new mongoose.Schema(
         default: null,
       },
     },
+    consents: {
+      personalData: {
+        type: Boolean,
+        default: false,
+      },
+      refundPolicy: {
+        type: Boolean,
+        default: false,
+      },
+      acceptedAt: {
+        type: Date,
+        default: null,
+      },
+    },
   },
   {
     timestamps: true,

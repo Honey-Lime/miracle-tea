@@ -1,4 +1,5 @@
 import { useState, useContext, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { sendEmailCode, verifyEmailCode } from "../services/emailService";
 import { forgotPassword, resetPassword } from "../services/authService";
@@ -53,6 +54,7 @@ const LoginModal = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [personalDataAccepted, setPersonalDataAccepted] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [error, setError] = useState("");
@@ -160,9 +162,17 @@ const LoginModal = () => {
       return;
     }
 
+    if (isRegister && !personalDataAccepted) {
+      setError("Для регистрации нужно принять политику обработки персональных данных");
+      return;
+    }
+
     setLoading(true);
     const result = isRegister
-      ? await register(getNormalizedEmail(), password, name, phone)
+      ? await register(getNormalizedEmail(), password, name, phone, {
+          personalData: personalDataAccepted,
+          acceptedAt: new Date().toISOString(),
+        })
       : await login(getNormalizedEmail(), password);
     setLoading(false);
 
@@ -258,6 +268,7 @@ const LoginModal = () => {
       setNewPassword("");
       setConfirmPassword("");
       setPhone("");
+      setPersonalDataAccepted(false);
       setShowPassword(false);
       setShowConfirmPassword(false);
       setError("");
@@ -416,6 +427,23 @@ const LoginModal = () => {
             </div>
           )}
 
+          {isRegister && (
+            <label className="registration-policy-consent">
+              <input
+                type="checkbox"
+                checked={personalDataAccepted}
+                onChange={(e) => setPersonalDataAccepted(e.target.checked)}
+                required
+              />
+              <span>
+                Я согласен(на) с{" "}
+                <Link to="/personal-data-policy" target="_blank" rel="noopener noreferrer">
+                  политикой обработки персональных данных
+                </Link>
+              </span>
+            </label>
+          )}
+
           {error && <p className="error">{error}</p>}
 
           {isRegister && emailVerified && (
@@ -425,7 +453,7 @@ const LoginModal = () => {
           <button
             type="submit"
             className={`btn btn-primary ${loading ? "btn-loading" : ""}`}
-            disabled={loading || (isRegister && !emailVerified)}
+            disabled={loading || (isRegister && (!emailVerified || !personalDataAccepted))}
           >
             {loading ? "" : isRegister ? "Зарегистрироваться" : "Войти"}
           </button>
@@ -442,6 +470,7 @@ const LoginModal = () => {
               setVerificationCode("");
               setConfirmPassword("");
               setPhone("");
+              setPersonalDataAccepted(false);
               setShowPassword(false);
               setShowConfirmPassword(false);
               setError("");

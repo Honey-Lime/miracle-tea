@@ -60,6 +60,44 @@
   color: var(--color-gray-500);
 }
 
+.op-orders-page .op-order-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  display: inline-block;
+}
+
+.op-orders-page .op-status-created {
+  background: var(--status-ordered-bg);
+  color: var(--status-ordered-text);
+}
+
+.op-orders-page .op-status-paid {
+  background: var(--status-paid-bg);
+  color: var(--status-paid-text);
+}
+
+.op-orders-page .op-status-assembled {
+  background: var(--status-shipping-bg);
+  color: var(--status-shipping-text);
+}
+
+.op-orders-page .op-status-shipped {
+  background: var(--status-completed-bg);
+  color: var(--status-completed-text);
+}
+
+.op-orders-page .op-status-completed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.op-orders-page .op-status-cancelled {
+  background: var(--status-cancelled-bg);
+  color: var(--status-cancelled-text);
+}
+
 .op-orders-page .op-order-details {
   display: grid;
   grid-template-columns: 1fr 1fr;

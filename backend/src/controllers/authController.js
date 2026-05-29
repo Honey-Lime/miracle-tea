@@ -132,10 +132,16 @@ exports.login = async (req, res) => {
 };
 
 exports.register = async (req, res) => {
-  const { email, password, name, phone } = req.body;
+  const { email, password, name, phone, consents } = req.body;
   const normalizedEmail = normalizeEmail(email);
   const normalizedName = normalizeName(name);
   const normalizedPhone = normalizePhone(phone);
+
+  if (!consents?.personalData) {
+    return res.status(400).json({
+      message: "Для регистрации нужно принять политику обработки персональных данных",
+    });
+  }
 
   if (!normalizedEmail) {
     return res.status(400).json({ message: "Email обязателен" });
@@ -178,6 +184,10 @@ exports.register = async (req, res) => {
       email: normalizedEmail,
       phone: normalizedPhone || undefined,
       password: hashedPassword,
+      consents: {
+        personalData: true,
+        acceptedAt: consents.acceptedAt || new Date(),
+      },
       isAdmin: isAdminUser(normalizedEmail),
     });
     await user.save();

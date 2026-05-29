@@ -88,9 +88,14 @@
   color: var(--status-paid-text);
 }
 
-.prfp-profile-page .prfp-status-completed {
+.prfp-profile-page .prfp-status-shipped {
   background: var(--status-completed-bg);
   color: var(--status-completed-text);
+}
+
+.prfp-profile-page .prfp-status-completed {
+  background: #dcfce7;
+  color: #166534;
 }
 
 .prfp-profile-page .prfp-status-cancelled {

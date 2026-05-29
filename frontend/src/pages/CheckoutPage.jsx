@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
@@ -19,11 +19,12 @@ const CheckoutPage = () => {
   const { cartItems, totalPrice } = useContext(CartContext);
   const { user, token } = useContext(AuthContext);
   const { addToast } = useToast();
-  const navigate = useNavigate();
   const [deliveryData, setDeliveryData] = useState(null);
-  const [checkFields, setCheckFields] = useState(false);
-
-  const [paymentMethod, setPaymentMethod] = useState("card");
+  const [personalDataAccepted, setPersonalDataAccepted] = useState(false);
+  const [refundPolicyAccepted, setRefundPolicyAccepted] = useState(false);
+  const canPay = Boolean(
+    deliveryData?.checked && personalDataAccepted && refundPolicyAccepted,
+  );
 
   // Общий вес заказа в граммах (уже есть в компоненте)
   const totalWeight = cartItems.reduce((sum, item) => sum + item.count, 0);
@@ -36,13 +37,23 @@ const CheckoutPage = () => {
         return;
       }
 
+      if (!deliveryData?.checked) {
+        addToast("Подтвердите способ и адрес доставки", "warning");
+        return;
+      }
+
+      if (!personalDataAccepted || !refundPolicyAccepted) {
+        addToast("Перед оплатой нужно принять обе политики", "warning");
+        return;
+      }
+
       const cartItemsWithDetails = cartItems.map((item) => ({
         pid: item.pid,
         count: item.count,
         isSampler: item.isSampler,
       }));
 
-      console.log('cartItemsWithDetails', cartItemsWithDetails);
+      // console.log('cartItemsWithDetails', cartItemsWithDetails);
       
 
       const orderData = {
@@ -55,6 +66,11 @@ const CheckoutPage = () => {
           provider: deliveryData?.service || "eshop",
           did: deliveryData?.code || "",
           details: deliveryData,
+        },
+        consents: {
+          personalData: personalDataAccepted,
+          refundPolicy: refundPolicyAccepted,
+          acceptedAt: new Date().toISOString(),
         },
       };
 
@@ -144,7 +160,7 @@ const CheckoutPage = () => {
           // data.checked true если есть все данные для создания заказа
           onDeliveryConfirm={(data) => {
             setDeliveryData(data);
-            console.log(data);
+            // console.log(data);
           }}
         />
 
@@ -171,15 +187,49 @@ const CheckoutPage = () => {
                   )?.label || "Не выбрано"} */}
                 </span>
               </div>
-              <div className="chp-grand-total">Всего: {totalPrice + deliveryData?.price} ₽</div>
+              <div className="chp-grand-total">
+                Всего: {totalPrice + (deliveryData?.price || 0)} ₽
+              </div>
+            </div>
+
+            <div className="chp-policy-consents" aria-label="Обязательные согласия">
+              <label className="chp-policy-consent">
+                <input
+                  type="checkbox"
+                  checked={personalDataAccepted}
+                  onChange={(event) => setPersonalDataAccepted(event.target.checked)}
+                />
+                <span>
+                  Я согласен(на) с{" "}
+                  <Link to="/personal-data-policy" target="_blank" rel="noopener noreferrer">
+                    политикой обработки персональных данных
+                  </Link>
+                </span>
+              </label>
+
+              <label className="chp-policy-consent">
+                <input
+                  type="checkbox"
+                  checked={refundPolicyAccepted}
+                  onChange={(event) => setRefundPolicyAccepted(event.target.checked)}
+                />
+                <span>
+                  Я принимаю{" "}
+                  <Link to="/refund-policy" target="_blank" rel="noopener noreferrer">
+                    политику возврата средств
+                  </Link>
+                </span>
+              </label>
             </div>
 
             <button
               className="btn btn-primary chp-btn-large"
-              disabled={!deliveryData?.checked}
+              disabled={!canPay}
               onClick={()=> {
-                if (deliveryData?.checked) {
+                if (canPay) {
                   handlePlaceOrder();
+                } else {
+                  addToast("Подтвердите доставку и примите обе политики", "warning");
                 }
               }}
             >
