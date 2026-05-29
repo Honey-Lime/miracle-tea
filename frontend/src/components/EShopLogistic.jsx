@@ -14,36 +14,64 @@ const INITIAL_STATUS = {
   reloadRecommended: false,
 };
 
-const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDeliveryConfirm }) => {
+const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, needCreateOrder, onDeliveryConfirm }) => {
+  // Этап 1. Загружаем справочники и базовые данные для расчёта доставки.
   // Основные данные API и справочники служб доставки.
   const [data, setData] = useState({});
   const [services, setServices] = useState({});
 
+  // Этап 2. Пользователь выбирает город, способ доставки и адрес получения.
   // Состояние выбора пользователя.
   const [selectedCity, setSelectedCity] = useState(null);
-  const [selectedTerminal, setSelectedTerminal] = useState(null);
   const [selectedMethod, setSelectedMethod] = useState(false);
+  const [selectedTerminal, setSelectedTerminal] = useState(null);
   const [addressPickMode, setAddressPickMode] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState(null);
   const [lastUserAddress, setLastUserAddress] = useState(null);
-  const [deliveryComment, setDeliveryComment] = useState("");
+
+  // Этап 3. Пользователь заполняет контактные данные для подтверждения доставки.
+  const [deliveryRoom, setDeliveryRoom] = useState(null);
+  const [deliveryName, setDeliveryName] = useState(null);
+  const [deliveryPhone, setDeliveryPhone] = useState(null);
+  const [deliveryComment, setDeliveryComment] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
   const [deliveryLoading, setDeliveryLoading] = useState({});
+  const [hasSelectedDelivery, setHasSelectedDelivery] = useState(false);
   const [output, setOutput] = useState(null);
 
+  // Этап 4. Управляем интерфейсом: статусы, загрузка и готовность карты.
   // Состояние интерфейса и загрузки.
   const [loading, setLoading] = useState(true);
   const [statusMessage, setStatusMessage] = useState(INITIAL_STATUS);
   const [mapLoad, setMapLoad] = useState(false);
   const [mapReady, setMapReady] = useState(false);
 
+  // Технические ссылки для синхронизации шагов выбора доставки и состояния карты.
   // Ссылки на объекты карты, чтобы не пересоздавать их без необходимости.
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const clustererRef = useRef(null);
   const addressPickModeRef = useRef(false);
   const deliveryAddressMarkerRef = useRef(null);
+  const manualAddressChangeRef = useRef(false);
   const sourceReadyRef = useRef(false);
   const lastCalculatedFiasRef = useRef(null);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // Унифицированное отображение статусов и ошибок для пользователя.
   function showStatus(code, type, text, reloadRecommended = false) {
@@ -79,6 +107,23 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
     });
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // Этап 0. Базовые UI-хелперы и форматирование значений для интерфейса.
   // Безопасно преобразуем значение к строке для вывода в UI.
   function renderValue(value) {
     if (value == null) return "";
@@ -86,6 +131,48 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
     return String(value);
   }
 
+  function formatPhone(value) {
+    const digits = value.replace(/\D/g, "").slice(0, 11);
+
+    if (!digits.length) {
+      return "";
+    }
+
+    let formatted = digits;
+
+    if (digits.length > 4) {
+      formatted = `${digits.slice(0, 4)} ${digits.slice(4)}`;
+    }
+
+    if (digits.length > 7) {
+      formatted = `${digits.slice(0, 4)} ${digits.slice(4, 7)}-${digits.slice(7)}`;
+    }
+
+    if (digits.length > 9) {
+      formatted = `${digits.slice(0, 4)} ${digits.slice(4, 7)}-${digits.slice(7, 9)}-${digits.slice(9)}`;
+    }
+
+    return formatted;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // Этап 1. Хелперы для геоданных и сетевых запросов доставки.
   // Преобразуем подсказку DaData в компактную структуру города/локации.
   function buildCityData(suggestion) {
     if (!suggestion?.data) {
@@ -103,6 +190,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
     };
   }
 
+  // Этап 1.1. Выбор города или адреса через строку поиска.
   // Обработчик выбора города или адреса из DaData.
   const handleCitySelect = (suggestion) => {
     const cityData = buildCityData(suggestion);
@@ -122,6 +210,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
         lat: cityData.lat,
       };
 
+      manualAddressChangeRef.current = true;
       setDeliveryAddress(nextAddress);
       setLastUserAddress(nextAddress);
 
@@ -138,7 +227,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
   };
 
   // Ищем FIAS по текстовому адресу, чтобы корректно пересчитать доставку.
-  async function getFiasByAddress(address) {
+  async function getDataByAddress(address) {
     try {
       const response = await fetch(
         "https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address",
@@ -164,6 +253,11 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
 
       const result = await response.json();
       const suggestion = result.suggestions?.[0];
+      // console.log(suggestion.data);
+      // console.log(suggestion.data.region);
+      // console.log(suggestion.data.street);
+      // console.log(suggestion.data.house);
+      
 
       return {
         fias:
@@ -177,6 +271,12 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
           suggestion?.data?.region_with_type ||
           suggestion?.value ||
           address,
+        region:
+          suggestion.data.region,
+        street:
+          suggestion.data.street,
+        house:
+          suggestion.data.house,
       };
     } catch (requestError) {
       console.error("Ошибка получения FIAS по адресу:", requestError);
@@ -203,6 +303,24 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
     };
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // Этап 2. Работа с картой, адресом доставки и объектами на карте.
+  // Этап 2.1. Выбор адреса курьерской доставки кликом по карте.
   // Обрабатываем клик по карте в режиме выбора адреса курьерской доставки.
   async function handleMapClick(coords) {
     const [lon, lat] = coords;
@@ -222,7 +340,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
         return;
       }
 
-      const locationData = await getFiasByAddress(address);
+      const locationData = await getDataByAddress(address);
       const nextFias = locationData?.fias;
       const nextLocationValue = locationData?.value;
 
@@ -230,8 +348,15 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
         address,
         lon,
         lat,
+        region:
+          locationData.region,
+        street:
+          locationData.street,
+        house:
+          locationData.house,
       };
 
+      manualAddressChangeRef.current = true;
       setDeliveryAddress(nextAddress);
       setLastUserAddress(nextAddress);
 
@@ -447,25 +572,44 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
     }));
   }
 
-  // Переключаем тип доставки: ПВЗ или курьер.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // Этап 3. Выбор способа доставки и сбор черновика заказа.
+  // Этап 3.1. Переключение между доставкой в ПВЗ и доставкой до двери.
+  // При возврате к курьеру восстанавливаем только адрес, который пользователь
+  // выбирал сам, чтобы не смешивать адрес ПВЗ и адрес доставки до двери.
   function changeDeliveryMethod(event, key, type) {
     document.querySelectorAll(".deliveryMethod").forEach((element) => element.classList.remove("active"));
     event.currentTarget.classList.add("active");
 
-    const selectedAddressFromLocation =
-      selectedCity && Number.isFinite(Number(selectedCity.lon)) && Number.isFinite(Number(selectedCity.lat))
-        ? {
-            address: selectedCity.value,
-            lon: Number(selectedCity.lon),
-            lat: Number(selectedCity.lat),
-          }
-        : null;
+    const nextDoorAddress = lastUserAddress;
+    const isMethodChanged =
+      selectedMethod?.name !== key || selectedMethod?.type !== type;
 
-    const nextDoorAddress = lastUserAddress || selectedAddressFromLocation;
+    if (isMethodChanged) {
+      setDeliveryAddress(null);
+      setOutput(null);
+      onDeliveryConfirm(null);
+    }
 
     switch (type) {
       case "terminal":
         setAddressPickMode(false);
+        manualAddressChangeRef.current = false;
         deleteDeliveryAddressMarker();
         setSelectedTerminal(null);
         showStatus("terminal-mode", "info", "Выберите удобный пункт выдачи на карте.");
@@ -474,11 +618,14 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
       case "door":
         setAddressPickMode(true);
         setSelectedTerminal(null);
+        manualAddressChangeRef.current = false;
 
-        // При возврате к курьерской доставке всегда восстанавливаем последний адрес,
-        // который пользователь выбрал сам через карту или поле ввода.
-        if (nextDoorAddress) {
+        // При возврате к курьерской доставке восстанавливаем только тот адрес,
+        // который пользователь выбрал сам через карту или ввёл вручную.
+        if (!isMethodChanged && nextDoorAddress) {
           setDeliveryAddress(nextDoorAddress);
+        } else {
+          setDeliveryAddress(null);
         }
 
         showStatus("door-mode", "info", "Выберите адрес на карте или введите его в строке поиска.");
@@ -491,7 +638,9 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
     setSelectedMethod({ name: key, type });
   }
 
-  async function handleAddressSubmit() {
+  // Этап 3.2. Собираем черновик доставки после выбора способа и адреса.
+  // На этом этапе фиксируем стоимость, сроки и точку получения.
+  async function handleDeliverySubmit() {
     if (!selectedMethod) {
       return;
     }
@@ -502,6 +651,9 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
 
     switch (selectedMethod.type) {
       case "terminal":
+        if (!selectedTerminal) {
+          return;
+        }
         
         out.isPostamat = selectedTerminal.is_postamat;
         out.address = selectedTerminal.address;
@@ -515,27 +667,44 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
         break;
 
       case "door": {
-
-        const recalculation = await customFetch(
-          "/delivery/calculation",
-          {
-            to: selectedCity.fias,
-            weight: 1,
-            service: selectedMethod.name,
-            address: deliveryAddress.address,
-          },
-          selectedMethod.name
-        );
-
-        if (!recalculation) {
+        if (!deliveryAddress) {
           return;
         }
 
-        out.address = deliveryAddress.address;
-        out.price = recalculation.data.door.price.value;
-        out.unitPrice = recalculation.data.door.price.unit;
-        out.time = recalculation.data.door.time.value;
-        out.unitTime = recalculation.data.door.time.unit;
+        let recalculation = null;
+
+        if (manualAddressChangeRef.current) {
+          console.error('recalculation');
+          
+          recalculation = await customFetch(
+            "/delivery/calculation",
+            {
+              to: selectedCity.fias,
+              weight: 1,
+              service: selectedMethod.name,
+              address: deliveryAddress.address,
+            },
+            selectedMethod.name
+          );
+
+          if (!recalculation) {
+            return;
+          }
+        }
+
+        out.address = deliveryAddress;
+        if (recalculation) {
+          out.price = recalculation.data.door.price.value;
+          out.unitPrice = recalculation.data.door.price.unit;
+          out.time = recalculation.data.door.time.value;
+          out.unitTime = recalculation.data.door.time.unit;
+        } else {
+          // console.log(data.calculation[selectedMethod.name].data);
+          out.price = data.calculation[selectedMethod.name].data.door.price.value;
+          out.unitPrice = data.calculation[selectedMethod.name].data.door.price.unit;
+          out.time = data.calculation[selectedMethod.name].data.door.time.value;
+          out.unitTime = data.calculation[selectedMethod.name].data.door.time.unit;
+        }
 
         break;
       }
@@ -543,16 +712,36 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
       default:
         break;
     }
+
     setOutput(out);
+    // onDeliveryConfirm(out);
 
     showStatus("delivery-confirmed", "success", "Адрес доставки подтверждён.");
   }
 
+  // Этап 4. Эффекты и синхронизация состояния доставки.
+  // Этап 4.1. Служебная синхронизация режима выбора адреса с обработчиком карты.
   // Синхронизируем ref, чтобы обработчик карты всегда видел актуальный режим.
   useEffect(() => {
     addressPickModeRef.current = addressPickMode;
   }, [addressPickMode]);
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // Этап 4.2. После выбора курьерского адреса показываем его маркер на карте.
   // Когда выбран адрес курьерской доставки, отображаем его маркер на карте.
   useEffect(() => {
     if (!mapReady || !deliveryAddress || !addressPickMode) {
@@ -568,9 +757,10 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
       });
     }
 
-    renderDeliveryAddressMarker(deliveryAddress);
+    renderDeliveryAddressMarker(deliveryAddress.address);
   }, [deliveryAddress, mapReady, addressPickMode]);
 
+  // Этап 4.3. При открытии виджета загружаем базовые данные и пробуем определить город.
   // Загружаем базовые данные: состояние EShopLogistic и примерный город по IP.
   useEffect(() => {
     const loadInitialData = async () => {
@@ -607,6 +797,11 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
 
         const locationData = await locationResponse.json();
         handleCitySelect(locationData.location);
+
+        // Автоопределённый по геолокации город нужен только для расчёта доставки,
+        // но не должен считаться выбранным адресом доставки.
+        setDeliveryAddress(null);
+        setLastUserAddress(null);
       } catch (requestError) {
         console.error("Ошибка начальной загрузки:", requestError);
         showError(
@@ -620,14 +815,14 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
     loadInitialData();
   }, []);
 
-  // После загрузки state сохраняем справочник служб доставки.
+  // Этап 4.4. После загрузки state сохраняем справочник служб доставки.
   useEffect(() => {
     if (data.state) {
       setServices(data.state.data.services);
     }
   }, [data.state]);
 
-  // Когда выбран город и известны службы, запрашиваем расчёт доставки по каждой службе.
+  // Этап 4.5. Когда известен город, запрашиваем первичный расчёт доставки по службам.
   useEffect(() => {
     if (!selectedCity?.fias || !selectedCity?.value || !Object.keys(services).length) {
       return;
@@ -758,7 +953,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
     }
   }, [mapLoad, mapReady, selectedMethod, data.calculation]);
 
-  // Убираем общий loader после загрузки базового состояния модуля доставки.
+  // Этап 4.6. Скрываем общий loader после загрузки базового состояния доставки.
   useEffect(() => {
     if (data.state) {
       setLoading(false);
@@ -767,7 +962,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
     }
   }, [data.state]);
 
-  // Подключаем и инициализируем Яндекс.Карты после загрузки основных данных.
+  // Этап 4.7. Подключаем и инициализируем карту после загрузки основных данных.
   useEffect(() => {
     if (loading) {
       return;
@@ -886,27 +1081,127 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
     };
   }, [loading]);
 
-  const hasSelectedDelivery = selectedTerminal || (addressPickMode && deliveryAddress);
-
+  // Этап 4.8. Понимаем, что пользователь уже выбрал ПВЗ или адрес курьера.
   useEffect(() => {
+    const status = selectedTerminal || (addressPickMode && deliveryAddress);
+    if (status) {
+      setHasSelectedDelivery(status);
+      return;
+    }
+
+    setHasSelectedDelivery(false);
+  }, [selectedTerminal, addressPickMode, deliveryAddress]);
+
+  // Этап 4.9. Автоматически обновляем черновик доставки после выбора ПВЗ
+  // или после ручного изменения адреса курьерской доставки.
+  useEffect(() => {
+    setOutput(null);
+    // onDeliveryConfirm(null);
+    if (selectedMethod?.type === "door") {
+      if (!manualAddressChangeRef.current || !addressPickMode || !deliveryAddress) {
+        return;
+      }
+
+      handleDeliverySubmit();
+      manualAddressChangeRef.current = false;
+      return;
+    }
+
+    if (selectedMethod?.type === "terminal" && selectedTerminal) {
+      handleDeliverySubmit();
+    }
+  }, [deliveryAddress, addressPickMode, selectedMethod, selectedTerminal]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // Этап 5. Финально проверяем контакты и передаём подтверждённую доставку в checkout.
+  async function submitDelivery() {
+    if (!output) {
+      return;
+    }
+
+    const nextErrors = {};
+
+    if (output.type === "door" && !deliveryRoom?.trim()) {
+      nextErrors.deliveryRoom = true;
+    }
+
+    if (!deliveryName?.trim()) {
+      nextErrors.deliveryName = true;
+    }
+
+    const phoneDigits = (deliveryPhone || "").replace(/\D/g, "");
+
+    if (!deliveryPhone?.trim() || phoneDigits.length !== 11) {
+      nextErrors.deliveryPhone = true;
+    }
+
+    setFieldErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length > 0) {
+      showError("delivery-required-fields", "Заполните обязательные поля доставки.");
+      return;
+    }
+
+    clearStatus("delivery-required-fields");
+
     const finalOutput = {
       ...output,
+      room: deliveryRoom?.trim() || "",
+      name: deliveryName.trim(),
+      phone: deliveryPhone.trim(),
       comment: deliveryComment,
+      checked: true,
     };
 
     onDeliveryConfirm(finalOutput);
-  },[output]);
+  }
+
+  useEffect(() => {
+    const nextErrors = {};
+    nextErrors.deliveryRoom = true;
+    nextErrors.deliveryName = true;
+    nextErrors.deliveryPhone = true;
+    setFieldErrors(nextErrors);
+
+    // console.log('delivery address', deliveryAddress);
+    
+    submitDelivery();
+  },[deliveryRoom, deliveryName, deliveryPhone, selectedMethod, deliveryAddress]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   return (
     <div className="EShopLogistic">
-      {statusMessage?.text && (
-        <div className={`deliveryStatus deliveryStatus--${statusMessage.type}`}>
-          <div>{statusMessage.text}</div>
-          {statusMessage.reloadRecommended && (
-            <div className="deliveryStatusHint">Если проблема повторяется, попробуйте перезагрузить страницу.</div>
-          )}
-        </div>
-      )}
 
       {loading && <div className="deliveryLoading">Загрузка...</div>}
 
@@ -999,12 +1294,6 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
                   <li>{deliveryAddress.address}</li>
                 </>
               )}
-
-              {hasSelectedDelivery && (
-                <div className="submitDeliveryButton" onClick={() => handleAddressSubmit()}>
-                  Подтвердить адрес доставки
-                </div>
-              )}
             </ul>
           </div>
 
@@ -1014,23 +1303,76 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, onDe
             <div className="prooveDelivery">
               <img src={services[output.service].logo} alt={output.service} />
               <div className="heading">{output.type == 'terminal' ? (output.isPostamat == true ? 'Постамат' : 'Пункт выдачи') : 'Курьер' } {services[output.service].name}</div>
-              <div className="address">{output.address}</div>
+              <div className="address">{output.address.address}</div>
+              {selectedMethod.type == 'door' && (
+                <div>
+                  <span className="red">*</span>Квартира: {" "}
+                  <input
+                    className={`room ${fieldErrors.deliveryRoom ? "inputError" : ""}`}
+                    type="text"
+                    placeholder="№"
+                    value={deliveryRoom || ""}
+                    onChange={(e) => {
+                      setDeliveryRoom(e.target.value);
+                      setFieldErrors((prev) => ({ ...prev, deliveryRoom: false }));
+                    }}
+                  />
+                </div>
+              )}
+              
+              <div>
+                <span className="red">*</span>Имя: {" "}
+                <input
+                  className={`name ${fieldErrors.deliveryName ? "inputError" : ""}`}
+                  type="text"
+                  placeholder="Сайтама"
+                  value={deliveryName || ""}
+                  onChange={(e) => {
+                    setDeliveryName(e.target.value);
+                    setFieldErrors((prev) => ({ ...prev, deliveryName: false }));
+                  }}
+                />
+              </div>
+              <div>
+                <span className="red">*</span>Телефон: {" "}
+                <input
+                  className={`phone ${fieldErrors.deliveryPhone ? "inputError" : ""}`}
+                  type="text"
+                  inputMode="tel"
+                  placeholder="+7 (900) 800-70-60"
+                  value={deliveryPhone || ""}
+                  onChange={(e) => {
+                    setDeliveryPhone(formatPhone(e.target.value));
+                    setFieldErrors((prev) => ({ ...prev, deliveryPhone: false }));
+                  }}
+                />
+              </div>
 
-              <div className="time">{output.time + ' ' + output.unitTime}</div>
-              <div className="price">{output.price + ' ' + output.unitPrice}</div>
               <textarea
                 className="comment"
                 type="text"
-                value={deliveryComment}
+                value={deliveryComment || ''}
                 onChange={(e) => setDeliveryComment(e.target.value)}
-                placeholder="Комментарий к доставке (укажите квартиру, подъезд, особенности адреса)"
+                placeholder="Комментарий к доставке (укажите особенности адреса)"
               />
-              <br/>
-              {/* <button className="submitDelivery" onClick={}>
-                Далее
-              </button> */}
+              <div className="time">{output.time + ' ' + output.unitTime}</div>
+              <div className="price">{output.price + ' ' + output.unitPrice}</div>
+
+              {/* <div className="submitDeliveryButton" onClick={() => submitDelivery()}>
+                Подтвердить адрес доставки
+              </div> */}
+
             </div>
           )}
+          
+        {statusMessage?.text && (
+          <div className={`deliveryStatus deliveryStatus--${statusMessage.type}`}>
+            <div>{statusMessage.text}</div>
+            {statusMessage.reloadRecommended && (
+              <div className="deliveryStatusHint">Если проблема повторяется, попробуйте перезагрузить страницу.</div>
+            )}
+          </div>
+        )}
         </>
       )}
     </div>

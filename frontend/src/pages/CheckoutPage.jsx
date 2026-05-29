@@ -20,6 +20,7 @@ const CheckoutPage = () => {
   const { addToast } = useToast();
   const navigate = useNavigate();
   const [deliveryData, setDeliveryData] = useState(null);
+  const [checkFields, setCheckFields] = useState(false);
 
   const [paymentMethod, setPaymentMethod] = useState("card");
 
@@ -108,9 +109,13 @@ const CheckoutPage = () => {
           DADATA_TOKEN={DADATA_TOKEN}
           ESHOPLOGISTIC_TOKEN={ESHOPLOGISTIC_TOKEN}
           YANDEX_API_KEY={YANDEX_API_KEY}
-          onDeliveryConfirm={(outputData) => {
-            // console.log("Доставка из дочернего компонента:", outputData);
-            setDeliveryData(outputData);
+          needCreateOrder={true}
+
+          // получаем выходные данные в state deliveryData
+          // data.checked true если есть все данные для создания заказа
+          onDeliveryConfirm={(data) => {
+            setDeliveryData(data);
+            console.log(data);
           }}
         />
 
@@ -125,7 +130,7 @@ const CheckoutPage = () => {
               {deliveryData?.price && (
                 <div>
                   <span>Доставка: </span>
-                  <span>{deliveryData?.price} ₽</span>
+                  <span>{deliveryData.price} ₽</span>
                 </div>
               )}
               <div>
@@ -142,7 +147,12 @@ const CheckoutPage = () => {
 
             <button
               className="btn btn-primary chp-btn-large"
-              onClick={handlePlaceOrder}
+              disabled={!deliveryData?.checked}
+              onClick={()=> {
+                if (deliveryData?.checked) {
+                  handlePlaceOrder();
+                }
+              }}
             >
               Оплатить
             </button>
