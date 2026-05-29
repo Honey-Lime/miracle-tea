@@ -199,7 +199,7 @@ app.post('/api/create-payment', async(req, res) => {
       Amount: amount,
       OrderId: orderId,
       Description: `Оплата заказа ${orderId}`,
-      NotificationURL: 'https://%D1%87%D1%83%D0%B4%D0%BE%D1%87%D0%B0%D0%B9.%D1%80%D1%84/api/create-delivery-order'
+      NotificationURL: 'https://чудочай.рф/api/create-delivery-order'
 
       // Receipt: {
       //   Email: "a@test.ru",
@@ -224,6 +224,7 @@ app.post('/api/create-payment', async(req, res) => {
         Amount: paymentData.Amount,
         OrderId: paymentData.OrderId,
         Description: paymentData.Description,
+        NotificationURL: paymentData.NotificationURL
       }, 
       TERMINAL_PASSWORD
     );

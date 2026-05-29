@@ -79,7 +79,7 @@ const CheckoutPage = () => {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
-          amount: "1000",
+          amount: 1000,
           orderId: "777",
           deliveryData: deliveryData
         }),
@@ -98,7 +98,7 @@ const CheckoutPage = () => {
           orderId: order._id, 
           paymentId: paymentResponse.paymentId } 
         });
-        
+
     } catch (error) {
       addToast(error.message, "error");
       console.error(error);
