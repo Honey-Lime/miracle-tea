@@ -69,15 +69,41 @@ const CheckoutPage = () => {
         body: JSON.stringify(orderData),
       });
 
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || "Ошибка при оформлении заказа");
       }
 
       const order = await response.json();
+
+      const payment = await fetch("/api/create-payment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          amount: "1000",
+          orderId: "777",
+          deliveryData: deliveryData
+        }),
+      });
+
+      if (!payment.ok) {
+        const error = await payment.json();
+        throw new Error(error.message || "Ошибка при оплате");
+      }
+      
       addToast("Заказ успешно оформлен!", "success");
-      await clearCart();
-      navigate("/thank-you", { state: { orderId: order._id } });
+      // await clearCart();
+      const paymentResponse = payment.json();
+      navigate(paymentResponse.paymentUrl, { 
+        state: { 
+          orderId: order._id, 
+          paymentId: paymentResponse.paymentId } 
+        });
+        
     } catch (error) {
       addToast(error.message, "error");
       console.error(error);

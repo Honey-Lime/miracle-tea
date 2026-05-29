@@ -14,9 +14,23 @@ const INITIAL_STATUS = {
   reloadRecommended: false,
 };
 
+const DELIVERY_CONTACT_STORAGE_KEY = "EShopLogisticDeliveryData";
+
 const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, needCreateOrder, onDeliveryConfirm }) => {
   // Этап 1. Загружаем справочники и базовые данные для расчёта доставки.
   // Основные данные API и справочники служб доставки.
+  function getSavedDeliveryContact() {
+    try {
+      const saved = localStorage.getItem(DELIVERY_CONTACT_STORAGE_KEY);
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  }
+
+  const savedDeliveryContact = getSavedDeliveryContact();
+
+  
   const [data, setData] = useState({});
   const [services, setServices] = useState({});
 
@@ -30,10 +44,11 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
   const [lastUserAddress, setLastUserAddress] = useState(null);
 
   // Этап 3. Пользователь заполняет контактные данные для подтверждения доставки.
-  const [deliveryRoom, setDeliveryRoom] = useState(null);
-  const [deliveryName, setDeliveryName] = useState(null);
-  const [deliveryPhone, setDeliveryPhone] = useState(null);
-  const [deliveryComment, setDeliveryComment] = useState(null);
+  const [deliveryRoom, setDeliveryRoom] = useState(savedDeliveryContact.deliveryRoom || "");
+  const [deliveryName, setDeliveryName] = useState(savedDeliveryContact.deliveryName || "");
+  const [deliveryPhone, setDeliveryPhone] = useState(savedDeliveryContact.deliveryPhone || "");
+  const [deliveryComment, setDeliveryComment] = useState(savedDeliveryContact.deliveryComment || null);
+
   const [fieldErrors, setFieldErrors] = useState({});
   const [deliveryLoading, setDeliveryLoading] = useState({});
   const [hasSelectedDelivery, setHasSelectedDelivery] = useState(false);
@@ -1131,6 +1146,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
   // Этап 5. Финально проверяем контакты и передаём подтверждённую доставку в checkout.
   async function submitDelivery() {
     if (!output) {
+      console.log("NO OUTPUT");
       return;
     }
 
@@ -1154,6 +1170,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
 
     if (Object.keys(nextErrors).length > 0) {
       showError("delivery-required-fields", "Заполните обязательные поля доставки.");
+      console.log("NEXT_ERRORS", nextErrors);
       return;
     }
 
@@ -1172,16 +1189,35 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
   }
 
   useEffect(() => {
+    if (!output) {
+      return;
+    }
+
+    submitDelivery();
+  }, [output, deliveryRoom, deliveryName, deliveryPhone]);
+
+
+  useEffect(() => {
     const nextErrors = {};
-    nextErrors.deliveryRoom = true;
-    nextErrors.deliveryName = true;
-    nextErrors.deliveryPhone = true;
+    nextErrors.deliveryRoom = deliveryRoom ? false : true;
+    nextErrors.deliveryName = deliveryName ? false : true;
+    nextErrors.deliveryPhone = deliveryPhone ? false : true;
     setFieldErrors(nextErrors);
 
-    // console.log('delivery address', deliveryAddress);
-    
-    submitDelivery();
-  },[deliveryRoom, deliveryName, deliveryPhone, selectedMethod, deliveryAddress]);
+  },[deliveryRoom, deliveryName, deliveryPhone, selectedMethod]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      DELIVERY_CONTACT_STORAGE_KEY,
+      JSON.stringify({
+        deliveryRoom,
+        deliveryName,
+        deliveryPhone,
+        deliveryComment
+      })
+    );
+  }, [deliveryRoom, deliveryName, deliveryPhone, deliveryComment]);
+
 
 
 
@@ -1347,21 +1383,17 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
                   }}
                 />
               </div>
-
-              <textarea
-                className="comment"
-                type="text"
-                value={deliveryComment || ''}
-                onChange={(e) => setDeliveryComment(e.target.value)}
-                placeholder="Комментарий к доставке (укажите особенности адреса)"
-              />
+              <div>Комментарий: 
+                <input
+                  className="comment"
+                  type="text"
+                  value={deliveryComment || ''}
+                  onChange={(e) => setDeliveryComment(e.target.value)}
+                  placeholder="Комментарий к доставке (укажите особенности адреса)"
+                />
+              </div>
               <div className="time">{output.time + ' ' + output.unitTime}</div>
               <div className="price">{output.price + ' ' + output.unitPrice}</div>
-
-              {/* <div className="submitDeliveryButton" onClick={() => submitDelivery()}>
-                Подтвердить адрес доставки
-              </div> */}
-
             </div>
           )}
           

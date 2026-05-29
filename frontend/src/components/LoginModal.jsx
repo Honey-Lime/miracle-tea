@@ -5,12 +5,54 @@ import { forgotPassword, resetPassword } from "../services/authService";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const PasswordEyeIcon = ({ isOpen }) => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    {isOpen ? (
+      <>
+        <path
+          d="M2.5 12C4.5 7.8 7.7 5.7 12 5.7C16.3 5.7 19.5 7.8 21.5 12C19.5 16.2 16.3 18.3 12 18.3C7.7 18.3 4.5 16.2 2.5 12Z"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" />
+      </>
+    ) : (
+      <>
+        <path
+          d="M3 12C5.1 15.2 8.1 16.8 12 16.8C15.9 16.8 18.9 15.2 21 12"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path d="M6.5 15.2L5 17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M10 16.6L9.5 19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M14 16.6L14.5 19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M17.5 15.2L19 17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </>
+    )}
+  </svg>
+);
+
 const LoginModal = () => {
   const { loginModalOpen, closeLoginModal, login, register } =
     useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [isRegister, setIsRegister] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [error, setError] = useState("");
@@ -34,6 +76,30 @@ const LoginModal = () => {
   };
 
   const getNormalizedEmail = () => email.trim().toLowerCase();
+
+  const formatPhone = (value) => {
+    const digits = value.replace(/\D/g, "").slice(0, 11);
+
+    if (!digits.length) {
+      return "";
+    }
+
+    let formatted = digits;
+
+    if (digits.length > 4) {
+      formatted = `${digits.slice(0, 4)} ${digits.slice(4)}`;
+    }
+
+    if (digits.length > 7) {
+      formatted = `${digits.slice(0, 4)} ${digits.slice(4, 7)}-${digits.slice(7)}`;
+    }
+
+    if (digits.length > 9) {
+      formatted = `${digits.slice(0, 4)} ${digits.slice(4, 7)}-${digits.slice(7, 9)}-${digits.slice(9)}`;
+    }
+
+    return formatted;
+  };
 
   const handleSendCode = async () => {
     setError("");
@@ -89,9 +155,21 @@ const LoginModal = () => {
       return;
     }
 
+    const phoneDigits = phone.replace(/\D/g, "");
+
+    if (isRegister && phoneDigits.length !== 11) {
+      setError("Введите корректный номер телефона");
+      return;
+    }
+
+    if (isRegister && password !== confirmPassword) {
+      setError("Пароли не совпадают");
+      return;
+    }
+
     setLoading(true);
     const result = isRegister
-      ? await register(getNormalizedEmail(), password, name)
+      ? await register(getNormalizedEmail(), password, name, phone)
       : await login(getNormalizedEmail(), password);
     setLoading(false);
 
@@ -185,6 +263,10 @@ const LoginModal = () => {
       setResetCodeSent(false);
       setResetCode("");
       setNewPassword("");
+      setConfirmPassword("");
+      setPhone("");
+      setShowPassword(false);
+      setShowConfirmPassword(false);
       setError("");
     }
   }, [loginModalOpen]);
@@ -260,7 +342,7 @@ const LoginModal = () => {
 
           {isRegister && (
             <div className="form-group">
-              <label>Имя</label>
+              <label>Имя <span className="required-mark">*</span></label>
               <input
                 type="text"
                 value={name}
@@ -271,16 +353,41 @@ const LoginModal = () => {
             </div>
           )}
 
+          {isRegister && (
+            <div className="form-group">
+              <label>Телефон <span className="required-mark">*</span></label>
+              <input
+                type="tel"
+                inputMode="tel"
+                value={phone}
+                onChange={(e) => setPhone(formatPhone(e.target.value))}
+                required
+                placeholder="7900 800-70-60"
+              />
+            </div>
+          )}
+
           <div className="form-group">
             <label>Пароль</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              placeholder="Пароль"
-            />
+            <div className="password-input-wrapper">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                placeholder="Пароль"
+              />
+              <button
+                type="button"
+                className="password-toggle-btn"
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"}
+                title={showPassword ? "Скрыть пароль" : "Показать пароль"}
+              >
+                <PasswordEyeIcon isOpen={showPassword} />
+              </button>
+            </div>
             {!isRegister && (
               <button
                 type="button"
@@ -291,6 +398,31 @@ const LoginModal = () => {
               </button>
             )}
           </div>
+
+          {isRegister && (
+            <div className="form-group">
+              <label>Повторите пароль</label>
+              <div className="password-input-wrapper">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  placeholder="Повторите пароль"
+                />
+                <button
+                  type="button"
+                  className="password-toggle-btn"
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  aria-label={showConfirmPassword ? "Скрыть пароль" : "Показать пароль"}
+                  title={showConfirmPassword ? "Скрыть пароль" : "Показать пароль"}
+                >
+                  <PasswordEyeIcon isOpen={showConfirmPassword} />
+                </button>
+              </div>
+            </div>
+          )}
 
           {error && <p className="error">{error}</p>}
 
@@ -316,6 +448,10 @@ const LoginModal = () => {
               setEmailVerified(false);
               setCodeSent(false);
               setVerificationCode("");
+              setConfirmPassword("");
+              setPhone("");
+              setShowPassword(false);
+              setShowConfirmPassword(false);
               setError("");
             }}
           >

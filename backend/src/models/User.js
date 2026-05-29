@@ -15,17 +15,15 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
-      required: false,
+      required: true,
       unique: true,
-      sparse: true,
-      default: undefined,
       set: (value) => {
         if (value === null || value === undefined) {
-          return undefined;
+          return value;
         }
 
         const normalizedValue = String(value).trim();
-        return normalizedValue || undefined;
+        return normalizedValue;
       },
     },
     password: {

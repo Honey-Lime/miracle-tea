@@ -26,6 +26,7 @@ const isAdminUser = (email) => {
 const normalizeEmail = (email = "") => email.trim().toLowerCase();
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const normalizeName = (name = "") => name.trim();
+const normalizePhone = (phone = "") => phone.replace(/\D/g, "");
 
 const getAuthErrorResponse = (error) => {
   if (error?.code === 11000) {
@@ -131,9 +132,10 @@ exports.login = async (req, res) => {
 };
 
 exports.register = async (req, res) => {
-  const { email, password, name } = req.body;
+  const { email, password, name, phone } = req.body;
   const normalizedEmail = normalizeEmail(email);
   const normalizedName = normalizeName(name);
+  const normalizedPhone = normalizePhone(phone);
 
   if (!normalizedEmail) {
     return res.status(400).json({ message: "Email обязателен" });
@@ -145,6 +147,10 @@ exports.register = async (req, res) => {
 
   if (!normalizedName) {
     return res.status(400).json({ message: "Имя обязательно для регистрации" });
+  }
+
+  if (normalizedPhone.length !== 11) {
+    return res.status(400).json({ message: "Введите корректный номер телефона" });
   }
 
   if (!password) {
@@ -170,6 +176,7 @@ exports.register = async (req, res) => {
     const user = new User({
       name: normalizedName,
       email: normalizedEmail,
+      phone: normalizedPhone,
       password: hashedPassword,
       isAdmin: isAdminUser(normalizedEmail),
     });
