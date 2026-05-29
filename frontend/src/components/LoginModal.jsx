@@ -155,13 +155,6 @@ const LoginModal = () => {
       return;
     }
 
-    const phoneDigits = phone.replace(/\D/g, "");
-
-    if (isRegister && phoneDigits.length !== 11) {
-      setError("Введите корректный номер телефона");
-      return;
-    }
-
     if (isRegister && password !== confirmPassword) {
       setError("Пароли не совпадают");
       return;
@@ -355,13 +348,12 @@ const LoginModal = () => {
 
           {isRegister && (
             <div className="form-group">
-              <label>Телефон <span className="required-mark">*</span></label>
+              <label>Телефон</label>
               <input
                 type="tel"
                 inputMode="tel"
                 value={phone}
                 onChange={(e) => setPhone(formatPhone(e.target.value))}
-                required
                 placeholder="7900 800-70-60"
               />
             </div>

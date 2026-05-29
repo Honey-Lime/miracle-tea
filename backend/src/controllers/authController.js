@@ -149,7 +149,7 @@ exports.register = async (req, res) => {
     return res.status(400).json({ message: "Имя обязательно для регистрации" });
   }
 
-  if (normalizedPhone.length !== 11) {
+  if (normalizedPhone && normalizedPhone.length !== 11) {
     return res.status(400).json({ message: "Введите корректный номер телефона" });
   }
 
@@ -176,7 +176,7 @@ exports.register = async (req, res) => {
     const user = new User({
       name: normalizedName,
       email: normalizedEmail,
-      phone: normalizedPhone,
+      phone: normalizedPhone || undefined,
       password: hashedPassword,
       isAdmin: isAdminUser(normalizedEmail),
     });

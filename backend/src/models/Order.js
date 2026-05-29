@@ -7,6 +7,11 @@ const orderSchema = new mongoose.Schema(
       ref: "User",
       default: null,
     },
+    customerType: {
+      type: String,
+      enum: ["user", "guest"],
+      default: "user",
+    },
     date: {
       type: Date,
       default: Date.now,

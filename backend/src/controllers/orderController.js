@@ -6,6 +6,7 @@ const { logError } = require("../utils/logger");
 // Create a new order
 exports.createOrder = async (req, res) => {
   const { list, delivery } = req.body;
+  const customerType = req.userId ? "user" : "guest";
 
   try {
     // Validate products and calculate total
@@ -53,6 +54,7 @@ exports.createOrder = async (req, res) => {
 
     const order = new Order({
       userId: req.userId || null,
+      customerType,
       list: listWithPrices,
       delivery,
       totalPrice,

@@ -16,7 +16,7 @@ const YANDEX_API_KEY = "d748d3d0-760c-44fa-923c-d865d6017c60";
 
 const CheckoutPage = () => {
   const { cartItems, totalPrice, clearCart } = useContext(CartContext);
-  const { user, token, openLoginModal } = useContext(AuthContext);
+  const { user, token } = useContext(AuthContext);
   const { addToast } = useToast();
   const navigate = useNavigate();
   const [deliveryData, setDeliveryData] = useState(null);
@@ -30,12 +30,6 @@ const CheckoutPage = () => {
   // Оформление заказа
   const handlePlaceOrder = async () => {
     try {
-      if (!user || !token) {
-        addToast("Для оформления заказа нужно войти в аккаунт", "warning");
-        openLoginModal();
-        return;
-      }
-
       if (!cartItems.length) {
         addToast("Корзина пуста", "warning");
         return;
@@ -48,7 +42,8 @@ const CheckoutPage = () => {
       }));
 
       const orderData = {
-        userId: user?._id,
+        customerType: user && token ? "user" : "guest",
+        userId: user?.id || user?._id || null,
         list: cartItemsWithDetails,
         delivery: {
           address: {
@@ -64,7 +59,7 @@ const CheckoutPage = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(orderData),
       });
@@ -81,7 +76,7 @@ const CheckoutPage = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
           amount: "1000",
