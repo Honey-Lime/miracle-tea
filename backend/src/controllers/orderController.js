@@ -7,6 +7,7 @@ const { logError } = require("../utils/logger");
 const ID_COUNTER = "orderSequence";
 const LETTERS_COUNT = 26;
 const NUMBERS_COUNT = 100;
+const PAID_TOTAL_STATUSES = ["paid", "assembled", "shipped", "completed"];
 
 const formatLetters = (index) => {
   let length = 2;
@@ -68,6 +69,20 @@ const saveCartState = async (cart) => {
   );
 
   return Order.findById(cart._id);
+};
+
+const recalculateUserTotal = async (userId) => {
+  if (!userId) {
+    return 0;
+  }
+
+  const orders = await Order.find({
+    userId,
+    status: { $in: PAID_TOTAL_STATUSES },
+  }).select("totalPrice");
+  const total = orders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+  await User.updateOne({ _id: userId }, { $set: { total } });
+  return total;
 };
 
 // Create a new order
@@ -263,7 +278,7 @@ exports.removeFromCart = async (req, res) => {
       status: "cart",
     });
     if (!cart) {
-      return res.status(404).json({ message: "Cart not found" });
+      return res.json({ list: [], totalPrice: 0 });
     }
 
     cart.list = cart.list.filter(
@@ -405,6 +420,7 @@ exports.cancelUserOrder = async (req, res) => {
 
     order.status = "cancelled";
     const updatedOrder = await order.save();
+    await recalculateUserTotal(req.userId);
 
     res.json(updatedOrder);
   } catch (error) {

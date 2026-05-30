@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const Order = require("../models/Order");
 const VerificationCode = require("../models/VerificationCode");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -27,6 +28,7 @@ const normalizeEmail = (email = "") => email.trim().toLowerCase();
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const normalizeName = (name = "") => name.trim();
 const normalizePhone = (phone = "") => phone.replace(/\D/g, "");
+const PAID_TOTAL_STATUSES = ["paid", "assembled", "shipped", "completed"];
 const generateName = (email) => {
   const emailPrefix = email.split("@")[0]?.trim();
   return emailPrefix ? `Пользователь ${emailPrefix}` : "Пользователь";
@@ -73,14 +75,31 @@ const getAuthErrorResponse = (error) => {
   };
 };
 
-const buildAuthResponse = (user) => ({
-  id: user._id,
-  name: user.name,
-  email: user.email,
-  phone: user.phone,
-  total: user.total,
-  isAdmin: user.isAdmin,
-});
+const calculatePaidOrdersTotal = async (userId) => {
+  const orders = await Order.find({
+    userId,
+    status: { $in: PAID_TOTAL_STATUSES },
+  }).select("totalPrice");
+
+  return orders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+};
+
+const buildAuthResponse = async (user) => {
+  const total = await calculatePaidOrdersTotal(user._id);
+
+  if (user.total !== total) {
+    await User.updateOne({ _id: user._id }, { $set: { total } });
+  }
+
+  return {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    total,
+    isAdmin: user.isAdmin,
+  };
+};
 
 const createAuthToken = (user) =>
   jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET, {
@@ -127,7 +146,7 @@ exports.login = async (req, res) => {
 
     res.json({
       token,
-      user: buildAuthResponse(user),
+      user: await buildAuthResponse(user),
     });
   } catch (error) {
     const { status, message } = getAuthErrorResponse(error);
@@ -190,7 +209,7 @@ exports.register = async (req, res) => {
 
     res.json({
       token,
-      user: buildAuthResponse(user),
+      user: await buildAuthResponse(user),
     });
   } catch (error) {
     const { status, message } = getAuthErrorResponse(error);
@@ -205,7 +224,7 @@ exports.getProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.json(buildAuthResponse(user));
+    res.json(await buildAuthResponse(user));
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -256,7 +275,7 @@ exports.updateName = async (req, res) => {
     user.name = normalizedName;
     await user.save();
 
-    res.json(buildAuthResponse(user));
+    res.json(await buildAuthResponse(user));
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

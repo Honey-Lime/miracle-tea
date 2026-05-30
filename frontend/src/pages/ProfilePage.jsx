@@ -143,6 +143,11 @@ const ProfilePage = () => {
     return `${price.toLocaleString("ru-RU")} ₽`;
   };
 
+  const paidTotalStatuses = ["paid", "assembled", "shipped", "completed"];
+  const paidOrdersTotal = orders
+    .filter((order) => paidTotalStatuses.includes(order.status))
+    .reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+
   useEffect(() => {
     if (user) {
       setNameValue(user.name || "");
@@ -244,7 +249,7 @@ const ProfilePage = () => {
       <div className="prfp-profile-info">
         <h2>Привет, {user.name}!</h2>
         <p>Email: {user.email}</p>
-        <p>Общая сумма покупок: {user.total || 0} ₽</p>
+        <p>Общая сумма покупок: {formatPrice(paidOrdersTotal)}</p>
         <div className="prfp-profile-actions">
           <button
             className="btn btn-secondary"

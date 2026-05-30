@@ -19,6 +19,7 @@ const User = require("./models/User");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const PAID_TOTAL_STATUSES = ["paid", "assembled", "shipped", "completed"];
 
 // В продакшене SSL обычно терминируется на nginx, а Node работает по HTTP за прокси.
 // Поэтому HTTPS в Node включаем только явно через ENABLE_HTTPS=true.
@@ -220,12 +221,19 @@ async function markOrderAsPaid(order, paymentUpdate = {}) {
     const user = await User.findById(order.userId);
 
     if (user) {
-      user.total += order.totalPrice;
       user.delivery.last = order.delivery?.address || null;
       user.delivery.history.push({
         date: new Date(),
         order: order.id,
       });
+      const paidOrders = await Order.find({
+        userId: order.userId,
+        status: { $in: PAID_TOTAL_STATUSES },
+      }).select("totalPrice");
+      user.total = paidOrders.reduce(
+        (sum, paidOrder) => sum + (paidOrder.totalPrice || 0),
+        order.totalPrice,
+      );
       await user.save();
     }
 
