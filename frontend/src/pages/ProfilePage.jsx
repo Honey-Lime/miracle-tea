@@ -148,6 +148,25 @@ const ProfilePage = () => {
     .filter((order) => paidTotalStatuses.includes(order.status))
     .reduce((sum, order) => sum + (order.totalPrice || 0), 0);
 
+  const getDeliveryDetails = (order) => {
+    const delivery = order?.delivery || {};
+    const details = delivery.details || {};
+    const address = delivery.address || details.address || {};
+
+    return {
+      name: details.name || delivery.name || "",
+      phone: details.phone || delivery.phone || "",
+      address:
+        address.address ||
+        address.fullAddress ||
+        address.value ||
+        (typeof address === "string" ? address : ""),
+      room: details.room || delivery.room || "",
+      comment: details.comment || delivery.comment || "",
+      price: Number(delivery.price || details.price || 0),
+    };
+  };
+
   useEffect(() => {
     if (user) {
       setNameValue(user.name || "");
@@ -493,6 +512,39 @@ const ProfilePage = () => {
                     {getStatusLabel(selectedOrder.status)}
                   </span>
                 </p>
+                {(() => {
+                  const deliveryDetails = getDeliveryDetails(selectedOrder);
+
+                  return (
+                    <>
+                      {deliveryDetails.name && (
+                        <p>
+                          <strong>Имя:</strong> {deliveryDetails.name}
+                        </p>
+                      )}
+                      {deliveryDetails.phone && (
+                        <p>
+                          <strong>Номер телефона:</strong> {deliveryDetails.phone}
+                        </p>
+                      )}
+                      {deliveryDetails.address && (
+                        <p>
+                          <strong>Адрес доставки:</strong> {deliveryDetails.address}
+                        </p>
+                      )}
+                      {deliveryDetails.room && (
+                        <p>
+                          <strong>Квартира:</strong> {deliveryDetails.room}
+                        </p>
+                      )}
+                      {deliveryDetails.comment && (
+                        <p>
+                          <strong>Комментарий:</strong> {deliveryDetails.comment}
+                        </p>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
               <div className="prfp-order-items-block">
                 <h3>Товары</h3>
@@ -527,6 +579,10 @@ const ProfilePage = () => {
                       ),
                     )}
                   </span>
+                </div>
+                <div className="prfp-total-row">
+                  <span>Стоимость доставки:</span>
+                  <span>{formatPrice(getDeliveryDetails(selectedOrder).price)}</span>
                 </div>
                 <div className="prfp-total-row grand-total">
                   <span>Итого:</span>
