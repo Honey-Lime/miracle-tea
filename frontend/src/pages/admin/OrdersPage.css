@@ -133,7 +133,25 @@
   margin-bottom: 0.75rem;
 }
 
+.op-orders-page .op-order-payment {
+  grid-column: 1 / -1;
+  padding-top: 1rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--color-gray-200);
+}
+
+.op-orders-page .op-order-payment > strong {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
 .op-orders-page .op-delivery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1.5rem;
+}
+
+.op-orders-page .op-payment-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem 1.5rem;
@@ -145,12 +163,28 @@
   gap: 0.25rem;
 }
 
+.op-orders-page .op-payment-grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
 .op-orders-page .op-delivery-grid span {
   color: var(--color-gray-500);
   font-size: 0.9rem;
 }
 
+.op-orders-page .op-payment-grid span {
+  color: var(--color-gray-500);
+  font-size: 0.9rem;
+}
+
 .op-orders-page .op-delivery-grid strong {
+  color: var(--color-text-primary);
+  overflow-wrap: anywhere;
+}
+
+.op-orders-page .op-payment-grid strong {
   color: var(--color-text-primary);
   overflow-wrap: anywhere;
 }

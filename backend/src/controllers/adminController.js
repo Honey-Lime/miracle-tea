@@ -10,7 +10,7 @@ const PAID_TOTAL_STATUSES = ["paid", "assembled", "shipped", "completed"];
 
 function readLogTail(filePath, maxBytes = 200000) {
   if (!fs.existsSync(filePath)) {
-    return "";
+    return { content: "", size: 0, hasMore: false };
   }
 
   const stats = fs.statSync(filePath);
@@ -19,7 +19,11 @@ function readLogTail(filePath, maxBytes = 200000) {
   const fd = fs.openSync(filePath, "r");
   fs.readSync(fd, buffer, 0, buffer.length, start);
   fs.closeSync(fd);
-  return buffer.toString("utf8");
+  return {
+    content: buffer.toString("utf8"),
+    size: stats.size,
+    hasMore: start > 0,
+  };
 }
 
 const restoreOrderRemains = async (order) => {
@@ -53,8 +57,9 @@ const recalculateUserTotal = async (userId) => {
 exports.getLogs = async (req, res) => {
   try {
     const type = req.query.type === "errors" ? "errors" : "app";
-    const content = readLogTail(getLogFilePath(type));
-    res.json({ type, content });
+    const maxBytes = Math.min(Number(req.query.maxBytes) || 200000, 5000000);
+    const result = readLogTail(getLogFilePath(type), maxBytes);
+    res.json({ type, ...result, maxBytes });
   } catch (error) {
     logError(error, "getLogs", req);
     res.status(500).json({ message: error.message });

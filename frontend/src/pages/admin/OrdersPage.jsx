@@ -95,7 +95,7 @@ const OrdersPage = () => {
       shipped: "op-status-shipped",
       completed: "op-status-completed",
       cancelled: "op-status-cancelled",
-      refunded: "op-status-cancelled",
+      refunded: "op-status-completed",
     };
     return classes[status] || "";
   };
@@ -273,6 +273,15 @@ const OrdersPage = () => {
                       <div className="op-delivery-comment">
                         <span>Комментарий:</span>
                         <strong>{getDeliveryDetails(order).comment || "Нет комментария"}</strong>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="op-order-payment">
+                    <strong>Оплата:</strong>
+                    <div className="op-payment-grid">
+                      <div>
+                        <span>ID платежа:</span>
+                        <strong>{order.payment?.paymentId || "Не указан"}</strong>
                       </div>
                     </div>
                   </div>

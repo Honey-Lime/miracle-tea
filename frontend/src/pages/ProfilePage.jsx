@@ -49,7 +49,7 @@ const ProfilePage = () => {
       shipped: "prfp-status-shipped",
       completed: "prfp-status-completed",
       cancelled: "prfp-status-cancelled",
-      refunded: "prfp-status-shipped",
+      refunded: "prfp-status-completed",
       cart: "prfp-status-cart",
       payment_pending: "prfp-status-cart",
     };
