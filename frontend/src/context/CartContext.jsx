@@ -43,6 +43,7 @@ export const CartProvider = ({ children }) => {
             count: item.count,
             isSampler: item.isSampler || false,
             maxRemains: item.pid.remains,
+            unit: item.pid.unit || "grams",
           }));
           setCartItems(mergedItems);
         } catch (error) {
@@ -59,16 +60,18 @@ export const CartProvider = ({ children }) => {
   }, [user, token]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const addToCart = async (product, count, isSampler = false) => {
-    const pricePerGram = product.price / 100;
+    const unit = product.unit || "grams";
+    const pricePerUnit = unit === "grams" ? product.price / 100 : product.price;
     // Для пробника фиксируем количество 10 г
     const finalCount = isSampler ? 10 : count;
     const newItem = {
       pid: product._id,
       name: product.name,
-      price: pricePerGram,
+      price: pricePerUnit,
       count: finalCount,
       isSampler,
       maxRemains: product.remains,
+      unit,
     };
 
     // Update local state optimistically
@@ -97,7 +100,7 @@ export const CartProvider = ({ children }) => {
     // Show notification
     const message = isSampler
       ? `Пробник "${product.name}" добавлен в корзину`
-      : `"${product.name}" (${finalCount} г) добавлен в корзину`;
+      : `"${product.name}" (${finalCount} ${unit === "grams" ? "г" : "шт"}) добавлен в корзину`;
     addToast(message, "success");
 
     // Sync with server if user is logged in
@@ -145,9 +148,14 @@ export const CartProvider = ({ children }) => {
         return;
       }
     } else {
-      // Для обычного товара проверяем минимальное количество 50 г
-      if (newCount < 50) {
-        addToast("Минимальное количество для чая — 50 г", "warning");
+      const item = cartItems.find(
+        (item) => item.pid === pid && item.isSampler === isSampler,
+      );
+      const unit = item?.unit || "grams";
+      const minCount = unit === "grams" ? 50 : 1;
+      if (newCount < minCount) {
+        const unitLabel = unit === "grams" ? "г" : "шт";
+        addToast(`Минимальное количество — ${minCount} ${unitLabel}`, "warning");
         return;
       }
     }

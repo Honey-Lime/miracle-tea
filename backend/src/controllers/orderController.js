@@ -1,7 +1,50 @@
 const Order = require("../models/Order");
 const Product = require("../models/Product");
 const User = require("../models/User");
+const Counter = require("../models/Counter");
 const { logError } = require("../utils/logger");
+
+const ID_COUNTER = "orderSequence";
+const LETTERS_COUNT = 26;
+const NUMBERS_COUNT = 100;
+
+const formatLetters = (index) => {
+  let length = 2;
+  let offset = index;
+  let capacity = LETTERS_COUNT ** length;
+
+  while (offset >= capacity) {
+    offset -= capacity;
+    length += 1;
+    capacity = LETTERS_COUNT ** length;
+  }
+
+  let letters = "";
+  for (let position = 0; position < length; position += 1) {
+    const divisor = LETTERS_COUNT ** (length - position - 1);
+    const letterIndex = Math.floor(offset / divisor) % LETTERS_COUNT;
+    letters += String.fromCharCode(65 + letterIndex);
+  }
+
+  return letters;
+};
+
+const formatId = (sequence) => {
+  const letterIndex = Math.floor(sequence / NUMBERS_COUNT);
+  const digits = String(sequence % NUMBERS_COUNT).padStart(2, "0");
+
+  return `${formatLetters(letterIndex)}${digits}`;
+};
+
+const generateId = async () => {
+  const counter = await Counter.findOneAndUpdate(
+    { _id: ID_COUNTER },
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true },
+  );
+
+  return formatId(counter.seq - 1);
+};
 
 // Create a new order
 exports.createOrder = async (req, res) => {
@@ -29,13 +72,14 @@ exports.createOrder = async (req, res) => {
           .status(400)
           .json({ message: `Insufficient stock for ${product.name}` });
       }
-      if (!item.isSampler && item.count < 50) {
+      const unit = product.unit || "grams";
+      const minCount = unit === "grams" ? 50 : 1;
+      if (!item.isSampler && item.count < minCount) {
         return res
           .status(400)
-          .json({ message: "Минимальное количество для чая — 50 г" });
+          .json({ message: `Минимальное количество — ${minCount} ${unit === "grams" ? "г" : "шт"}` });
       }
-      // Price per gram (price in DB is per 100g)
-      const itemPrice = (product.price / 100) * item.count;
+      const itemPrice = (unit === "grams" ? product.price / 100 : product.price) * item.count;
       totalPrice += itemPrice;
       // Update remains
       product.remains -= item.count;
@@ -52,13 +96,14 @@ exports.createOrder = async (req, res) => {
         return {
           pid: item.pid,
           count: item.count,
-          priceAtOrder: product.price / 100,
+          priceAtOrder: (product.unit || "grams") === "grams" ? product.price / 100 : product.price,
           isSampler: item.isSampler || false,
         };
       }),
     );
 
     const order = new Order({
+      _id: await generateId(),
       userId: req.userId || null,
       customerType,
       list: listWithPrices,
@@ -110,11 +155,13 @@ exports.addToCart = async (req, res) => {
     if (product.remains < count) {
       return res.status(400).json({ message: "Insufficient stock" });
     }
-    // Validate minimum quantity for non-sampler (50g)
-    if (!isSampler && count < 50) {
+    const unit = product.unit || "grams";
+    const minCount = unit === "grams" ? 50 : 1;
+    const priceAtOrder = unit === "grams" ? product.price / 100 : product.price;
+    if (!isSampler && count < minCount) {
       return res
         .status(400)
-        .json({ message: "Минимальное количество для чая — 50 г" });
+        .json({ message: `Минимальное количество — ${minCount} ${unit === "grams" ? "г" : "шт"}` });
     }
 
     let cart = await Order.findOne({
@@ -125,6 +172,7 @@ exports.addToCart = async (req, res) => {
     if (!cart) {
       // Create new cart
       cart = new Order({
+        _id: `cart:${req.userId}`,
         userId: req.userId,
         status: "cart",
         list: [],
@@ -148,10 +196,10 @@ exports.addToCart = async (req, res) => {
       // Update quantity for non-sampler
       cart.list[existingIndex].count += count;
       // Validate minimum quantity after update
-      if (cart.list[existingIndex].count < 50) {
+      if (cart.list[existingIndex].count < minCount) {
         return res
           .status(400)
-          .json({ message: "Минимальное количество для чая — 50 г" });
+          .json({ message: `Минимальное количество — ${minCount} ${unit === "grams" ? "г" : "шт"}` });
       }
       // Ensure not exceeding stock (optional)
     } else {
@@ -163,7 +211,7 @@ exports.addToCart = async (req, res) => {
       cart.list.push({
         pid,
         count,
-        priceAtOrder: product.price / 100,
+        priceAtOrder,
         isSampler,
       });
     }
@@ -259,11 +307,12 @@ exports.updateCartItem = async (req, res) => {
         if (product.remains < count) {
           return res.status(400).json({ message: "Insufficient stock" });
         }
-        // Validate minimum quantity for non-sampler (50g)
-        if (count < 50) {
+        const unit = product.unit || "grams";
+        const minCount = unit === "grams" ? 50 : 1;
+        if (count < minCount) {
           return res
             .status(400)
-            .json({ message: "Минимальное количество для чая — 50 г" });
+            .json({ message: `Минимальное количество — ${minCount} ${unit === "grams" ? "г" : "шт"}` });
         }
         item.count = count;
       }
@@ -318,7 +367,7 @@ exports.getUserOrders = async (req, res) => {
 exports.cancelUserOrder = async (req, res) => {
   try {
     const order = await Order.findOne({
-      _id: req.params.id,
+      id: req.params.id,
       userId: req.userId,
     });
 
@@ -377,6 +426,7 @@ exports.updateOrderStatus = async (req, res) => {
       "shipped",
       "completed",
       "cancelled",
+      "refunded",
     ];
 
     if (!status || !validStatuses.includes(status)) {

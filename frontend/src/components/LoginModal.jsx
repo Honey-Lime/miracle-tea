@@ -53,7 +53,6 @@ const LoginModal = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
   const [personalDataAccepted, setPersonalDataAccepted] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
@@ -78,30 +77,6 @@ const LoginModal = () => {
   };
 
   const getNormalizedEmail = () => email.trim().toLowerCase();
-
-  const formatPhone = (value) => {
-    const digits = value.replace(/\D/g, "").slice(0, 11);
-
-    if (!digits.length) {
-      return "";
-    }
-
-    let formatted = digits;
-
-    if (digits.length > 4) {
-      formatted = `${digits.slice(0, 4)} ${digits.slice(4)}`;
-    }
-
-    if (digits.length > 7) {
-      formatted = `${digits.slice(0, 4)} ${digits.slice(4, 7)}-${digits.slice(7)}`;
-    }
-
-    if (digits.length > 9) {
-      formatted = `${digits.slice(0, 4)} ${digits.slice(4, 7)}-${digits.slice(7, 9)}-${digits.slice(9)}`;
-    }
-
-    return formatted;
-  };
 
   const handleSendCode = async () => {
     setError("");
@@ -169,7 +144,7 @@ const LoginModal = () => {
 
     setLoading(true);
     const result = isRegister
-      ? await register(getNormalizedEmail(), password, name, phone, {
+      ? await register(getNormalizedEmail(), password, name, {
           personalData: personalDataAccepted,
           acceptedAt: new Date().toISOString(),
         })
@@ -267,7 +242,6 @@ const LoginModal = () => {
       setResetCode("");
       setNewPassword("");
       setConfirmPassword("");
-      setPhone("");
       setPersonalDataAccepted(false);
       setShowPassword(false);
       setShowConfirmPassword(false);
@@ -346,26 +320,12 @@ const LoginModal = () => {
 
           {isRegister && (
             <div className="form-group">
-              <label>Имя <span className="required-mark">*</span></label>
+              <label>Имя</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                required
-                placeholder="Ваше имя"
-              />
-            </div>
-          )}
-
-          {isRegister && (
-            <div className="form-group">
-              <label>Телефон</label>
-              <input
-                type="tel"
-                inputMode="tel"
-                value={phone}
-                onChange={(e) => setPhone(formatPhone(e.target.value))}
-                placeholder="7900 800-70-60"
+                placeholder="Ваше имя (необязательно)"
               />
             </div>
           )}
@@ -469,7 +429,6 @@ const LoginModal = () => {
               setCodeSent(false);
               setVerificationCode("");
               setConfirmPassword("");
-              setPhone("");
               setPersonalDataAccepted(false);
               setShowPassword(false);
               setShowConfirmPassword(false);

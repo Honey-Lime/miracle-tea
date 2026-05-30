@@ -17,10 +17,9 @@ const ProductPage = () => {
       try {
         const response = await getProduct(id);
         setProduct(response.data);
-        // Корректировка начального значения, если остаток меньше 50г
-        if (response.data.remains < 50) {
-          setSelectedGrams(response.data.remains);
-        }
+        const unit = response.data.unit || "grams";
+        const minCount = unit === "grams" ? 50 : 1;
+        setSelectedGrams(response.data.remains < minCount ? response.data.remains : minCount);
       } catch (err) {
         setError("Не удалось загрузить товар");
         console.error(err);
@@ -33,9 +32,12 @@ const ProductPage = () => {
 
   const handleGramChange = (delta) => {
     if (!product) return;
+    const unit = product.unit || "grams";
+    const step = unit === "grams" ? 50 : 1;
+    const minCount = unit === "grams" ? 50 : 1;
     const newGrams = selectedGrams + delta;
-    if (newGrams < 50) {
-      setSelectedGrams(50);
+    if (newGrams < minCount) {
+      setSelectedGrams(minCount);
     } else if (newGrams > product.remains) {
       setSelectedGrams(product.remains);
     } else {
@@ -49,13 +51,14 @@ const ProductPage = () => {
     // Проверка на пробник: ограничение 1 пробник каждого вида чая
     addToCart(product, grams, isSampler);
     if (!isSampler) {
-      setSelectedGrams(50); // сброс после добавления
+      setSelectedGrams((product.unit || "grams") === "grams" ? 50 : 1); // сброс после добавления
     }
   };
 
   const handleSetGrams = (value) => {
     if (!product) return;
-    if (value < 50) value = 50;
+    const minCount = (product.unit || "grams") === "grams" ? 50 : 1;
+    if (value < minCount) value = minCount;
     if (value > product.remains) value = product.remains;
     setSelectedGrams(value);
   };
@@ -68,8 +71,13 @@ const ProductPage = () => {
     return <div className="pp-product-error">{error || "Товар не найден"}</div>;
   }
 
-  const pricePerGram = product.price / 100;
-  const totalPrice = (pricePerGram * selectedGrams).toFixed(2);
+  const unit = product.unit || "grams";
+  const isGrams = unit === "grams";
+  const step = isGrams ? 50 : 1;
+  const minCount = isGrams ? 50 : 1;
+  const unitLabel = isGrams ? "г" : "шт";
+  const pricePerUnit = isGrams ? product.price / 100 : product.price;
+  const totalPrice = (pricePerUnit * selectedGrams).toFixed(2);
   const media = product.images || [];
   const isSamplerAvailable = product.remains >= 10;
   const hasSamplerInCart = cartItems.some(
@@ -135,9 +143,11 @@ const ProductPage = () => {
             </div>
           )}
           <div className="pp-product-price">
-            <span className="pp-price-value">{product.price} ₽/100г</span>
+            <span className="pp-price-value">
+              {product.price} ₽/{isGrams ? "100г" : "шт"}
+            </span>
             {product.remains < 250 && (
-              <span className="pp-remains">Остаток: {product.remains} г</span>
+              <span className="pp-remains">Остаток: {product.remains} {unitLabel}</span>
             )}
           </div>
 
@@ -147,42 +157,42 @@ const ProductPage = () => {
           </div>
 
           <div className="pp-gram-selection">
-            <h3>Выберите количество грамм</h3>
+            <h3>Выберите количество</h3>
             <div className="pp-gram-controls">
               <button
                 className="pp-gram-btn minus50"
-                onClick={() => handleGramChange(-50)}
-                disabled={selectedGrams - 50 < 50}
+                onClick={() => handleGramChange(-step)}
+                disabled={selectedGrams - step < minCount}
               >
-                -50 г
+                -{step} {unitLabel}
               </button>
               <div className="pp-gram-display">
                 <input
                   type="number"
-                  min="50"
+                  min={minCount}
                   max={product.remains}
-                  step="50"
+                  step={step}
                   value={selectedGrams}
                   onChange={(e) => handleSetGrams(Number(e.target.value))}
                 />
-                <span> г</span>
+                <span> {unitLabel}</span>
               </div>
               <button
                 className="pp-gram-btn plus50"
-                onClick={() => handleGramChange(50)}
-                disabled={selectedGrams + 50 > product.remains}
+                onClick={() => handleGramChange(step)}
+                disabled={selectedGrams + step > product.remains}
               >
-                +50 г
+                +{step} {unitLabel}
               </button>
             </div>
-            <div className="pp-gram-hint">Минимальный заказ — 50 г.</div>
+            <div className="pp-gram-hint">Минимальный заказ — {minCount} {unitLabel}.</div>
           </div>
 
           <div className="pp-purchase-section">
             <div className="pp-total-price">
               <span>Итого:</span>
               <strong>{totalPrice} ₽</strong>
-              <span className="pp-total-grams">({selectedGrams} г)</span>
+              <span className="pp-total-grams">({selectedGrams} {unitLabel})</span>
             </div>
             <div className="pp-action-buttons">
               <button

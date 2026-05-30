@@ -8,9 +8,9 @@ const EditProductModal = ({ product, onClose, onProductUpdated }) => {
   const { addToast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
-    content: "",
     description: "",
     price: "",
+    unit: "grams",
     cost: "",
     remains: "",
     tags: [],
@@ -26,9 +26,9 @@ const EditProductModal = ({ product, onClose, onProductUpdated }) => {
     // Инициализация формы данными продукта
     setFormData({
       name: product.name || "",
-      content: Array.isArray(product.content) ? product.content.join(", ") : "",
       description: product.description || "",
       price: product.price?.toString() || "",
+      unit: product.unit || "grams",
       cost: product.cost?.toString() || "",
       remains: product.remains?.toString() || "",
       tags: product.tags || [],
@@ -54,13 +54,7 @@ const EditProductModal = ({ product, onClose, onProductUpdated }) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        name === "content"
-          ? value
-              .split(",")
-              .map((s) => s.trim())
-              .filter(Boolean)
-          : value,
+      [name]: value,
     }));
   };
 
@@ -183,7 +177,6 @@ const EditProductModal = ({ product, onClose, onProductUpdated }) => {
         price: Number(formData.price),
         cost: formData.cost ? Number(formData.cost) : undefined,
         remains: Number(formData.remains),
-        content: Array.isArray(formData.content) ? formData.content : [],
       };
 
       const response = await axios.put(
@@ -229,18 +222,6 @@ const EditProductModal = ({ product, onClose, onProductUpdated }) => {
             </div>
 
             <div className="epm-form-group">
-              <label htmlFor="content">Содержимое (через запятую)</label>
-              <input
-                type="text"
-                id="content"
-                name="content"
-                value={formData.content}
-                onChange={handleChange}
-                placeholder="Например: улун, сильноферментированный"
-              />
-            </div>
-
-            <div className="epm-form-group">
               <label>Теги</label>
               <div className="epm-tags-container">
                 {allTags.map((tag) => (
@@ -273,7 +254,9 @@ const EditProductModal = ({ product, onClose, onProductUpdated }) => {
 
             <div className="epm-form-row">
               <div className="epm-form-group">
-                <label htmlFor="price">Цена (₽)</label>
+                <label htmlFor="price">
+                  Цена ({formData.unit === "grams" ? "₽/100 г" : "₽/шт"})
+                </label>
                 <input
                   type="number"
                   id="price"
@@ -300,7 +283,23 @@ const EditProductModal = ({ product, onClose, onProductUpdated }) => {
               </div>
 
               <div className="epm-form-group">
-                <label htmlFor="remains">Остаток на складе (г)</label>
+                <label htmlFor="unit">Режим счета</label>
+                <select
+                  id="unit"
+                  name="unit"
+                  value={formData.unit}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="grams">Граммы</option>
+                  <option value="pieces">Штуки</option>
+                </select>
+              </div>
+
+              <div className="epm-form-group">
+                <label htmlFor="remains">
+                  Остаток на складе ({formData.unit === "grams" ? "г" : "шт"})
+                </label>
                 <input
                   type="number"
                   id="remains"

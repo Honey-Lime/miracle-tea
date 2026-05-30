@@ -221,7 +221,7 @@ async function markOrderAsPaid(order, paymentUpdate = {}) {
       user.delivery.last = order.delivery?.address || null;
       user.delivery.history.push({
         date: new Date(),
-        order: order._id,
+        order: order.id,
       });
       await user.save();
     }
@@ -245,17 +245,17 @@ app.post('/api/create-payment', async(req, res) => {
   try {
     const {
       amount,
-      orderId,
+      id,
       deliveryData
     } = req.body;
 
-    if (!amount || !orderId || !deliveryData) {
+    if (!amount || !id || !deliveryData) {
       return res.status(400).json({
         error: "Недостаточно данных для создания платежа",
       });
     }
 
-    order = await Order.findById(orderId);
+    order = await Order.findById(id);
 
     if (!order) {
       return res.status(404).json({
@@ -263,11 +263,12 @@ app.post('/api/create-payment', async(req, res) => {
       });
     }
 
+    const bankOrderId = order.id;
     const paymentData = {
       TerminalKey: TERMINAL_KEY,
       Amount: Number(amount),
-      OrderId: String(orderId),
-      Description: `Оплата заказа ${orderId}`,
+      OrderId: bankOrderId,
+      Description: `Оплата заказа ${bankOrderId}`,
       // SuccessURL: 'https://чудочай.рф/thank-you',
       // FailURL: 'https://чудочай.рф/checkout',
       NotificationURL: 'https://чудочай.рф/api/create-delivery-order'
@@ -316,7 +317,7 @@ app.post('/api/create-payment', async(req, res) => {
     if (!response.ok || result.Success === false) {
       console.error("Ошибка создания платежа при ответе банка:", result);
       await restoreOrderProducts(order);
-      await Order.deleteOne({ _id: order._id });
+      await order.deleteOne();
 
       return res.status(400).json({
         error: "Ошибка создания платежа при ответе банка",
@@ -352,7 +353,7 @@ app.post('/api/create-payment', async(req, res) => {
 
     if (order?.status === "payment_pending") {
       await restoreOrderProducts(order);
-      await Order.deleteOne({ _id: order._id });
+      await order.deleteOne();
     }
 
     res.status(500).json({ error: 'Не удалось инициировать платеж' });
@@ -388,7 +389,7 @@ app.post('/api/create-delivery-order', async(req, res) => {
     } else if (["REJECTED", "DEADLINE_EXPIRED", "CANCELED"].includes(notification.Status)) {
       if (order.status === "payment_pending") {
         await restoreOrderProducts(order);
-        await Order.deleteOne({ _id: order._id });
+        await order.deleteOne();
         return res.status(200).send('OK');
       }
     }
@@ -411,13 +412,13 @@ app.post('/api/create-delivery-order', async(req, res) => {
 
 app.post('/api/check-payment', async(req, res) => {
   try {
-    const { orderId, paymentId } = req.body;
+    const { id, paymentId } = req.body;
 
-    if (!orderId || !paymentId) {
-      return res.status(400).json({ error: "orderId и paymentId обязательны" });
+    if (!id || !paymentId) {
+      return res.status(400).json({ error: "id и paymentId обязательны" });
     }
 
-    const order = await Order.findById(orderId);
+    const order = await Order.findById(id);
 
     if (!order) {
       return res.status(404).json({ error: "Заказ не найден" });

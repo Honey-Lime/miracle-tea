@@ -10,7 +10,7 @@ exports.getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find({ status: { $nin: ["cart", "payment_pending"] } })
       .populate("userId", "name email phone")
-      .populate("list.pid", "name price")
+      .populate("list.pid", "name price unit")
       .sort({ date: -1 });
     res.json(orders);
   } catch (error) {
@@ -29,6 +29,7 @@ exports.updateOrderStatus = async (req, res) => {
       "shipped",
       "completed",
       "cancelled",
+      "refunded",
     ];
 
     if (!status || !validStatuses.includes(status)) {
@@ -52,7 +53,7 @@ exports.updateOrderStatus = async (req, res) => {
 // Add new product
 exports.addProduct = async (req, res) => {
   try {
-    const { name, content, description, price, cost, remains, tags, images } =
+    const { name, description, price, unit, cost, remains, tags, images } =
       req.body;
 
     // Преобразуем images в правильный формат если это массив строк
@@ -71,9 +72,9 @@ exports.addProduct = async (req, res) => {
 
     const product = new Product({
       name,
-      content,
       description,
       price,
+      unit: unit || "grams",
       cost,
       remains,
       tags: tags || [],
@@ -234,7 +235,7 @@ exports.deleteTag = async (req, res) => {
 // Update product
 exports.updateProduct = async (req, res) => {
   try {
-    const { name, content, description, price, cost, remains, tags, images } =
+    const { name, description, price, unit, cost, remains, tags, images } =
       req.body;
     const product = await Product.findById(req.params.id);
     if (!product) {
@@ -242,9 +243,9 @@ exports.updateProduct = async (req, res) => {
     }
 
     product.name = name || product.name;
-    product.content = content || product.content;
     product.description = description || product.description;
     product.price = price !== undefined ? price : product.price;
+    product.unit = unit || product.unit;
     product.cost = cost !== undefined ? cost : product.cost;
     product.remains = remains !== undefined ? remains : product.remains;
     product.tags = tags || product.tags;
@@ -375,7 +376,7 @@ exports.getStatistics = async (req, res) => {
             _id: productId,
             name: productName,
             totalGrams: 0,
-            orderIds: new Set(),
+            orders: new Set(),
             totalGramsExclSamplers: 0,
             samplerGrams: 0,
           };
@@ -387,7 +388,7 @@ exports.getStatistics = async (req, res) => {
         if (item.isSampler) {
           productStats[productId].samplerGrams += count;
         } else {
-          productStats[productId].orderIds.add(order._id.toString());
+          productStats[productId].orders.add(order.id);
           productStats[productId].totalGramsExclSamplers += count;
         }
       }
@@ -398,12 +399,12 @@ exports.getStatistics = async (req, res) => {
       _id: stat._id,
       name: stat.name,
       totalGrams: stat.totalGrams,
-      orderCount: stat.orderIds.size,
+      orderCount: stat.orders.size,
       totalGramsExclSamplers: stat.totalGramsExclSamplers,
       samplerCount: stat.samplerGrams,
       avgOrderSize:
-        stat.orderIds.size > 0
-          ? stat.totalGramsExclSamplers / stat.orderIds.size
+        stat.orders.size > 0
+          ? stat.totalGramsExclSamplers / stat.orders.size
           : 0,
     }));
 

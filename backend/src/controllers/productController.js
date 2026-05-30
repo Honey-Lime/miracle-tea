@@ -25,7 +25,7 @@ exports.getProductById = async (req, res) => {
 
 // Create a new product (admin only)
 exports.createProduct = async (req, res) => {
-  const { name, content, description, price, cost, remains, tags, images } =
+  const { name, description, price, unit, cost, remains, tags, images } =
     req.body;
   try {
     // Преобразуем images в правильный формат если это массив строк
@@ -44,9 +44,9 @@ exports.createProduct = async (req, res) => {
 
     const product = new Product({
       name,
-      content,
       description,
       price,
+      unit: unit || "grams",
       cost,
       remains,
       tags: tags || [],

@@ -16,11 +16,12 @@ const CatalogPage = () => {
       try {
         const response = await getProducts();
         setProducts(response.data);
-        // Инициализируем граммовку для каждого товара (50г по умолчанию)
+        // Инициализируем количество для каждого товара
         const initialGrams = {};
         response.data.forEach((product) => {
+          const minCount = (product.unit || "grams") === "grams" ? 50 : 1;
           initialGrams[product._id] =
-            product.remains < 50 ? product.remains : 50;
+            product.remains < minCount ? product.remains : minCount;
         });
         setGramCounts(initialGrams);
       } catch (error) {
@@ -40,23 +41,24 @@ const CatalogPage = () => {
     ? products.filter((product) => product.tags?.includes(selectedTag))
     : products;
 
-  const handleGramChange = (productId, delta, maxRemains) => {
+  const handleGramChange = (product, delta) => {
     setGramCounts((prev) => {
-      const currentGrams = prev[productId] || 50;
+      const minCount = (product.unit || "grams") === "grams" ? 50 : 1;
+      const currentGrams = prev[product._id] || minCount;
       const newGrams = currentGrams + delta;
-      if (newGrams < 50) {
-        return { ...prev, [productId]: 50 };
-      } else if (newGrams > maxRemains) {
-        return { ...prev, [productId]: maxRemains };
+      if (newGrams < minCount) {
+        return { ...prev, [product._id]: minCount };
+      } else if (newGrams > product.remains) {
+        return { ...prev, [product._id]: product.remains };
       }
-      return { ...prev, [productId]: newGrams };
+      return { ...prev, [product._id]: newGrams };
     });
   };
 
   const handleAddToCart = (product, grams) => {
     addToCart(product, grams, false);
-    // Сбрасываем граммовку до 50г после добавления
-    setGramCounts((prev) => ({ ...prev, [product._id]: 50 }));
+    const minCount = (product.unit || "grams") === "grams" ? 50 : 1;
+    setGramCounts((prev) => ({ ...prev, [product._id]: minCount }));
   };
 
   const handleCardClick = (e, productId) => {
@@ -119,7 +121,13 @@ const CatalogPage = () => {
         {filteredProducts.length === 0 ? (
           <p className="cp-no-products">Товары с выбранным тегом не найдены</p>
         ) : (
-          filteredProducts.map((product) => (
+          filteredProducts.map((product) => {
+            const isGrams = (product.unit || "grams") === "grams";
+            const step = isGrams ? 50 : 1;
+            const minCount = isGrams ? 50 : 1;
+            const unitLabel = isGrams ? "г" : "шт";
+            const currentCount = gramCounts[product._id] || minCount;
+            return (
             <div
               key={product._id}
               className="cp-product-card"
@@ -150,7 +158,7 @@ const CatalogPage = () => {
                   <span className="cp-price">{product.price}₽</span>
                   {product.remains < 250 && (
                     <span className="cp-remains">
-                      Остаток {product.remains}г
+                      Остаток {product.remains}{unitLabel}
                     </span>
                   )}
                 </div>
@@ -159,35 +167,31 @@ const CatalogPage = () => {
                     <button
                       className="gram-btn gram-btn_minus"
                       onClick={() =>
-                        handleGramChange(product._id, -50, product.remains)
+                        handleGramChange(product, -step)
                       }
-                      disabled={(gramCounts[product._id] || 50) - 50 < 50}
+                      disabled={currentCount - step < minCount}
                     >
-                      -50
+                      -{step}
                     </button>
                     <span className="gram-count">
-                      {gramCounts[product._id] || 50}г
+                      {currentCount}{unitLabel}
                     </span>
                     <button
                       className="gram-btn gram-btn_plus"
                       onClick={() =>
-                        handleGramChange(product._id, 50, product.remains)
+                        handleGramChange(product, step)
                       }
-                      disabled={
-                        (gramCounts[product._id] || 50) + 50 > product.remains
-                      }
+                      disabled={currentCount + step > product.remains}
                     >
-                      +50
+                      +{step}
                     </button>
                   </div>
                   <button
                     className="btn btn-primary cp-add-to-cart-btn"
                     onClick={() =>
-                      handleAddToCart(product, gramCounts[product._id] || 50)
+                      handleAddToCart(product, currentCount)
                     }
-                    disabled={
-                      (gramCounts[product._id] || 50) > product.remains
-                    }
+                    disabled={currentCount > product.remains}
                     title="Добавить в корзину"
                   >
                     🛒
@@ -195,7 +199,7 @@ const CatalogPage = () => {
                 </div>
               </div>
             </div>
-          ))
+          );})
         )}
       </div>
     </div>

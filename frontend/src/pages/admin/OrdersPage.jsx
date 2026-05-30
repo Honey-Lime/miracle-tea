@@ -7,6 +7,7 @@ const OrdersPage = () => {
   const { token } = useAuth();
   const { addToast } = useToast();
   const [orders, setOrders] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -30,10 +31,10 @@ const OrdersPage = () => {
     }
   };
 
-  const handleUpdateStatus = async (orderId, newStatus) => {
+  const handleUpdateStatus = async (id, newStatus) => {
     try {
       await axios.put(
-        `/api/admin/orders/${orderId}/status`,
+        `/api/admin/orders/${id}/status`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } },
       );
@@ -41,7 +42,7 @@ const OrdersPage = () => {
       // Обновляем статус локально, чтобы не вызывать прыжок страницы
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
-          order._id === orderId ? { ...order, status: newStatus } : order,
+          order.id === id ? { ...order, status: newStatus } : order,
         ),
       );
     } catch (err) {
@@ -58,6 +59,7 @@ const OrdersPage = () => {
       shipped: "Отправлен",
       completed: "Завершен",
       cancelled: "Отменен",
+      refunded: "Возврат совершен",
     };
     return labels[status] || status;
   };
@@ -70,6 +72,7 @@ const OrdersPage = () => {
       shipped: "op-status-shipped",
       completed: "op-status-completed",
       cancelled: "op-status-cancelled",
+      refunded: "op-status-cancelled",
     };
     return classes[status] || "";
   };
@@ -107,6 +110,22 @@ const OrdersPage = () => {
     return `${details.time} ${details.unitTime || ""}`.trim();
   };
 
+  const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+  const filteredOrders = normalizedSearchQuery
+    ? orders.filter((order) => {
+        const id = (order.id || "").toLowerCase();
+        const deliveryPhone = (getDeliveryDetails(order).phone || "").toLowerCase();
+        const deliveryPhoneDigits = deliveryPhone.replace(/\D/g, "");
+        const queryDigits = normalizedSearchQuery.replace(/\D/g, "");
+
+        return (
+          id.includes(normalizedSearchQuery) ||
+          deliveryPhone.includes(normalizedSearchQuery) ||
+          (queryDigits && deliveryPhoneDigits.includes(queryDigits))
+        );
+      })
+    : orders;
+
   if (loading) {
     return <div className="op-loading">Загрузка заказов...</div>;
   }
@@ -118,14 +137,27 @@ const OrdersPage = () => {
   return (
     <div className="op-orders-page">
       <h1>Заказы</h1>
+      <div className="op-orders-search">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Поиск по ID заказа или телефону доставки"
+        />
+      </div>
       {orders.length === 0 ? (
         <p className="op-no-orders">Нет оформленных заказов</p>
+      ) : filteredOrders.length === 0 ? (
+        <p className="op-no-orders">Заказы не найдены</p>
       ) : (
         <div className="op-orders-list">
-          {orders.map((order) => (
-            <div key={order._id} className="op-order-row">
+          {filteredOrders.map((order) => (
+            <div key={order.id} className="op-order-row">
               <div className="op-order-info">
                 <div className="op-order-header">
+                  <span className="op-order-number">
+                    Заказ №{order.id}
+                  </span>
                   <span className="op-order-date">
                     {new Date(order.date).toLocaleDateString("ru-RU", {
                       year: "numeric",
@@ -151,13 +183,19 @@ const OrdersPage = () => {
                   <div className="op-order-items">
                     <strong>Товары:</strong>
                     <ul>
-                      {order.list.map((item, index) => (
-                        <li key={index}>
-                          {item.pid?.name || "Товар удален"} - {item.count}г ×{" "}
-                          {formatPrice(item.priceAtOrder * 100)}/100г ={" "}
-                          {formatPrice(item.count * item.priceAtOrder)}
-                        </li>
-                      ))}
+                      {order.list.map((item, index) => {
+                        const isGrams = (item.pid?.unit || "grams") === "grams";
+                        const unitLabel = isGrams ? "г" : "шт";
+                        const priceLabel = isGrams
+                          ? `${formatPrice(item.priceAtOrder * 100)}/100г`
+                          : `${formatPrice(item.priceAtOrder)}/шт`;
+                        return (
+                          <li key={index}>
+                            {item.pid?.name || "Товар удален"} - {item.count}{unitLabel} ×{" "}
+                            {priceLabel} = {formatPrice(item.count * item.priceAtOrder)}
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                   <div className="op-order-summary">
@@ -219,7 +257,7 @@ const OrdersPage = () => {
                     {order.status === "created" && (
                       <button
                         className="op-btn-paid"
-                        onClick={() => handleUpdateStatus(order._id, "paid")}
+                        onClick={() => handleUpdateStatus(order.id, "paid")}
                       >
                         Оплачен
                       </button>
@@ -227,7 +265,7 @@ const OrdersPage = () => {
                     {order.status === "paid" && (
                       <button
                         className="op-btn-shipping"
-                        onClick={() => handleUpdateStatus(order._id, "assembled")}
+                        onClick={() => handleUpdateStatus(order.id, "assembled")}
                       >
                         Собран
                       </button>
@@ -235,7 +273,7 @@ const OrdersPage = () => {
                     {order.status === "assembled" && (
                       <button
                         className="op-btn-shipping"
-                        onClick={() => handleUpdateStatus(order._id, "shipped")}
+                        onClick={() => handleUpdateStatus(order.id, "shipped")}
                       >
                         Отправлен
                       </button>
@@ -243,9 +281,17 @@ const OrdersPage = () => {
                     {order.status === "shipped" && (
                       <button
                         className="op-btn-shipping"
-                        onClick={() => handleUpdateStatus(order._id, "completed")}
+                        onClick={() => handleUpdateStatus(order.id, "completed")}
                       >
                         Завершен
+                      </button>
+                    )}
+                    {order.status === "cancelled" && (
+                      <button
+                        className="op-btn-paid"
+                        onClick={() => handleUpdateStatus(order.id, "refunded")}
+                      >
+                        Возврат совершен
                       </button>
                     )}
                   </div>

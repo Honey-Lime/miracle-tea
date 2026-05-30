@@ -5,8 +5,10 @@ import { Link } from "react-router-dom";
 const CartPage = () => {
   const { cartItems, totalPrice, updateQuantity, removeFromCart } =
     useContext(CartContext);
-  const totalGrams = cartItems.reduce((sum, item) => sum + item.count, 0);
-  const canCheckout = totalGrams >= 50;
+  const totalGrams = cartItems
+    .filter((item) => (item.unit || "grams") === "grams")
+    .reduce((sum, item) => sum + item.count, 0);
+  const canCheckout = cartItems.length > 0;
 
   if (cartItems.length === 0) {
     return (
@@ -24,30 +26,37 @@ const CartPage = () => {
     <div className="crt-cart-page">
       <h1>Корзина</h1>
       <div className="crt-items">
-        {cartItems.map((item) => (
+        {cartItems.map((item) => {
+          const isGrams = (item.unit || "grams") === "grams";
+          const step = isGrams ? 50 : 1;
+          const minCount = isGrams ? 50 : 1;
+          const unitLabel = isGrams ? "г" : "шт";
+          return (
           <div key={`${item.pid}-${item.isSampler}`} className="crt-item">
             <div className="crt-item-info">
               <h3>
                 {item.name} {item.isSampler && "(Пробник 10г)"}
               </h3>
-              <p>Цена: {(item.price * 10).toFixed(2)} ₽/10г</p>
+              <p>
+                Цена: {isGrams ? `${(item.price * 10).toFixed(2)} ₽/10г` : `${item.price.toFixed(2)} ₽/шт`}
+              </p>
             </div>
             <div className="crt-item-controls">
               <div className="crt-quantity">
                 <button
                   onClick={() =>
-                    updateQuantity(item.pid, item.isSampler, item.count - 50)
+                    updateQuantity(item.pid, item.isSampler, item.count - step)
                   }
-                  disabled={item.isSampler || item.count <= 50}
+                  disabled={item.isSampler || item.count <= minCount}
                 >
                   -
                 </button>
                 <span>
-                  {item.count} г{item.isSampler && " (пробник)"}
+                  {item.count} {unitLabel}{item.isSampler && " (пробник)"}
                 </span>
                 <button
                   onClick={() =>
-                    updateQuantity(item.pid, item.isSampler, item.count + 50)
+                    updateQuantity(item.pid, item.isSampler, item.count + step)
                   }
                   disabled={item.isSampler || item.count >= item.maxRemains}
                 >
@@ -65,7 +74,7 @@ const CartPage = () => {
               </button>
             </div>
           </div>
-        ))}
+        );})}
       </div>
       <div className="crt-summary">
         <div className="crt-summary-inner">
@@ -82,11 +91,7 @@ const CartPage = () => {
             <span>{totalPrice} ₽</span>
           </div>
           <div className="crt-checkout-note">
-            {!canCheckout && (
-              <p className="crt-warning">
-                Минимальный заказ 50 г. Добавьте ещё товаров.
-              </p>
-            )}
+            {!canCheckout && <p className="crt-warning">Добавьте товары.</p>}
             <Link
               to="/checkout"
               className={`btn btn-primary ${!canCheckout ? "disabled" : ""}`}

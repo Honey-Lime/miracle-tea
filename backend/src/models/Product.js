@@ -20,6 +20,12 @@ const productSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    unit: {
+      type: String,
+      enum: ["grams", "pieces"],
+      default: "grams",
+      required: true,
+    },
     cost: {
       type: Number,
       min: 0,

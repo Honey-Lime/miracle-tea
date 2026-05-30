@@ -46,13 +46,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (email, password, name, phone, consents) => {
+  const register = async (email, password, name, consents) => {
     try {
       const response = await axios.post("/api/auth/register", {
         email,
         password,
         name,
-        phone,
         consents,
       });
       applyAuthResponse(response);
@@ -69,6 +68,10 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
     setToken(null);
     setUser(null);
+  };
+
+  const updateUser = (updatedUser) => {
+    setUser(updatedUser);
   };
 
   const openLoginModal = () => setLoginModalOpen(true);
@@ -92,6 +95,7 @@ export const AuthProvider = ({ children }) => {
     isAdmin,
     login,
     register,
+    updateUser,
     logout,
     loginModalOpen,
     openLoginModal,

@@ -44,8 +44,7 @@ const userSchema = new mongoose.Schema(
             default: Date.now,
           },
           order: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Order",
+            type: String,
           },
         },
       ],

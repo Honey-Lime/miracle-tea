@@ -1,15 +1,22 @@
 import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 import { cancelOrder, getMyOrders } from "../services/orderService";
-import { changePassword } from "../services/authService";
+import { changePassword, updateName } from "../services/authService";
 
 const ProfilePage = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, updateUser } = useContext(AuthContext);
+  const { addToCart } = useCart();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [nameModalOpen, setNameModalOpen] = useState(false);
   const [orderModalOpen, setOrderModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [nameValue, setNameValue] = useState(user?.name || "");
+  const [nameError, setNameError] = useState("");
+  const [nameSuccess, setNameSuccess] = useState("");
+  const [nameLoading, setNameLoading] = useState(false);
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -27,6 +34,7 @@ const ProfilePage = () => {
       shipped: "Отправлен",
       completed: "Завершен",
       cancelled: "Отменен",
+      refunded: "Возврат совершен",
       cart: "Корзина",
       payment_pending: "Ожидает оплаты",
     };
@@ -41,6 +49,7 @@ const ProfilePage = () => {
       shipped: "prfp-status-shipped",
       completed: "prfp-status-completed",
       cancelled: "prfp-status-cancelled",
+      refunded: "prfp-status-cancelled",
       cart: "prfp-status-cart",
       payment_pending: "prfp-status-cart",
     };
@@ -54,24 +63,79 @@ const ProfilePage = () => {
 
   const canCancelOrder = (order) => order.status === "paid";
 
-  const handleCancelOrder = async (orderId) => {
+  const handleCancelOrder = async (id) => {
     if (!window.confirm("Отменить заказ?")) {
       return;
     }
 
     try {
-      const response = await cancelOrder(orderId);
+      const response = await cancelOrder(id);
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
-          order._id === orderId ? { ...order, status: response.data.status } : order,
+          order.id === id ? { ...order, status: response.data.status } : order,
         ),
       );
 
-      if (selectedOrder?._id === orderId) {
+      if (selectedOrder?.id === id) {
         setSelectedOrder((prev) => ({ ...prev, status: response.data.status }));
       }
     } catch (error) {
       alert(error.response?.data?.message || "Не удалось отменить заказ");
+    }
+  };
+
+  const getRepeatOrderCount = (item) => {
+    const product = item.pid;
+    if (!product) {
+      return 0;
+    }
+
+    const remains = Number(product.remains) || 0;
+    if (remains <= 0) {
+      return 0;
+    }
+
+    if (item.isSampler) {
+      return remains >= 10 ? 10 : 0;
+    }
+
+    const unit = product.unit || "grams";
+    const minCount = unit === "grams" ? 50 : 1;
+    const requestedCount = Number(item.count) || 0;
+    const availableCount = Math.min(requestedCount, remains);
+
+    return availableCount >= minCount ? availableCount : 0;
+  };
+
+  const handleRepeatOrder = async (order) => {
+    const itemsToAdd = (order.list || [])
+      .map((item) => ({
+        item,
+        count: getRepeatOrderCount(item),
+      }))
+      .filter(({ count }) => count > 0);
+
+    if (itemsToAdd.length === 0) {
+      alert("В заказе нет товаров, доступных для повторного добавления в корзину");
+      return;
+    }
+
+    for (const { item, count } of itemsToAdd) {
+      const product = item.pid;
+      await addToCart(
+        {
+          ...product,
+          _id: product._id || product.id,
+        },
+        count,
+        item.isSampler || false,
+      );
+    }
+
+    if (itemsToAdd.length < (order.list || []).length) {
+      alert(
+        "Корзина обновлена. Некоторые товары не добавлены, потому что их нет в наличии или доступного остатка меньше минимального количества.",
+      );
     }
   };
 
@@ -81,6 +145,7 @@ const ProfilePage = () => {
 
   useEffect(() => {
     if (user) {
+      setNameValue(user.name || "");
       getMyOrders()
         .then((res) => {
           // Исключаем корзину и временные заказы, ожидающие подтверждения оплаты.
@@ -137,6 +202,33 @@ const ProfilePage = () => {
     }
   };
 
+  const handleNameChange = async (e) => {
+    e.preventDefault();
+    setNameError("");
+    setNameSuccess("");
+
+    const normalizedName = nameValue.trim();
+    if (!normalizedName) {
+      setNameError("Имя не может быть пустым");
+      return;
+    }
+
+    setNameLoading(true);
+    try {
+      const response = await updateName(normalizedName);
+      updateUser(response.data);
+      setNameSuccess("Имя успешно изменено");
+      setTimeout(() => {
+        setNameModalOpen(false);
+        setNameSuccess("");
+      }, 1500);
+    } catch (error) {
+      setNameError(error.response?.data?.message || "Ошибка при смене имени");
+    } finally {
+      setNameLoading(false);
+    }
+  };
+
   if (!user) {
     return (
       <div className="prfp-profile-page container">
@@ -156,6 +248,15 @@ const ProfilePage = () => {
         <div className="prfp-profile-actions">
           <button
             className="btn btn-secondary"
+            onClick={() => {
+              setNameValue(user.name || "");
+              setNameModalOpen(true);
+            }}
+          >
+            Изменить имя
+          </button>
+          <button
+            className="btn btn-secondary"
             onClick={() => setPasswordModalOpen(true)}
           >
             Сменить пароль
@@ -165,6 +266,48 @@ const ProfilePage = () => {
           </button>
         </div>
       </div>
+
+      {/* Модальное окно смены имени */}
+      {nameModalOpen && (
+        <div className="modal-overlay" onClick={() => setNameModalOpen(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="prfp-modal-header">
+              <h2>Смена имени</h2>
+              <button
+                className="prfp-modal-close"
+                onClick={() => setNameModalOpen(false)}
+              >
+                ×
+              </button>
+            </div>
+            <form onSubmit={handleNameChange}>
+              <div className="form-group">
+                <label>Новое имя</label>
+                <input
+                  type="text"
+                  value={nameValue}
+                  onChange={(e) => setNameValue(e.target.value)}
+                  required
+                />
+              </div>
+              {nameError && <div className="error-message">{nameError}</div>}
+              {nameSuccess && <div className="success-message">{nameSuccess}</div>}
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setNameModalOpen(false)}
+                >
+                  Отмена
+                </button>
+                <button type="submit" className="btn btn-primary" disabled={nameLoading}>
+                  {nameLoading ? "Сохранение..." : "Сохранить"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Модальное окно смены пароля */}
       {passwordModalOpen && (
@@ -273,11 +416,11 @@ const ProfilePage = () => {
             <tbody>
               {orders.map((order) => (
                 <tr
-                  key={order._id}
+                  key={order.id}
                   className="prfp-order-row-clickable"
                   onClick={() => handleViewOrder(order)}
                 >
-                  <td>{order._id.slice(-6)}</td>
+                  <td>{order.id}</td>
                   <td>{new Date(order.date).toLocaleDateString("ru-RU")}</td>
                   <td>{order.totalPrice} ₽</td>
                   <td>
@@ -290,10 +433,16 @@ const ProfilePage = () => {
                     </span>
                   </td>
                   <td onClick={(e) => e.stopPropagation()}>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => handleRepeatOrder(order)}
+                    >
+                      Повторить заказ
+                    </button>
                     {canCancelOrder(order) && (
                       <button
                         className="btn btn-secondary"
-                        onClick={() => handleCancelOrder(order._id)}
+                        onClick={() => handleCancelOrder(order.id)}
                       >
                         Отменить заказ
                       </button>
@@ -314,7 +463,7 @@ const ProfilePage = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="prfp-modal-header">
-              <h2>Заказ №{selectedOrder._id.slice(-6)}</h2>
+              <h2>Заказ №{selectedOrder.id}</h2>
               <button
                 className="prfp-modal-close"
                 onClick={() => setOrderModalOpen(false)}
@@ -343,21 +492,23 @@ const ProfilePage = () => {
               <div className="prfp-order-items-block">
                 <h3>Товары</h3>
                 <ul className="prfp-order-items-list">
-                  {selectedOrder.list.map((item, index) => (
+                  {selectedOrder.list.map((item, index) => {
+                    const unitLabel = (item.pid?.unit || "grams") === "grams" ? "г" : "шт";
+                    return (
                     <li key={index}>
                       <div className="prfp-item-row">
                         <span className="prfp-item-name">
                           {item.pid?.name || "Товар удален"}
                         </span>
                         <span className="prfp-item-quantity">
-                          {item.count} г
+                          {item.count} {unitLabel}
                         </span>
                         <span className="prfp-item-price">
                           {formatPrice(item.count * item.priceAtOrder)}
                         </span>
                       </div>
                     </li>
-                  ))}
+                  );})}
                 </ul>
               </div>
               <div className="prfp-order-total-block">
@@ -385,10 +536,16 @@ const ProfilePage = () => {
               >
                 Закрыть
               </button>
+              <button
+                className="btn btn-primary"
+                onClick={() => handleRepeatOrder(selectedOrder)}
+              >
+                Повторить заказ
+              </button>
               {canCancelOrder(selectedOrder) && (
                 <button
                   className="btn btn-secondary"
-                  onClick={() => handleCancelOrder(selectedOrder._id)}
+                  onClick={() => handleCancelOrder(selectedOrder.id)}
                 >
                   Отменить заказ
                 </button>

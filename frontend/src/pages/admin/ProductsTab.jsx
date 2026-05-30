@@ -107,7 +107,9 @@ const ProductsTab = () => {
         {filteredProducts.length === 0 ? (
           <p className="pt-no-products">Товары не найдены</p>
         ) : (
-          filteredProducts.map((product) => (
+          filteredProducts.map((product) => {
+            const isGrams = (product.unit || "grams") === "grams";
+            return (
             <div key={product._id} className="pt-product-item">
               <span className="pt-col-name">
                 {product.name}
@@ -120,8 +122,12 @@ const ProductsTab = () => {
                   </span>
                 )}
               </span>
-              <span className="pt-col-price">{product.price} ₽</span>
-              <span className="pt-col-remains">{product.remains} г</span>
+              <span className="pt-col-price">
+                {product.price} ₽/{isGrams ? "100 г" : "шт"}
+              </span>
+              <span className="pt-col-remains">
+                {product.remains} {isGrams ? "г" : "шт"}
+              </span>
               <span className="pt-col-tags">
                 {product.tags && product.tags.length > 0 ? (
                   <div className="pt-tags-wrapper">
@@ -157,7 +163,7 @@ const ProductsTab = () => {
                 </button>
               </span>
             </div>
-          ))
+          );})
         )}
       </div>
 

@@ -67,10 +67,8 @@ const SupplyTab = () => {
         },
       );
 
-      addToast(
-        `Добавлено ${quantity}г чая "${selectedProduct.name}"`,
-        "success",
-      );
+      const unitLabel = (selectedProduct.unit || "grams") === "grams" ? "г" : "шт";
+      addToast(`Добавлено ${quantity}${unitLabel} товара "${selectedProduct.name}"`, "success");
       setSelectedProduct(null);
       setQuantity("");
       setSearchQuery("");
@@ -88,10 +86,12 @@ const SupplyTab = () => {
         <div className="add-stock-section">
           <h3>Добавление поставки</h3>
           <div className="selected-product">
-            <strong>Выбран чай:</strong> {selectedProduct.name}
+            <strong>Выбран товар:</strong> {selectedProduct.name}
           </div>
           <div className="quantity-group">
-            <label htmlFor="quantity">Количество добавляемых грамм</label>
+            <label htmlFor="quantity">
+              Количество добавляемых {(selectedProduct.unit || "grams") === "grams" ? "грамм" : "штук"}
+            </label>
             <input
               type="number"
               id="quantity"
@@ -149,7 +149,7 @@ const SupplyTab = () => {
                 >
                   <span className="product-name">{product.name}</span>
                   <span className="product-info">
-                    {product.remains}г | {product.price}₽
+                    {product.remains}{(product.unit || "grams") === "grams" ? "г" : "шт"} | {product.price}₽
                   </span>
                 </li>
               ))}

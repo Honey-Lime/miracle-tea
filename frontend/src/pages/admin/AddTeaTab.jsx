@@ -8,9 +8,9 @@ const AddTeaTab = () => {
   const { addToast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
-    content: "",
     description: "",
     price: "",
+    unit: "grams",
     cost: "",
     remains: "",
     tags: [],
@@ -41,8 +41,7 @@ const AddTeaTab = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        name === "content" ? value.split(",").map((s) => s.trim()) : value,
+      [name]: value,
     }));
   };
 
@@ -141,9 +140,9 @@ const AddTeaTab = () => {
       addToast("Чай успешно добавлен", "success");
       setFormData({
         name: "",
-        content: "",
         description: "",
         price: "",
+        unit: "grams",
         cost: "",
         remains: "",
         tags: [],
@@ -169,18 +168,6 @@ const AddTeaTab = () => {
           onChange={handleChange}
           required
           placeholder="Например: Да Хун Пао"
-        />
-      </div>
-
-      <div className="att-form-group">
-        <label htmlFor="content">Содержимое (через запятую)</label>
-        <input
-          type="text"
-          id="content"
-          name="content"
-          value={formData.content}
-          onChange={handleChange}
-          placeholder="Например: улун, сильноферментированный"
         />
       </div>
 
@@ -223,7 +210,9 @@ const AddTeaTab = () => {
 
       <div className="att-form-row">
         <div className="att-form-group">
-          <label htmlFor="price">Цена (₽)</label>
+          <label htmlFor="price">
+            Цена ({formData.unit === "grams" ? "₽/100 г" : "₽/шт"})
+          </label>
           <input
             type="number"
             id="price"
@@ -250,7 +239,23 @@ const AddTeaTab = () => {
         </div>
 
         <div className="att-form-group">
-          <label htmlFor="remains">Остаток на складе (г)</label>
+          <label htmlFor="unit">Режим счета</label>
+          <select
+            id="unit"
+            name="unit"
+            value={formData.unit}
+            onChange={handleChange}
+            required
+          >
+            <option value="grams">Граммы</option>
+            <option value="pieces">Штуки</option>
+          </select>
+        </div>
+
+        <div className="att-form-group">
+          <label htmlFor="remains">
+            Остаток на складе ({formData.unit === "grams" ? "г" : "шт"})
+          </label>
           <input
             type="number"
             id="remains"

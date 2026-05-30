@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema(
   {
+    _id: {
+      type: String,
+      required: true,
+    },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -18,7 +22,7 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["cart", "payment_pending", "created", "paid", "assembled", "shipped", "completed", "cancelled"],
+      enum: ["cart", "payment_pending", "created", "paid", "assembled", "shipped", "completed", "cancelled", "refunded"],
       default: "cart",
     },
     list: [
@@ -113,6 +117,22 @@ const orderSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    toJSON: {
+      transform: (_doc, ret) => {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.__v;
+        return ret;
+      },
+    },
+    toObject: {
+      transform: (_doc, ret) => {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.__v;
+        return ret;
+      },
+    },
   },
 );
 

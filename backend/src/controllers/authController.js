@@ -27,6 +27,10 @@ const normalizeEmail = (email = "") => email.trim().toLowerCase();
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const normalizeName = (name = "") => name.trim();
 const normalizePhone = (phone = "") => phone.replace(/\D/g, "");
+const generateName = (email) => {
+  const emailPrefix = email.split("@")[0]?.trim();
+  return emailPrefix ? `Пользователь ${emailPrefix}` : "Пользователь";
+};
 
 const getAuthErrorResponse = (error) => {
   if (error?.code === 11000) {
@@ -135,7 +139,6 @@ exports.register = async (req, res) => {
   const { email, password, name, phone, consents } = req.body;
   const normalizedEmail = normalizeEmail(email);
   const normalizedName = normalizeName(name);
-  const normalizedPhone = normalizePhone(phone);
 
   if (!consents?.personalData) {
     return res.status(400).json({
@@ -149,14 +152,6 @@ exports.register = async (req, res) => {
 
   if (!isValidEmail(normalizedEmail)) {
     return res.status(400).json({ message: "Введите корректный email" });
-  }
-
-  if (!normalizedName) {
-    return res.status(400).json({ message: "Имя обязательно для регистрации" });
-  }
-
-  if (normalizedPhone && normalizedPhone.length !== 11) {
-    return res.status(400).json({ message: "Введите корректный номер телефона" });
   }
 
   if (!password) {
@@ -180,9 +175,8 @@ exports.register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({
-      name: normalizedName,
+      name: normalizedName || generateName(normalizedEmail),
       email: normalizedEmail,
-      phone: normalizedPhone || undefined,
       password: hashedPassword,
       consents: {
         personalData: true,
@@ -241,6 +235,28 @@ exports.changePassword = async (req, res) => {
     await user.save();
 
     res.json({ message: "Пароль успешно изменён" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.updateName = async (req, res) => {
+  const normalizedName = normalizeName(req.body.name);
+
+  if (!normalizedName) {
+    return res.status(400).json({ message: "Имя не может быть пустым" });
+  }
+
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.name = normalizedName;
+    await user.save();
+
+    res.json(buildAuthResponse(user));
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

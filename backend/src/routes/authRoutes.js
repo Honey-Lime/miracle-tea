@@ -13,6 +13,9 @@ router.get("/profile", authMiddleware, authController.getProfile);
 // Protected route: change password
 router.put("/change-password", authMiddleware, authController.changePassword);
 
+// Protected route: update profile name
+router.put("/name", authMiddleware, authController.updateName);
+
 // Forgot password - отправка кода подтверждения
 router.post("/forgot-password", authController.forgotPassword);
 

@@ -20,7 +20,7 @@ const ThankYouPage = () => {
       try {
         const lastPayment = JSON.parse(sessionStorage.getItem("lastPayment") || "null");
 
-        if (!lastPayment?.orderId || !lastPayment?.paymentId) {
+        if (!lastPayment?.id || !lastPayment?.paymentId) {
           setError("Не удалось найти данные платежа. Если оплата прошла, заказ обновится после уведомления банка.");
           return;
         }

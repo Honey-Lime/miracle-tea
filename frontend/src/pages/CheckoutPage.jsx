@@ -26,8 +26,9 @@ const CheckoutPage = () => {
     deliveryData?.checked && personalDataAccepted && refundPolicyAccepted,
   );
 
-  // Общий вес заказа в граммах (уже есть в компоненте)
-  const totalWeight = cartItems.reduce((sum, item) => sum + item.count, 0);
+  const totalWeight = cartItems
+    .filter((item) => (item.unit || "grams") === "grams")
+    .reduce((sum, item) => sum + item.count, 0);
 
   // Оформление заказа
   const handlePlaceOrder = async () => {
@@ -99,7 +100,7 @@ const CheckoutPage = () => {
         },
         body: JSON.stringify({
           amount: Math.round((totalPrice + (deliveryData?.price || 0)) * 100),
-          orderId: order._id,
+          id: order.id,
           deliveryData: deliveryData
         }),
       });
@@ -115,7 +116,7 @@ const CheckoutPage = () => {
       sessionStorage.setItem(
         "lastPayment",
         JSON.stringify({
-          orderId: order._id,
+          id: order.id,
           paymentId: paymentResponse.paymentId,
         })
       );
@@ -136,12 +137,19 @@ const CheckoutPage = () => {
         <div className="chp-order-summary">
           <h2>Ваш заказ</h2>
           <ul>
-            {cartItems.map((item) => (
-              <li key={`${item.pid}-${item.isSampler}`}>
-                {item.name} {item.isSampler && "(Пробник)"} — {item.count} г ×{" "}
-                {item.price * 10} ₽/10г = {item.count * item.price} ₽
-              </li>
-            ))}
+            {cartItems.map((item) => {
+              const isGrams = (item.unit || "grams") === "grams";
+              const unitLabel = isGrams ? "г" : "шт";
+              const priceLabel = isGrams
+                ? `${item.price * 10} ₽/10г`
+                : `${item.price} ₽/шт`;
+              return (
+                <li key={`${item.pid}-${item.isSampler}`}>
+                  {item.name} {item.isSampler && "(Пробник)"} — {item.count} {unitLabel} ×{" "}
+                  {priceLabel} = {item.count * item.price} ₽
+                </li>
+              );
+            })}
           </ul>
           <div className="chp-summary-total">
             <strong>Сумма товаров: {totalPrice} ₽</strong>
