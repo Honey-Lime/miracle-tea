@@ -3,6 +3,7 @@ import { Routes, Route, NavLink } from "react-router-dom";
 import OrdersPage from "./admin/OrdersPage";
 import EditPage from "./admin/EditPage";
 import StatisticsTab from "./admin/StatisticsTab";
+import LogsPage from "./admin/LogsPage";
 
 const AdminPanel = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -29,6 +30,9 @@ const AdminPanel = () => {
           <NavLink to="/admin/statistics" className="ap-sidebar-link">
             Статистика
           </NavLink>
+          <NavLink to="/admin/logs" className="ap-sidebar-link">
+            Логи
+          </NavLink>
         </nav>
       </aside>
       <main className="ap-admin-content">
@@ -36,6 +40,7 @@ const AdminPanel = () => {
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="/edit" element={<EditPage />} />
           <Route path="/statistics" element={<StatisticsTab />} />
+          <Route path="/logs" element={<LogsPage />} />
           <Route path="/" element={<OrdersPage />} />
         </Routes>
       </main>

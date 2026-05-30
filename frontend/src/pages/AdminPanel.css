@@ -92,3 +92,40 @@
   padding: 2rem;
   overflow-y: auto;
 }
+
+.ap-logs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.ap-logs-header h1 {
+  margin: 0;
+}
+
+.ap-logs-header select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border, #d0d7de);
+  border-radius: 6px;
+  background: var(--color-white);
+}
+
+.ap-logs-error {
+  color: #b42318;
+  font-weight: 600;
+}
+
+.ap-logs-content {
+  min-height: 420px;
+  max-height: 70vh;
+  overflow: auto;
+  padding: 1rem;
+  border-radius: 8px;
+  background: #111827;
+  color: #e5e7eb;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}

@@ -6,7 +6,12 @@ const cors = require("cors");
 const morgan = require("morgan");
 const path = require("path");
 require("dotenv").config();
-const { logDBOperation, logHTTPRequest } = require("./utils/logger");
+const {
+  logDBOperation,
+  logHTTPRequest,
+  logError,
+  logClientError,
+} = require("./utils/logger");
 const crypto = require("crypto");
 const Order = require("./models/Order");
 const Product = require("./models/Product");
@@ -94,7 +99,10 @@ app.use((req, res, next) => {
   const start = Date.now();
   res.on("finish", () => {
     const duration = Date.now() - start;
-    logHTTPRequest(req.method, req.originalUrl, res.statusCode, duration);
+    logHTTPRequest(req.method, req.originalUrl, res.statusCode, duration, {
+      user: req.userId || "guest",
+      ip: req.ip || req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
+    });
   });
   next();
 });
@@ -137,14 +145,9 @@ app.get("/", (req, res) => {
   res.send("Miracle Tea API is running");
 });
 
-// Logs route (for debugging)
-app.get("/api/logs", (req, res) => {
-  const logFile = path.join(__dirname, "../logs/app.log");
-  if (!fs.existsSync(logFile)) {
-    return res.status(404).json({ error: "Log file not found" });
-  }
-  const logs = fs.readFileSync(logFile, "utf8");
-  res.type("text/plain").send(logs);
+app.post("/api/client-errors", (req, res) => {
+  logClientError(req.body, req);
+  res.status(204).send();
 });
 
 
@@ -488,6 +491,22 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/email", emailRoutes);
 
 console.log("Routes registered");
+
+app.use((err, req, res, next) => {
+  logError(err, "Unhandled request error", req);
+  if (res.headersSent) {
+    return next(err);
+  }
+  res.status(500).json({ message: "Внутренняя ошибка сервера" });
+});
+
+process.on("unhandledRejection", (reason) => {
+  logError(reason instanceof Error ? reason : new Error(String(reason)), "Unhandled promise rejection");
+});
+
+process.on("uncaughtException", (error) => {
+  logError(error, "Uncaught exception");
+});
 
 // Start server
 const startServer = () => {

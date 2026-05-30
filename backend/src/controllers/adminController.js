@@ -1,9 +1,34 @@
 const Order = require("../models/Order");
 const Product = require("../models/Product");
 const Tag = require("../models/Tag");
-const { logError } = require("../utils/logger");
+const { getLogFilePath, logError } = require("../utils/logger");
 const path = require("path");
 const fs = require("fs");
+
+function readLogTail(filePath, maxBytes = 200000) {
+  if (!fs.existsSync(filePath)) {
+    return "";
+  }
+
+  const stats = fs.statSync(filePath);
+  const start = Math.max(0, stats.size - maxBytes);
+  const buffer = Buffer.alloc(stats.size - start);
+  const fd = fs.openSync(filePath, "r");
+  fs.readSync(fd, buffer, 0, buffer.length, start);
+  fs.closeSync(fd);
+  return buffer.toString("utf8");
+}
+
+exports.getLogs = async (req, res) => {
+  try {
+    const type = req.query.type === "errors" ? "errors" : "app";
+    const content = readLogTail(getLogFilePath(type));
+    res.json({ type, content });
+  } catch (error) {
+    logError(error, "getLogs", req);
+    res.status(500).json({ message: error.message });
+  }
+};
 
 // Get all orders with status except "cart"
 exports.getAllOrders = async (req, res) => {

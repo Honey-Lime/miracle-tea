@@ -41,4 +41,7 @@ router.put("/products/:id/delete-media", adminController.deleteProductImage);
 // Statistics
 router.get("/statistics", adminController.getStatistics);
 
+// Logs
+router.get("/logs", adminController.getLogs);
+
 module.exports = router;

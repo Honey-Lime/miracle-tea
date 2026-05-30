@@ -1,4 +1,5 @@
 import axios from "axios";
+import { reportClientError } from "./errorReporter";
 
 const api = axios.create({
   baseURL: "/api",
@@ -12,5 +13,22 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    reportClientError(error, "api.response", {
+      request: {
+        method: error.config?.method,
+        url: error.config?.url,
+      },
+      response: {
+        status: error.response?.status,
+        data: error.response?.data,
+      },
+    });
+    return Promise.reject(error);
+  },
+);
 
 export default api;
