@@ -51,6 +51,29 @@ const OrdersPage = () => {
     }
   };
 
+  const handleCancelOrder = async (id) => {
+    if (!window.confirm("Отменить заказ и вернуть товары на остаток?")) {
+      return;
+    }
+
+    try {
+      const response = await axios.put(
+        `/api/admin/orders/${id}/cancel`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      addToast("Заказ отменен, товары возвращены на остаток", "success");
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === id ? { ...order, status: response.data.status } : order,
+        ),
+      );
+    } catch (err) {
+      addToast(err.response?.data?.message || "Ошибка отмены заказа", "error");
+      console.error(err);
+    }
+  };
+
   const getStatusLabel = (status) => {
     const labels = {
       created: "Создан",
@@ -292,6 +315,14 @@ const OrdersPage = () => {
                         onClick={() => handleUpdateStatus(order.id, "refunded")}
                       >
                         Возврат совершен
+                      </button>
+                    )}
+                    {!["cancelled", "refunded", "completed"].includes(order.status) && (
+                      <button
+                        className="op-btn-cancel"
+                        onClick={() => handleCancelOrder(order.id)}
+                      >
+                        Отменить
                       </button>
                     )}
                   </div>

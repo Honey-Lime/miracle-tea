@@ -1,9 +1,12 @@
 const Order = require("../models/Order");
 const Product = require("../models/Product");
 const Tag = require("../models/Tag");
+const User = require("../models/User");
 const { getLogFilePath, logError } = require("../utils/logger");
 const path = require("path");
 const fs = require("fs");
+
+const PAID_TOTAL_STATUSES = ["paid", "assembled", "shipped", "completed"];
 
 function readLogTail(filePath, maxBytes = 200000) {
   if (!fs.existsSync(filePath)) {
@@ -18,6 +21,34 @@ function readLogTail(filePath, maxBytes = 200000) {
   fs.closeSync(fd);
   return buffer.toString("utf8");
 }
+
+const restoreOrderRemains = async (order) => {
+  const operations = order.list
+    .filter((item) => item.pid && item.count > 0)
+    .map((item) => ({
+      updateOne: {
+        filter: { _id: item.pid },
+        update: { $inc: { remains: item.count } },
+      },
+    }));
+
+  if (operations.length > 0) {
+    await Product.bulkWrite(operations);
+  }
+};
+
+const recalculateUserTotal = async (userId) => {
+  if (!userId) {
+    return;
+  }
+
+  const orders = await Order.find({
+    userId,
+    status: { $in: PAID_TOTAL_STATUSES },
+  }).select("totalPrice");
+  const total = orders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+  await User.updateOne({ _id: userId }, { $set: { total } });
+};
 
 exports.getLogs = async (req, res) => {
   try {
@@ -71,6 +102,29 @@ exports.updateOrderStatus = async (req, res) => {
     res.json(updatedOrder);
   } catch (error) {
     logError(error, "updateOrderStatus");
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.cancelOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: "Заказ не найден" });
+    }
+
+    if (["cancelled", "refunded"].includes(order.status)) {
+      return res.status(400).json({ message: "Заказ уже отменен" });
+    }
+
+    order.status = "cancelled";
+    const updatedOrder = await order.save();
+    await restoreOrderRemains(order);
+    await recalculateUserTotal(order.userId);
+
+    res.json(updatedOrder);
+  } catch (error) {
+    logError(error, "cancelOrder");
     res.status(500).json({ message: error.message });
   }
 };

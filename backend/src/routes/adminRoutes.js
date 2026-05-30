@@ -11,6 +11,7 @@ router.use(adminMiddleware);
 
 // Orders
 router.get("/orders", adminController.getAllOrders);
+router.put("/orders/:id/cancel", adminController.cancelOrder);
 router.put("/orders/:id/status", adminController.updateOrderStatus);
 
 // Products

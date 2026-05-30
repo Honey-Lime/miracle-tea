@@ -85,6 +85,21 @@ const recalculateUserTotal = async (userId) => {
   return total;
 };
 
+const restoreOrderRemains = async (order) => {
+  const operations = order.list
+    .filter((item) => item.pid && item.count > 0)
+    .map((item) => ({
+      updateOne: {
+        filter: { _id: item.pid },
+        update: { $inc: { remains: item.count } },
+      },
+    }));
+
+  if (operations.length > 0) {
+    await Product.bulkWrite(operations);
+  }
+};
+
 // Create a new order
 exports.createOrder = async (req, res) => {
   const { list, delivery, consents } = req.body;
@@ -406,7 +421,7 @@ exports.getUserOrders = async (req, res) => {
 exports.cancelUserOrder = async (req, res) => {
   try {
     const order = await Order.findOne({
-      id: req.params.id,
+      _id: req.params.id,
       userId: req.userId,
     });
 
@@ -420,6 +435,7 @@ exports.cancelUserOrder = async (req, res) => {
 
     order.status = "cancelled";
     const updatedOrder = await order.save();
+    await restoreOrderRemains(order);
     await recalculateUserTotal(req.userId);
 
     res.json(updatedOrder);
