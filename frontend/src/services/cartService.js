@@ -42,10 +42,18 @@ export const updateCartItem = async (token, { pid, isSampler, count }) => {
 
 // Clear cart on server
 export const clearCart = async (token) => {
-  const response = await axios.delete(`${API_URL}/cart/clear`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
+  try {
+    const response = await axios.delete(`${API_URL}/cart/clear`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      return { list: [], totalPrice: 0 };
+    }
+
+    throw error;
+  }
 };
 
 // Merge local cart with server cart
