@@ -278,7 +278,7 @@ exports.removeFromCart = async (req, res) => {
       status: "cart",
     });
     if (!cart) {
-      return res.json({ list: [], totalPrice: 0 });
+      return res.status(404).json({ message: "Cart not found" });
     }
 
     cart.list = cart.list.filter(
@@ -378,7 +378,7 @@ exports.clearCart = async (req, res) => {
       status: "cart",
     });
     if (!cart) {
-      return res.status(404).json({ message: "Cart not found" });
+      return res.json({ list: [], totalPrice: 0 });
     }
     cart.list = [];
     cart.totalPrice = 0;
