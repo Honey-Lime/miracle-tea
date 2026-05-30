@@ -427,8 +427,8 @@ exports.deleteProductImage = async (req, res) => {
 // Get statistics: average order value and per-product stats
 exports.getStatistics = async (req, res) => {
   try {
-    // Get all non-cart orders
-    const orders = await Order.find({ status: { $ne: "cart" } })
+    // Only paid orders that were not cancelled/refunded should affect statistics.
+    const orders = await Order.find({ status: { $in: PAID_TOTAL_STATUSES } })
       .populate("list.pid", "name price")
       .lean();
 

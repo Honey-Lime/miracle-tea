@@ -45,11 +45,11 @@ const ProfilePage = () => {
     const classes = {
       created: "prfp-status-ordered",
       paid: "prfp-status-paid",
-      assembled: "prfp-status-shipping",
+      assembled: "prfp-status-shipped",
       shipped: "prfp-status-shipped",
       completed: "prfp-status-completed",
       cancelled: "prfp-status-cancelled",
-      refunded: "prfp-status-cancelled",
+      refunded: "prfp-status-shipped",
       cart: "prfp-status-cart",
       payment_pending: "prfp-status-cart",
     };
