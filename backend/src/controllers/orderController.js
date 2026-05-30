@@ -46,6 +46,30 @@ const generateId = async () => {
   return formatId(counter.seq - 1);
 };
 
+const saveCartState = async (cart) => {
+  if (cart.isNew) {
+    return cart.save();
+  }
+
+  await Order.updateOne(
+    { _id: cart._id, userId: cart.userId, status: "cart" },
+    {
+      $set: {
+        list: cart.list.map((item) => ({
+          pid: item.pid,
+          count: item.count,
+          priceAtOrder: item.priceAtOrder,
+          isSampler: item.isSampler,
+        })),
+        totalPrice: cart.totalPrice,
+      },
+    },
+    { runValidators: true },
+  );
+
+  return Order.findById(cart._id);
+};
+
 // Create a new order
 exports.createOrder = async (req, res) => {
   const { list, delivery, consents } = req.body;
@@ -222,8 +246,8 @@ exports.addToCart = async (req, res) => {
       0,
     );
 
-    await cart.save();
-    res.json(cart);
+    const savedCart = await saveCartState(cart);
+    res.json(savedCart);
   } catch (error) {
     logError(error, "createOrder");
     res.status(500).json({ message: error.message });
@@ -251,8 +275,8 @@ exports.removeFromCart = async (req, res) => {
       0,
     );
 
-    await cart.save();
-    res.json(cart);
+    const savedCart = await saveCartState(cart);
+    res.json(savedCart);
   } catch (error) {
     logError(error, "addToCart");
     res.status(500).json({ message: error.message });
@@ -323,8 +347,8 @@ exports.updateCartItem = async (req, res) => {
       0,
     );
 
-    await cart.save();
-    res.json(cart);
+    const savedCart = await saveCartState(cart);
+    res.json(savedCart);
   } catch (error) {
     logError(error, "updateCartItem");
     res.status(500).json({ message: error.message });
@@ -343,8 +367,8 @@ exports.clearCart = async (req, res) => {
     }
     cart.list = [];
     cart.totalPrice = 0;
-    await cart.save();
-    res.json(cart);
+    const savedCart = await saveCartState(cart);
+    res.json(savedCart);
   } catch (error) {
     logError(error, "getCart");
     res.status(500).json({ message: error.message });
