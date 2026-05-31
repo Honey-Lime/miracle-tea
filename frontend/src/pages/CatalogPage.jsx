@@ -60,8 +60,17 @@ const CatalogPage = () => {
   };
 
   const handleAddToCart = (product, grams) => {
-    addToCart(product, grams, false);
     const minCount = (product.unit || "grams") === "grams" ? 50 : 1;
+    const alreadyInCart = cartItems
+      .filter((item) => item.pid === product._id)
+      .reduce((sum, item) => sum + item.count, 0);
+    const availableToAdd = Math.max(product.remains - alreadyInCart, 0);
+
+    if (grams < minCount || grams > availableToAdd) {
+      return;
+    }
+
+    addToCart(product, grams, false);
     setGramCounts((prev) => ({ ...prev, [product._id]: minCount }));
   };
 
@@ -140,6 +149,7 @@ const CatalogPage = () => {
               .reduce((sum, item) => sum + item.count, 0);
             const availableToAdd = Math.max(product.remains - alreadyInCart, 0);
             const currentCount = gramCounts[product._id] || minCount;
+            const canAddCurrentCount = currentCount >= minCount && currentCount <= availableToAdd;
             const isSamplerAvailable = isGrams && availableToAdd >= 10;
             const hasSamplerInCart = cartItems.some(
               (item) => item.pid === product._id && item.isSampler === true,
@@ -190,10 +200,11 @@ const CatalogPage = () => {
                     >
                       -{step}
                     </button>
-                    <span className="gram-count" 
-                      disabled={currentCount > availableToAdd || currentCount < minCount}
+                    <span className={`gram-count ${!canAddCurrentCount ? "disabled" : ""}`}
+                      aria-disabled={!canAddCurrentCount}
                       onClick={(e) => {
                         e.stopPropagation();
+                        if (!canAddCurrentCount) return;
                         handleAddToCart(product, currentCount);
                       }}>
                       <span className="current">{currentCount}{unitLabel}</span>
@@ -219,11 +230,15 @@ const CatalogPage = () => {
                     disabled={!isSamplerAvailable || hasSamplerInCart}
                     title={
                       hasSamplerInCart
-                        ? "Пробник уже добавлен"
-                        : "Добавить пробник 10 г"
+                        ? "Уже в корзине"
+                        : "🛒ПРОБНИК"
                     }
                   >
-                    🛒ПРОБНИК
+                    {
+                      hasSamplerInCart
+                        ? "Уже в корзине"
+                        : "🛒ПРОБНИК"
+                    }
                   </button>
                 </div>
               </div>
