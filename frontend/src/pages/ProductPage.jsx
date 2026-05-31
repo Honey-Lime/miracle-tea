@@ -3,11 +3,12 @@ import { useParams, Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { getProduct } from "../services/productService";
+import api from "../services/api";
 
 const ProductPage = () => {
   const { id } = useParams();
   const { addToCart, cartItems } = useCart();
-  const { user, token } = useAuth();
+  const { user, token, isAdmin } = useAuth();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,6 +16,10 @@ const ProductPage = () => {
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
   const [reviews, setReviews] = useState([]);
   const [reviewsSort, setReviewsSort] = useState("likes");
+  const [reviewPhotoViewer, setReviewPhotoViewer] = useState(null);
+  const [adminCommentDrafts, setAdminCommentDrafts] = useState({});
+  const [adminCommentPhotos, setAdminCommentPhotos] = useState({});
+  const [adminCommentDropActive, setAdminCommentDropActive] = useState({});
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -39,7 +44,16 @@ const ProductPage = () => {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
       .then((response) => response.json())
-      .then((data) => setReviews(Array.isArray(data) ? data : []))
+      .then((data) => {
+        const nextReviews = Array.isArray(data) ? data : [];
+        setReviews(nextReviews);
+        setAdminCommentDrafts(
+          nextReviews.reduce((drafts, review) => ({
+            ...drafts,
+            [review.id]: review.adminComment?.text || "",
+          }), {}),
+        );
+      })
       .catch(() => setReviews([]));
   }, [id, token]);
 
@@ -108,6 +122,22 @@ const ProductPage = () => {
     }
   };
 
+  const saveAdminComment = async (reviewId) => {
+    const formData = new FormData();
+    formData.append("text", adminCommentDrafts[reviewId] || "");
+    (adminCommentPhotos[reviewId] || []).forEach((photo) => formData.append("photos", photo));
+
+    try {
+      const response = await api.put(`/admin/reviews/${reviewId}/comment`, formData);
+      setReviews((prev) => prev.map((review) => (
+        review.id === reviewId ? { ...review, adminComment: response.data.adminComment } : review
+      )));
+      setAdminCommentPhotos((prev) => ({ ...prev, [reviewId]: [] }));
+    } catch (err) {
+      alert(err.response?.data?.message || "Не удалось сохранить комментарий");
+    }
+  };
+
   if (loading) {
     return <div className="pp-product-loading">Загрузка товара...</div>;
   }
@@ -143,6 +173,19 @@ const ProductPage = () => {
 
     return (secondReview.likes || 0) - (firstReview.likes || 0);
   });
+  const closeReviewPhotoViewer = () => setReviewPhotoViewer(null);
+  const showPrevReviewPhoto = () => {
+    setReviewPhotoViewer((viewer) => viewer && {
+      ...viewer,
+      index: viewer.index === 0 ? viewer.photos.length - 1 : viewer.index - 1,
+    });
+  };
+  const showNextReviewPhoto = () => {
+    setReviewPhotoViewer((viewer) => viewer && {
+      ...viewer,
+      index: viewer.index === viewer.photos.length - 1 ? 0 : viewer.index + 1,
+    });
+  };
 
   return (
     <div className="pp-product-page container">
@@ -312,14 +355,78 @@ const ProductPage = () => {
                   <div className="pp-review-admin-comment">
                     <strong>Ответ магазина</strong>
                     <p>{review.adminComment.text}</p>
+                    {review.adminComment.photos?.length > 0 && (
+                      <div className="pp-review-photos">
+                        {review.adminComment.photos.map((photo, index) => (
+                          <button
+                            type="button"
+                            key={`admin-${review.id}-${photo.url}`}
+                            onClick={() => setReviewPhotoViewer({ photos: review.adminComment.photos, index })}
+                          >
+                            <img src={photo.url} alt={`Фото ответа магазина ${index + 1}`} />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {isAdmin && (
+                  <div className="pp-admin-review-comment-form">
+                    <label>Комментарий администратора</label>
+                    <textarea
+                      rows={3}
+                      value={adminCommentDrafts[review.id] || ""}
+                      onChange={(event) => setAdminCommentDrafts((prev) => ({ ...prev, [review.id]: event.target.value }))}
+                      placeholder="Ответ магазина под отзывом"
+                    />
+                    <label
+                      className={`pp-admin-comment-dropzone ${adminCommentDropActive[review.id] ? "dragging" : ""}`}
+                      onDragEnter={(event) => {
+                        event.preventDefault();
+                        setAdminCommentDropActive((prev) => ({ ...prev, [review.id]: true }));
+                      }}
+                      onDragOver={(event) => {
+                        event.preventDefault();
+                        setAdminCommentDropActive((prev) => ({ ...prev, [review.id]: true }));
+                      }}
+                      onDragLeave={() => setAdminCommentDropActive((prev) => ({ ...prev, [review.id]: false }))}
+                      onDrop={(event) => {
+                        event.preventDefault();
+                        setAdminCommentDropActive((prev) => ({ ...prev, [review.id]: false }));
+                        setAdminCommentPhotos((prev) => ({
+                          ...prev,
+                          [review.id]: Array.from(event.dataTransfer.files || []).filter((file) => file.type.startsWith("image/")),
+                        }));
+                      }}
+                    >
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(event) => setAdminCommentPhotos((prev) => ({
+                          ...prev,
+                          [review.id]: Array.from(event.target.files || []),
+                        }))}
+                      />
+                      {(adminCommentPhotos[review.id] || []).length > 0
+                        ? `Выбрано фото: ${adminCommentPhotos[review.id].length}`
+                        : "Перетащите фото или выберите файлы"}
+                    </label>
+                    <button className="btn btn-secondary" type="button" onClick={() => saveAdminComment(review.id)}>
+                      Сохранить комментарий
+                    </button>
                   </div>
                 )}
                 {review.photos?.length > 0 && (
                   <div className="pp-review-photos">
                     {review.photos.map((photo, index) => (
-                      <a href={photo.url} target="_blank" rel="noreferrer" key={`${review.id}-${photo.url}`}>
+                      <button
+                        type="button"
+                        key={`${review.id}-${photo.url}`}
+                        onClick={() => setReviewPhotoViewer({ photos: review.photos, index })}
+                      >
                         <img src={photo.url} alt={`Фото к отзыву ${index + 1}`} />
-                      </a>
+                      </button>
                     ))}
                   </div>
                 )}
@@ -348,6 +455,22 @@ const ProductPage = () => {
           </div>
         )}
       </section>
+      {reviewPhotoViewer && (
+        <div className="pp-review-photo-modal" onClick={closeReviewPhotoViewer}>
+          <div className="pp-review-photo-modal-content" onClick={(event) => event.stopPropagation()}>
+            <button className="pp-review-photo-close" type="button" onClick={closeReviewPhotoViewer}>×</button>
+            <button className="pp-review-photo-nav prev" type="button" onClick={showPrevReviewPhoto}>‹</button>
+            <img
+              src={reviewPhotoViewer.photos[reviewPhotoViewer.index].url}
+              alt={`Фото отзыва ${reviewPhotoViewer.index + 1}`}
+            />
+            <button className="pp-review-photo-nav next" type="button" onClick={showNextReviewPhoto}>›</button>
+            <div className="pp-review-photo-counter">
+              {reviewPhotoViewer.index + 1} / {reviewPhotoViewer.photos.length}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

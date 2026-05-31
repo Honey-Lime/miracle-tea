@@ -409,6 +409,30 @@
   resize: vertical;
 }
 
+.ap-chat-file-dropzone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 62px;
+  padding: 0.7rem;
+  border: 2px dashed var(--border-color);
+  border-radius: 10px;
+  background: var(--color-gray-100);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.ap-chat-file-dropzone.dragging {
+  border-color: #1d4ed8;
+  box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.16);
+  transform: scale(1.02);
+}
+
+.ap-chat-file-dropzone input {
+  display: none;
+}
+
 @media (max-width: 900px) {
   .ap-customers-header,
   .ap-customers-search {

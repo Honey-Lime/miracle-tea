@@ -225,9 +225,13 @@ exports.updateReviewAdminComment = async (req, res) => {
     }
 
     const text = String(req.body.text || "").trim();
+    const existingPhotos = Array.isArray(review.adminComment?.photos) ? review.adminComment.photos : [];
+    const newPhotos = (req.files || []).map((file) => ({ url: `/uploads/chat/${file.filename}` }));
+    const photos = req.body.clearPhotos === "true" ? newPhotos : [...existingPhotos, ...newPhotos];
     review.adminComment = {
       text,
-      updatedAt: text ? new Date() : null,
+      photos,
+      updatedAt: text || photos.length > 0 ? new Date() : null,
     };
 
     await review.save();

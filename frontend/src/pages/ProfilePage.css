@@ -80,6 +80,13 @@
   background: var(--color-gray-100);
   cursor: pointer;
   text-align: center;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.prfp-profile-page .prfp-review-dropzone.dragging {
+  border-color: #1d4ed8;
+  box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.16);
+  transform: scale(1.02);
 }
 
 .prfp-profile-page .prfp-review-dropzone input {

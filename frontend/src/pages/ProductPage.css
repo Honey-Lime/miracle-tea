@@ -337,6 +337,48 @@
   margin: 0;
 }
 
+.pp-product-page .pp-admin-review-comment-form {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0.75rem 0;
+  padding: 0.85rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--color-gray-100);
+}
+
+.pp-product-page .pp-admin-review-comment-form textarea {
+  width: 100%;
+  padding: 0.65rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  resize: vertical;
+}
+
+.pp-product-page .pp-admin-comment-dropzone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 64px;
+  padding: 0.65rem;
+  border: 2px dashed var(--border-color);
+  border-radius: 10px;
+  background: var(--color-white);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.pp-product-page .pp-admin-comment-dropzone.dragging {
+  border-color: #1d4ed8;
+  box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.16);
+  transform: scale(1.02);
+}
+
+.pp-product-page .pp-admin-comment-dropzone input {
+  display: none;
+}
+
 .pp-product-page .pp-review-photos {
   display: flex;
   flex-wrap: wrap;
@@ -344,13 +386,16 @@
   margin: 0.75rem 0;
 }
 
-.pp-product-page .pp-review-photos a {
+.pp-product-page .pp-review-photos button {
   display: block;
   width: 92px;
   height: 92px;
+  padding: 0;
+  border: none;
   border-radius: 8px;
   overflow: hidden;
   background: var(--color-gray-100);
+  cursor: zoom-in;
 }
 
 .pp-product-page .pp-review-photos img {
@@ -389,6 +434,78 @@
 .pp-product-page .pp-review-reactions button:disabled {
   cursor: not-allowed;
   opacity: 0.65;
+}
+
+.pp-review-photo-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: rgba(0, 0, 0, 0.78);
+}
+
+.pp-review-photo-modal-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(980px, 100%);
+  min-height: 60vh;
+}
+
+.pp-review-photo-modal-content img {
+  max-width: 100%;
+  max-height: 82vh;
+  border-radius: 12px;
+  object-fit: contain;
+}
+
+.pp-review-photo-close,
+.pp-review-photo-nav {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--color-text-primary);
+}
+
+.pp-review-photo-close {
+  top: -0.5rem;
+  right: -0.5rem;
+  width: 42px;
+  height: 42px;
+  font-size: 1.7rem;
+}
+
+.pp-review-photo-nav {
+  top: 50%;
+  width: 52px;
+  height: 52px;
+  font-size: 2.4rem;
+  transform: translateY(-50%);
+}
+
+.pp-review-photo-nav.prev {
+  left: 1rem;
+}
+
+.pp-review-photo-nav.next {
+  right: 1rem;
+}
+
+.pp-review-photo-counter {
+  position: absolute;
+  bottom: -2rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  font-weight: 700;
 }
 
 @media (max-width: 768px) {

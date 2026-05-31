@@ -6,6 +6,7 @@ const ChatsPage = () => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [text, setText] = useState("");
   const [photos, setPhotos] = useState([]);
+  const [dropActive, setDropActive] = useState(false);
 
   const loadChats = async () => {
     const response = await api.get("/admin/chats");
@@ -72,7 +73,26 @@ const ChatsPage = () => {
               </div>
               <form className="ap-chat-form" onSubmit={sendMessage}>
                 <textarea value={text} onChange={(event) => setText(event.target.value)} rows={3} placeholder="Ответ клиенту" />
-                <input type="file" accept="image/*" multiple onChange={(event) => setPhotos(Array.from(event.target.files || []))} />
+                <label
+                  className={`ap-chat-file-dropzone ${dropActive ? "dragging" : ""}`}
+                  onDragEnter={(event) => {
+                    event.preventDefault();
+                    setDropActive(true);
+                  }}
+                  onDragOver={(event) => {
+                    event.preventDefault();
+                    setDropActive(true);
+                  }}
+                  onDragLeave={() => setDropActive(false)}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    setDropActive(false);
+                    setPhotos(Array.from(event.dataTransfer.files || []).filter((file) => file.type.startsWith("image/")));
+                  }}
+                >
+                  <input type="file" accept="image/*" multiple onChange={(event) => setPhotos(Array.from(event.target.files || []))} />
+                  {photos.length > 0 ? `Выбрано фото: ${photos.length}` : "Перетащите фото сюда или выберите файл"}
+                </label>
                 <button className="btn btn-primary" type="submit">Отправить</button>
               </form>
             </>

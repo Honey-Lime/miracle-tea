@@ -9,6 +9,7 @@ const ChatWidget = () => {
   const [chat, setChat] = useState(null);
   const [text, setText] = useState("");
   const [photos, setPhotos] = useState([]);
+  const [dropActive, setDropActive] = useState(false);
   const messagesRef = useRef(null);
 
   const loadChat = async () => {
@@ -58,7 +59,7 @@ const ChatWidget = () => {
   return (
     <div className={`cw-chat-widget ${open ? "open" : ""}`}>
       <button className="cw-chat-toggle" type="button" onClick={() => (user ? setOpen(!open) : openLoginModal())}>
-        <span>Чат с администрацией</span>
+        <span aria-hidden="true">💬</span>
         {unread > 0 && <strong>{unread}</strong>}
       </button>
       {open && user && (
@@ -83,7 +84,26 @@ const ChatWidget = () => {
           </div>
           <form className="cw-chat-form" onSubmit={sendMessage}>
             <textarea value={text} onChange={(event) => setText(event.target.value)} placeholder="Ваше сообщение" rows={2} />
-            <input type="file" accept="image/*" multiple onChange={(event) => setPhotos(Array.from(event.target.files || []))} />
+            <label
+              className={`cw-file-dropzone ${dropActive ? "dragging" : ""}`}
+              onDragEnter={(event) => {
+                event.preventDefault();
+                setDropActive(true);
+              }}
+              onDragOver={(event) => {
+                event.preventDefault();
+                setDropActive(true);
+              }}
+              onDragLeave={() => setDropActive(false)}
+              onDrop={(event) => {
+                event.preventDefault();
+                setDropActive(false);
+                setPhotos(Array.from(event.dataTransfer.files || []).filter((file) => file.type.startsWith("image/")));
+              }}
+            >
+              <input type="file" accept="image/*" multiple onChange={(event) => setPhotos(Array.from(event.target.files || []))} />
+              {photos.length > 0 ? `Выбрано фото: ${photos.length}` : "Перетащите фото сюда или выберите файл"}
+            </label>
             <button className="btn btn-primary" type="submit">Отправить</button>
           </form>
         </div>

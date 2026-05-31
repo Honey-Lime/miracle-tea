@@ -71,9 +71,10 @@ exports.getProductReviews = async (req, res) => {
       date: review.createdAt,
       name: review.userId?.name || "Покупатель",
       text: review.text,
-      adminComment: review.adminComment?.text
+      adminComment: review.adminComment?.text || review.adminComment?.photos?.length > 0
         ? {
             text: review.adminComment.text,
+            photos: review.adminComment.photos || [],
             updatedAt: review.adminComment.updatedAt,
           }
         : null,

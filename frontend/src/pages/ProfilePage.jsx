@@ -1,4 +1,5 @@
 import { useContext, useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { cancelOrder, getMyOrders } from "../services/orderService";
@@ -43,6 +44,7 @@ const PasswordEyeIcon = ({ isOpen }) => (
 );
 
 const ProfilePage = () => {
+  const location = useLocation();
   const { user, logout, updateUser, openForgotPasswordModal } = useContext(AuthContext);
   const { addToCart } = useCart();
   const [orders, setOrders] = useState([]);
@@ -57,6 +59,7 @@ const ProfilePage = () => {
   const [selectedReviewOpportunity, setSelectedReviewOpportunity] = useState(null);
   const [reviewText, setReviewText] = useState("");
   const [reviewPhotos, setReviewPhotos] = useState([]);
+  const [reviewDropActive, setReviewDropActive] = useState(false);
   const reviewPhotosRef = useRef([]);
   const [reviewError, setReviewError] = useState("");
   const [nameValue, setNameValue] = useState(user?.name || "");
@@ -236,24 +239,28 @@ const ProfilePage = () => {
     };
   };
 
+  const loadProfileData = () => {
+    if (!user) return;
+    setLoading(true);
+    setNameValue(user.name || "");
+    getMyOrders()
+      .then((res) => {
+        // Исключаем корзину и временные заказы, ожидающие подтверждения оплаты.
+        const completedOrders = res.data.filter(
+          (order) => !["cart", "payment_pending"].includes(order.status),
+        );
+        setOrders(completedOrders);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Ошибка загрузки заказов:", err);
+        setLoading(false);
+      });
+  };
+
   useEffect(() => {
-    if (user) {
-      setNameValue(user.name || "");
-      getMyOrders()
-        .then((res) => {
-          // Исключаем корзину и временные заказы, ожидающие подтверждения оплаты.
-          const completedOrders = res.data.filter(
-            (order) => !["cart", "payment_pending"].includes(order.status),
-          );
-          setOrders(completedOrders);
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error("Ошибка загрузки заказов:", err);
-          setLoading(false);
-        });
-    }
-  }, [user]);
+    loadProfileData();
+  }, [user, location.pathname]);
 
   useEffect(() => {
     loadReviewOpportunities();
@@ -506,10 +513,19 @@ const ProfilePage = () => {
               <div className="form-group">
                 <label>Фото к отзыву (до 5 штук)</label>
                 <label
-                  className="prfp-review-dropzone"
-                  onDragOver={(event) => event.preventDefault()}
+                  className={`prfp-review-dropzone ${reviewDropActive ? "dragging" : ""}`}
+                  onDragEnter={(event) => {
+                    event.preventDefault();
+                    setReviewDropActive(true);
+                  }}
+                  onDragOver={(event) => {
+                    event.preventDefault();
+                    setReviewDropActive(true);
+                  }}
+                  onDragLeave={() => setReviewDropActive(false)}
                   onDrop={(event) => {
                     event.preventDefault();
+                    setReviewDropActive(false);
                     addReviewPhotos(event.dataTransfer.files);
                   }}
                 >
