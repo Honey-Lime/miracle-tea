@@ -396,6 +396,19 @@ const ProductPage = () => {
                   <span>{new Date(review.date).toLocaleDateString("ru-RU")}</span>
                 </div>
                 <p>{review.text}</p>
+                {review.photos?.length > 0 && (
+                  <div className="pp-review-photos">
+                    {review.photos.map((photo, index) => (
+                      <button
+                        type="button"
+                        key={`${review.id}-${photo.url}`}
+                        onClick={() => setReviewPhotoViewer({ photos: review.photos, index })}
+                      >
+                        <img src={photo.url} alt={`Фото к отзыву ${index + 1}`} />
+                      </button>
+                    ))}
+                  </div>
+                )}
                 {review.adminComment?.text && (
                   <div className="pp-review-admin-comment">
                     <strong>Ответ магазина</strong>
@@ -513,19 +526,6 @@ const ProductPage = () => {
                       </div>
                     )}
                   </>
-                )}
-                {review.photos?.length > 0 && (
-                  <div className="pp-review-photos">
-                    {review.photos.map((photo, index) => (
-                      <button
-                        type="button"
-                        key={`${review.id}-${photo.url}`}
-                        onClick={() => setReviewPhotoViewer({ photos: review.photos, index })}
-                      >
-                        <img src={photo.url} alt={`Фото к отзыву ${index + 1}`} />
-                      </button>
-                    ))}
-                  </div>
                 )}
                 <div className="pp-review-reactions">
                   <button

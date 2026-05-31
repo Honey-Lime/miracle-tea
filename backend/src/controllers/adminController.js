@@ -358,10 +358,50 @@ exports.getCustomerDetails = async (req, res) => {
       .populate("list.pid", "name price unit")
       .sort({ date: -1 })
       .limit(30);
+    const completedOrders = await Order.find({ userId: user._id, status: { $in: PAID_TOTAL_STATUSES } })
+      .populate("list.pid", "name unit")
+      .lean();
     const reviews = await Review.find({ userId: user._id })
       .populate("productId", "name")
       .sort({ createdAt: -1 })
       .limit(50);
+
+    const deliveryPhones = [];
+    const deliveryPhoneSet = new Set();
+    orders.forEach((order) => {
+      const phone = String(order.delivery?.details?.phone || "").trim();
+      if (!phone || deliveryPhoneSet.has(phone)) return;
+      deliveryPhoneSet.add(phone);
+      deliveryPhones.push({ phone, lastUsedAt: order.date, orderId: order._id });
+    });
+
+    const productStatsById = new Map();
+    completedOrders.forEach((order) => {
+      (order.list || []).forEach((item) => {
+        if (!item.pid) return;
+        const productId = String(item.pid._id || item.pid);
+        const current = productStatsById.get(productId) || {
+          productId,
+          name: item.pid.name || "Товар",
+          unit: item.pid.unit || "grams",
+          totalCount: 0,
+          orderIds: new Set(),
+        };
+        current.totalCount += Number(item.count) || 0;
+        current.orderIds.add(String(order._id));
+        productStatsById.set(productId, current);
+      });
+    });
+
+    const productStats = Array.from(productStatsById.values())
+      .map((stat) => ({
+        productId: stat.productId,
+        name: stat.name,
+        unit: stat.unit,
+        totalCount: stat.totalCount,
+        ordersCount: stat.orderIds.size,
+      }))
+      .sort((a, b) => b.totalCount - a.totalCount);
 
     res.json({
       customer: {
@@ -377,6 +417,8 @@ exports.getCustomerDetails = async (req, res) => {
       },
       orders,
       reviews,
+      deliveryPhones,
+      productStats,
     });
   } catch (error) {
     logError(error, "getCustomerDetails");
@@ -760,7 +802,7 @@ exports.getStatistics = async (req, res) => {
         if (item.isSampler) {
           productStats[productId].samplerGrams += count;
         } else {
-          productStats[productId].orders.add(order.id);
+          productStats[productId].orders.add(String(order._id));
           productStats[productId].totalGramsExclSamplers += count;
         }
       }

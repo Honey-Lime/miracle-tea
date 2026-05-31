@@ -36,7 +36,8 @@ export const CartProvider = ({ children }) => {
         try {
           const userId = user.id || user._id;
           const cartOwnerUserId = localStorage.getItem(CART_OWNER_KEY);
-          const localItems = cartOwnerUserId && cartOwnerUserId !== String(userId) ? [] : cartItems;
+          const shouldUploadLocalCart = !cartOwnerUserId || cartOwnerUserId === String(userId);
+          const localItems = shouldUploadLocalCart ? cartItems : [];
 
           if (localItems.length !== cartItems.length) {
             setCartItems([]);

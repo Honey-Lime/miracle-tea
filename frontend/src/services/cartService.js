@@ -2,6 +2,32 @@ import axios from "axios";
 
 const API_URL = "/api/orders";
 
+const normalizeLocalCartItems = (items = []) => {
+  const itemsByKey = new Map();
+
+  items.forEach((item) => {
+    const pid = item?.pid?._id || item?.pid;
+    const isSampler = Boolean(item?.isSampler);
+    const unit = item?.unit || "grams";
+    const count = Number(item?.count) || 0;
+    const minCount = unit === "grams" ? 50 : 1;
+
+    if (!pid) return;
+    if (isSampler && count !== 10) return;
+    if (!isSampler && count < minCount) return;
+
+    const key = `${pid}:${isSampler ? "sampler" : "regular"}`;
+    const existing = itemsByKey.get(key);
+    itemsByKey.set(key, {
+      pid,
+      isSampler,
+      count: isSampler ? 10 : (existing?.count || 0) + count,
+    });
+  });
+
+  return Array.from(itemsByKey.values());
+};
+
 // Get cart from server
 export const getCart = async (token) => {
   const response = await axios.get(`${API_URL}/cart`, {
@@ -68,18 +94,26 @@ export const mergeCarts = async (token, localItems) => {
   }
 
   // Server cart is empty, upload local items (if any)
-  if (localItems.length === 0) {
+  const normalizedLocalItems = normalizeLocalCartItems(localItems);
+
+  if (normalizedLocalItems.length === 0) {
     return serverCart; // both empty
   }
 
   // Clear server cart (should already be empty) and add local items
   await clearCart(token);
-  for (const item of localItems) {
-    await addToCart(token, {
-      pid: item.pid,
-      count: item.count,
-      isSampler: item.isSampler,
-    });
+  for (const item of normalizedLocalItems) {
+    try {
+      await addToCart(token, {
+        pid: item.pid,
+        count: item.count,
+        isSampler: item.isSampler,
+      });
+    } catch (error) {
+      if (![400, 404].includes(error.response?.status)) {
+        throw error;
+      }
+    }
   }
 
   // Return updated cart

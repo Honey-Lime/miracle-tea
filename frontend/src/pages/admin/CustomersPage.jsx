@@ -12,6 +12,8 @@ const CustomersPage = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [orders, setOrders] = useState([]);
   const [reviews, setReviews] = useState([]);
+  const [deliveryPhones, setDeliveryPhones] = useState([]);
+  const [productStats, setProductStats] = useState([]);
   const [query, setQuery] = useState("");
   const [bonusAmount, setBonusAmount] = useState("");
   const [loading, setLoading] = useState(false);
@@ -36,6 +38,8 @@ const CustomersPage = () => {
       setSelectedCustomer(response.data.customer);
       setOrders(response.data.orders || []);
       setReviews(response.data.reviews || []);
+      setDeliveryPhones(response.data.deliveryPhones || []);
+      setProductStats(response.data.productStats || []);
       setBonusAmount("");
     } catch (error) {
       addToast(error.response?.data?.message || "Не удалось загрузить клиента", "error");
@@ -156,6 +160,58 @@ const CustomersPage = () => {
                     Списать
                   </button>
                 </div>
+              </div>
+
+              <div className="ap-customer-orders">
+                <h3>Номера для доставки</h3>
+                {deliveryPhones.length === 0 ? (
+                  <p>Номера доставки пока не указаны</p>
+                ) : (
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Телефон</th>
+                        <th>Последний заказ</th>
+                        <th>Дата</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {deliveryPhones.map((item) => (
+                        <tr key={`${item.phone}-${item.orderId}`}>
+                          <td>{item.phone}</td>
+                          <td>{item.orderId}</td>
+                          <td>{new Date(item.lastUsedAt).toLocaleDateString("ru-RU")}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+
+              <div className="ap-customer-orders">
+                <h3>Что заказывал клиент</h3>
+                {productStats.length === 0 ? (
+                  <p>Покупок чая пока нет</p>
+                ) : (
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Чай</th>
+                        <th>Всего заказано</th>
+                        <th>Заказов</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {productStats.map((product) => (
+                        <tr key={product.productId}>
+                          <td>{product.name}</td>
+                          <td>{product.totalCount} {product.unit === "grams" ? "г" : "шт"}</td>
+                          <td>{product.ordersCount}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
 
               <div className="ap-customer-orders">
