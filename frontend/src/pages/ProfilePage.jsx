@@ -2,6 +2,7 @@ import { useContext, useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import { useToast } from "../context/ToastContext";
 import { cancelOrder, getMyOrders } from "../services/orderService";
 import { changePassword, getProfile, updateName } from "../services/authService";
 import PhotoUploadField from "../components/PhotoUploadField";
@@ -48,6 +49,7 @@ const ProfilePage = () => {
   const location = useLocation();
   const { user, logout, updateUser, openForgotPasswordModal } = useContext(AuthContext);
   const { addToCart } = useCart();
+  const { addToast } = useToast();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
@@ -65,7 +67,6 @@ const ProfilePage = () => {
   const [reviewError, setReviewError] = useState("");
   const [nameValue, setNameValue] = useState(user?.name || "");
   const [nameError, setNameError] = useState("");
-  const [nameSuccess, setNameSuccess] = useState("");
   const [nameLoading, setNameLoading] = useState(false);
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -73,7 +74,6 @@ const ProfilePage = () => {
     confirmPassword: "",
   });
   const [passwordError, setPasswordError] = useState("");
-  const [passwordSuccess, setPasswordSuccess] = useState("");
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [showPasswordFields, setShowPasswordFields] = useState({
     currentPassword: false,
@@ -262,7 +262,7 @@ const ProfilePage = () => {
 
   useEffect(() => {
     loadProfileData();
-  }, [user, location.pathname]);
+  }, [user?.id, user?._id, location.pathname]);
 
   useEffect(() => {
     loadReviewOpportunities();
@@ -357,7 +357,6 @@ const ProfilePage = () => {
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     setPasswordError("");
-    setPasswordSuccess("");
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       setPasswordError("Новые пароли не совпадают");
@@ -375,16 +374,13 @@ const ProfilePage = () => {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
       });
-      setPasswordSuccess("Пароль успешно изменён");
       setPasswordData({
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
       });
-      setTimeout(() => {
-        setPasswordModalOpen(false);
-        setPasswordSuccess("");
-      }, 2000);
+      setPasswordModalOpen(false);
+      addToast("Пароль успешно изменён", "success");
     } catch (error) {
       setPasswordError(
         error.response?.data?.message || "Ошибка при смене пароля",
@@ -404,7 +400,6 @@ const ProfilePage = () => {
   const handleNameChange = async (e) => {
     e.preventDefault();
     setNameError("");
-    setNameSuccess("");
 
     const normalizedName = nameValue.trim();
     if (!normalizedName) {
@@ -416,11 +411,8 @@ const ProfilePage = () => {
     try {
       const response = await updateName(normalizedName);
       updateUser(response.data);
-      setNameSuccess("Имя успешно изменено");
-      setTimeout(() => {
-        setNameModalOpen(false);
-        setNameSuccess("");
-      }, 1500);
+      setNameModalOpen(false);
+      addToast("Имя успешно изменено", "success");
     } catch (error) {
       setNameError(error.response?.data?.message || "Ошибка при смене имени");
     } finally {
@@ -561,7 +553,6 @@ const ProfilePage = () => {
                 />
               </div>
               {nameError && <div className="error-message">{nameError}</div>}
-              {nameSuccess && <div className="success-message">{nameSuccess}</div>}
               <div className="modal-actions">
                 <button
                   type="button"
@@ -675,9 +666,6 @@ const ProfilePage = () => {
               </div>
               {passwordError && (
                 <div className="error-message">{passwordError}</div>
-              )}
-              {passwordSuccess && (
-                <div className="success-message">{passwordSuccess}</div>
               )}
               <button
                 type="button"

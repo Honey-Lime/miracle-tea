@@ -6,6 +6,8 @@ const formatMessage = (message) => ({
   sender: message.sender,
   text: message.text,
   photos: message.photos || [],
+  readByUser: message.readByUser,
+  readByAdmin: message.readByAdmin,
   createdAt: message.createdAt,
 });
 
@@ -50,14 +52,17 @@ const addMessage = async ({ chat, sender, text, files }) => {
 exports.getMyChat = async (req, res) => {
   try {
     const chat = await getOrCreateChat(req.userId);
+    await chat.populate("userId", "name email");
+    const responseChat = formatChat(chat);
+
     if (req.query.markRead === "true") {
       chat.messages.forEach((message) => {
         if (message.sender === "admin") message.readByUser = true;
       });
       await chat.save();
     }
-    await chat.populate("userId", "name email");
-    res.json(formatChat(chat));
+
+    res.json(responseChat);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -93,11 +98,14 @@ exports.getAdminChat = async (req, res) => {
   try {
     const chat = await Chat.findById(req.params.id).populate("userId", "name email");
     if (!chat) return res.status(404).json({ message: "Чат не найден" });
+    const responseChat = formatChat(chat);
+
     chat.messages.forEach((message) => {
       if (message.sender === "user") message.readByAdmin = true;
     });
     await chat.save();
-    res.json(formatChat(chat));
+
+    res.json(responseChat);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

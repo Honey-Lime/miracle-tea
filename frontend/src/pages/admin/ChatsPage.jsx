@@ -112,22 +112,26 @@ const ChatsPage = () => {
           ) : (
             <>
               <div className="ap-chat-messages">
-                {selectedChat.messages.map((message) => (
-                  <div className={`ap-chat-message ${message.sender}`} key={message.id}>
-                    <small>{message.sender === "admin" ? "Администратор" : <AdminUserMenu user={selectedChat.user} />}</small>
-                    {message.text && <p>{message.text}</p>}
-                    {message.photos?.map((photo, index) => (
-                      <button
-                        className="ap-chat-photo-thumb"
-                        type="button"
-                        key={photo.url}
-                        onClick={() => setPhotoViewer({ photos: message.photos, index })}
-                      >
-                        <img src={photo.url} alt="Фото в чате" />
-                      </button>
-                    ))}
-                  </div>
-                ))}
+                {selectedChat.messages.map((message) => {
+                  const isUnreadIncoming = message.sender === "user" && !message.readByAdmin;
+
+                  return (
+                    <div className={`ap-chat-message ${message.sender} ${isUnreadIncoming ? "ap-chat-message-unread" : ""}`} key={message.id}>
+                      <small>{message.sender === "admin" ? "Администратор" : <AdminUserMenu user={selectedChat.user} />}</small>
+                      {message.text && <p>{message.text}</p>}
+                      {message.photos?.map((photo, index) => (
+                        <button
+                          className="ap-chat-photo-thumb"
+                          type="button"
+                          key={photo.url}
+                          onClick={() => setPhotoViewer({ photos: message.photos, index })}
+                        >
+                          <img src={photo.url} alt="Фото в чате" />
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })}
               </div>
               <form className="ap-chat-form" onSubmit={sendMessage}>
                 <textarea value={text} onChange={(event) => setText(event.target.value)} onPaste={handleMessagePaste} rows={3} placeholder="Ответ клиенту" />

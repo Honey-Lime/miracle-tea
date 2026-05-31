@@ -117,22 +117,26 @@ const ChatWidget = () => {
           </div>
           <div className="cw-chat-messages" ref={messagesRef}>
             {(chat?.messages || []).length === 0 && <p className="cw-empty">Напишите нам, мы ответим здесь.</p>}
-            {(chat?.messages || []).map((message) => (
-              <div className={`cw-message ${message.sender}`} key={message.id}>
-                <small>{message.sender === "admin" ? "Администратор" : "Вы"}</small>
-                {message.text && <p>{message.text}</p>}
-                {message.photos?.map((photo, index) => (
-                  <button
-                    className="cw-photo-thumb"
-                    type="button"
-                    key={photo.url}
-                    onClick={() => setPhotoViewer({ photos: message.photos, index })}
-                  >
-                    <img src={photo.url} alt="Фото в чате" />
-                  </button>
-                ))}
-              </div>
-            ))}
+            {(chat?.messages || []).map((message) => {
+              const isUnreadIncoming = message.sender === "admin" && !message.readByUser;
+
+              return (
+                <div className={`cw-message ${message.sender} ${isUnreadIncoming ? "cw-message-unread" : ""}`} key={message.id}>
+                  <small>{message.sender === "admin" ? "Администратор" : "Вы"}</small>
+                  {message.text && <p>{message.text}</p>}
+                  {message.photos?.map((photo, index) => (
+                    <button
+                      className="cw-photo-thumb"
+                      type="button"
+                      key={photo.url}
+                      onClick={() => setPhotoViewer({ photos: message.photos, index })}
+                    >
+                      <img src={photo.url} alt="Фото в чате" />
+                    </button>
+                  ))}
+                </div>
+              );
+            })}
           </div>
           <form className="cw-chat-form" onSubmit={sendMessage}>
             <textarea value={text} onChange={(event) => setText(event.target.value)} onPaste={handleMessagePaste} placeholder="Ваше сообщение" rows={2} />
