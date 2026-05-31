@@ -409,6 +409,12 @@
   display: none;
 }
 
+.pp-product-page .pp-admin-comment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .pp-product-page .pp-review-photos {
   display: flex;
   flex-wrap: wrap;

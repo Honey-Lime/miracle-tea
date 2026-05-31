@@ -10,6 +10,7 @@ import { useToast } from "./ToastContext";
 import * as cartService from "../services/cartService";
 
 const CartContext = createContext();
+const CART_OWNER_KEY = "cartOwnerUserId";
 
 export const useCart = () => useContext(CartContext);
 
@@ -33,8 +34,16 @@ export const CartProvider = ({ children }) => {
       const syncCart = async () => {
         setIsSyncing(true);
         try {
+          const userId = user.id || user._id;
+          const cartOwnerUserId = localStorage.getItem(CART_OWNER_KEY);
+          const localItems = cartOwnerUserId && cartOwnerUserId !== String(userId) ? [] : cartItems;
+
+          if (localItems.length !== cartItems.length) {
+            setCartItems([]);
+          }
+
           // Merge local cart with server cart
-          const serverCart = await cartService.mergeCarts(token, cartItems);
+          const serverCart = await cartService.mergeCarts(token, localItems);
           // Update local cart with merged items
           const mergedItems = serverCart.list.map((item) => ({
             pid: item.pid._id || item.pid,
@@ -46,6 +55,7 @@ export const CartProvider = ({ children }) => {
             unit: item.pid.unit || "grams",
           }));
           setCartItems(mergedItems);
+          localStorage.setItem(CART_OWNER_KEY, String(userId));
         } catch (error) {
           console.error("Failed to sync cart with server:", error);
         } finally {
@@ -53,9 +63,9 @@ export const CartProvider = ({ children }) => {
         }
       };
       syncCart();
-    } else if (!user) {
-      // User logged out, keep local cart as is
-      // Optionally clear server cart? Not needed.
+    } else if (!user && !token) {
+      setCartItems([]);
+      localStorage.removeItem(CART_OWNER_KEY);
     }
   }, [user, token]); // eslint-disable-line react-hooks/exhaustive-deps
 

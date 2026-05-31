@@ -12,10 +12,10 @@ const ChatWidget = () => {
   const [dropActive, setDropActive] = useState(false);
   const messagesRef = useRef(null);
 
-  const loadChat = async () => {
+  const loadChat = async (markRead = open) => {
     if (!user) return;
     try {
-      const response = await api.get("/chats/my");
+      const response = await api.get("/chats/my", { params: { markRead } });
       setChat(response.data);
     } catch (error) {
       console.error("Не удалось загрузить чат", error);
@@ -27,7 +27,7 @@ const ChatWidget = () => {
     if (!user) return undefined;
     const intervalId = setInterval(loadChat, 15000);
     return () => clearInterval(intervalId);
-  }, [user]);
+  }, [user, open]);
 
   useEffect(() => {
     if (open) messagesRef.current?.scrollTo({ top: messagesRef.current.scrollHeight });

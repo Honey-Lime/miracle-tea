@@ -50,10 +50,12 @@ const addMessage = async ({ chat, sender, text, files }) => {
 exports.getMyChat = async (req, res) => {
   try {
     const chat = await getOrCreateChat(req.userId);
-    chat.messages.forEach((message) => {
-      if (message.sender === "admin") message.readByUser = true;
-    });
-    await chat.save();
+    if (req.query.markRead === "true") {
+      chat.messages.forEach((message) => {
+        if (message.sender === "admin") message.readByUser = true;
+      });
+      await chat.save();
+    }
     await chat.populate("userId", "name email");
     res.json(formatChat(chat));
   } catch (error) {

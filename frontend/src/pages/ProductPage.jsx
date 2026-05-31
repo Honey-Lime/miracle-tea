@@ -4,6 +4,7 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { getProduct } from "../services/productService";
 import api from "../services/api";
+import AdminUserMenu from "../components/AdminUserMenu";
 
 const ProductPage = () => {
   const { id } = useParams();
@@ -155,8 +156,28 @@ const ProductPage = () => {
         [reviewId]: response.data.adminComment?.photos || [],
       }));
       setAdminCommentPhotos((prev) => ({ ...prev, [reviewId]: [] }));
+      setAdminCommentEditorOpen((prev) => ({ ...prev, [reviewId]: false }));
     } catch (err) {
       alert(err.response?.data?.message || "Не удалось сохранить комментарий");
+    }
+  };
+
+  const deleteAdminComment = async (reviewId) => {
+    const formData = new FormData();
+    formData.append("text", "");
+    formData.append("keptPhotoUrls", JSON.stringify([]));
+
+    try {
+      const response = await api.put(`/admin/reviews/${reviewId}/comment`, formData);
+      setReviews((prev) => prev.map((review) => (
+        review.id === reviewId ? { ...review, adminComment: response.data.adminComment } : review
+      )));
+      setAdminCommentDrafts((prev) => ({ ...prev, [reviewId]: "" }));
+      setAdminCommentExistingPhotos((prev) => ({ ...prev, [reviewId]: [] }));
+      setAdminCommentPhotos((prev) => ({ ...prev, [reviewId]: [] }));
+      setAdminCommentEditorOpen((prev) => ({ ...prev, [reviewId]: false }));
+    } catch (err) {
+      alert(err.response?.data?.message || "Не удалось удалить комментарий");
     }
   };
 
@@ -369,7 +390,9 @@ const ProductPage = () => {
             {sortedReviews.map((review) => (
               <article className="pp-review-card" id={`review-${review.id}`} key={review.id}>
                 <div className="pp-review-header">
-                  <strong>{review.name}</strong>
+                  <strong>
+                    {isAdmin ? <AdminUserMenu user={review.user} fallback={review.name} /> : review.name}
+                  </strong>
                   <span>{new Date(review.date).toLocaleDateString("ru-RU")}</span>
                 </div>
                 <p>{review.text}</p>
@@ -428,6 +451,24 @@ const ProductPage = () => {
                             ))}
                           </div>
                         )}
+                        {(adminCommentPhotos[review.id] || []).length > 0 && (
+                          <div className="pp-admin-comment-files">
+                            {(adminCommentPhotos[review.id] || []).map((photo, index) => (
+                              <div className="pp-admin-comment-file" key={`${photo.name}-${photo.lastModified}-${index}`}>
+                                <img src={URL.createObjectURL(photo)} alt="Новое прикрепленное фото" />
+                                <button
+                                  type="button"
+                                  onClick={() => setAdminCommentPhotos((prev) => ({
+                                    ...prev,
+                                    [review.id]: (prev[review.id] || []).filter((_, photoIndex) => photoIndex !== index),
+                                  }))}
+                                >
+                                  Удалить
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                         <label
                           className={`pp-admin-comment-dropzone ${adminCommentDropActive[review.id] ? "dragging" : ""}`}
                           onDragEnter={(event) => {
@@ -461,9 +502,14 @@ const ProductPage = () => {
                             ? `Выбрано новых фото: ${adminCommentPhotos[review.id].length}`
                             : "Перетащите фото или выберите файлы"}
                         </label>
-                        <button className="btn btn-secondary" type="button" onClick={() => saveAdminComment(review.id)}>
-                          Сохранить комментарий
-                        </button>
+                        <div className="pp-admin-comment-actions">
+                          <button className="btn btn-secondary" type="button" onClick={() => saveAdminComment(review.id)}>
+                            Сохранить комментарий
+                          </button>
+                          <button className="btn btn-secondary" type="button" onClick={() => deleteAdminComment(review.id)}>
+                            Удалить комментарий
+                          </button>
+                        </div>
                       </div>
                     )}
                   </>

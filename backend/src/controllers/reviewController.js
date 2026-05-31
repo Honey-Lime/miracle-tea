@@ -63,13 +63,16 @@ const getCompletedReviewOpportunities = async (userId) => {
 exports.getProductReviews = async (req, res) => {
   try {
     const reviews = await Review.find({ productId: req.params.productId, status: "approved" })
-      .populate("userId", "name")
+      .populate("userId", "name email")
       .sort({ createdAt: -1 });
 
     res.json(reviews.map((review) => ({
       id: review._id,
       date: review.createdAt,
       name: review.userId?.name || "Покупатель",
+      user: review.userId
+        ? { id: review.userId._id, name: review.userId.name, email: review.userId.email }
+        : null,
       text: review.text,
       adminComment: review.adminComment?.text || review.adminComment?.photos?.length > 0
         ? {
