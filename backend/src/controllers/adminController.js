@@ -176,6 +176,37 @@ exports.getPendingReviews = async (_req, res) => {
   }
 };
 
+exports.getAdminNotificationCounts = async (_req, res) => {
+  try {
+    const [pendingReviews, chats] = await Promise.all([
+      Review.countDocuments({ status: "pending" }),
+      require("../models/Chat").find({}).select("messages"),
+    ]);
+    const unreadChats = chats.reduce(
+      (sum, chat) => sum + (chat.messages || []).filter((message) => message.sender === "user" && !message.readByAdmin).length,
+      0,
+    );
+    res.json({ pendingReviews, unreadChats });
+  } catch (error) {
+    logError(error, "getAdminNotificationCounts");
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getApprovedReviews = async (_req, res) => {
+  try {
+    const reviews = await Review.find({ status: "approved" })
+      .populate("userId", "name email")
+      .populate("productId", "name")
+      .sort({ createdAt: -1 })
+      .limit(200);
+    res.json(reviews.map((review) => ({ ...review.toObject(), type: "review" })));
+  } catch (error) {
+    logError(error, "getApprovedReviews");
+    res.status(500).json({ message: error.message });
+  }
+};
+
 exports.approveReview = async (req, res) => {
   try {
     const review = await Review.findById(req.params.id);
@@ -226,8 +257,12 @@ exports.updateReviewAdminComment = async (req, res) => {
 
     const text = String(req.body.text || "").trim();
     const existingPhotos = Array.isArray(review.adminComment?.photos) ? review.adminComment.photos : [];
+    const keptPhotoUrls = JSON.parse(req.body.keptPhotoUrls || "null");
+    const keptPhotos = Array.isArray(keptPhotoUrls)
+      ? existingPhotos.filter((photo) => keptPhotoUrls.includes(photo.url))
+      : existingPhotos;
     const newPhotos = (req.files || []).map((file) => ({ url: `/uploads/chat/${file.filename}` }));
-    const photos = req.body.clearPhotos === "true" ? newPhotos : [...existingPhotos, ...newPhotos];
+    const photos = req.body.clearPhotos === "true" ? newPhotos : [...keptPhotos, ...newPhotos];
     review.adminComment = {
       text,
       photos,
@@ -323,6 +358,10 @@ exports.getCustomerDetails = async (req, res) => {
       .populate("list.pid", "name price unit")
       .sort({ date: -1 })
       .limit(30);
+    const reviews = await Review.find({ userId: user._id })
+      .populate("productId", "name")
+      .sort({ createdAt: -1 })
+      .limit(50);
 
     res.json({
       customer: {
@@ -337,6 +376,7 @@ exports.getCustomerDetails = async (req, res) => {
         createdAt: user.createdAt,
       },
       orders,
+      reviews,
     });
   } catch (error) {
     logError(error, "getCustomerDetails");

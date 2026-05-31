@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { cancelOrder, getMyOrders } from "../services/orderService";
-import { changePassword, updateName } from "../services/authService";
+import { changePassword, getProfile, updateName } from "../services/authService";
 
 const PasswordEyeIcon = ({ isOpen }) => (
   <svg
@@ -243,10 +243,11 @@ const ProfilePage = () => {
     if (!user) return;
     setLoading(true);
     setNameValue(user.name || "");
-    getMyOrders()
-      .then((res) => {
+    Promise.all([getProfile(), getMyOrders()])
+      .then(([profileResponse, ordersResponse]) => {
+        updateUser(profileResponse.data);
         // Исключаем корзину и временные заказы, ожидающие подтверждения оплаты.
-        const completedOrders = res.data.filter(
+        const completedOrders = ordersResponse.data.filter(
           (order) => !["cart", "payment_pending"].includes(order.status),
         );
         setOrders(completedOrders);

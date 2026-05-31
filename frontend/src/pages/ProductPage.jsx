@@ -17,7 +17,9 @@ const ProductPage = () => {
   const [reviews, setReviews] = useState([]);
   const [reviewsSort, setReviewsSort] = useState("likes");
   const [reviewPhotoViewer, setReviewPhotoViewer] = useState(null);
+  const [adminCommentEditorOpen, setAdminCommentEditorOpen] = useState({});
   const [adminCommentDrafts, setAdminCommentDrafts] = useState({});
+  const [adminCommentExistingPhotos, setAdminCommentExistingPhotos] = useState({});
   const [adminCommentPhotos, setAdminCommentPhotos] = useState({});
   const [adminCommentDropActive, setAdminCommentDropActive] = useState({});
 
@@ -53,9 +55,21 @@ const ProductPage = () => {
             [review.id]: review.adminComment?.text || "",
           }), {}),
         );
+        setAdminCommentExistingPhotos(
+          nextReviews.reduce((photos, review) => ({
+            ...photos,
+            [review.id]: review.adminComment?.photos || [],
+          }), {}),
+        );
       })
       .catch(() => setReviews([]));
   }, [id, token]);
+
+  useEffect(() => {
+    if (!window.location.hash || reviews.length === 0) return;
+    const target = document.querySelector(window.location.hash);
+    if (target) target.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [reviews]);
 
   const handleGramChange = (delta) => {
     if (!product) return;
@@ -125,6 +139,10 @@ const ProductPage = () => {
   const saveAdminComment = async (reviewId) => {
     const formData = new FormData();
     formData.append("text", adminCommentDrafts[reviewId] || "");
+    formData.append(
+      "keptPhotoUrls",
+      JSON.stringify((adminCommentExistingPhotos[reviewId] || []).map((photo) => photo.url)),
+    );
     (adminCommentPhotos[reviewId] || []).forEach((photo) => formData.append("photos", photo));
 
     try {
@@ -132,6 +150,10 @@ const ProductPage = () => {
       setReviews((prev) => prev.map((review) => (
         review.id === reviewId ? { ...review, adminComment: response.data.adminComment } : review
       )));
+      setAdminCommentExistingPhotos((prev) => ({
+        ...prev,
+        [reviewId]: response.data.adminComment?.photos || [],
+      }));
       setAdminCommentPhotos((prev) => ({ ...prev, [reviewId]: [] }));
     } catch (err) {
       alert(err.response?.data?.message || "Не удалось сохранить комментарий");
@@ -345,7 +367,7 @@ const ProductPage = () => {
         ) : (
           <div className="pp-reviews-list">
             {sortedReviews.map((review) => (
-              <article className="pp-review-card" key={review.id}>
+              <article className="pp-review-card" id={`review-${review.id}`} key={review.id}>
                 <div className="pp-review-header">
                   <strong>{review.name}</strong>
                   <span>{new Date(review.date).toLocaleDateString("ru-RU")}</span>
@@ -371,51 +393,80 @@ const ProductPage = () => {
                   </div>
                 )}
                 {isAdmin && (
-                  <div className="pp-admin-review-comment-form">
-                    <label>Комментарий администратора</label>
-                    <textarea
-                      rows={3}
-                      value={adminCommentDrafts[review.id] || ""}
-                      onChange={(event) => setAdminCommentDrafts((prev) => ({ ...prev, [review.id]: event.target.value }))}
-                      placeholder="Ответ магазина под отзывом"
-                    />
-                    <label
-                      className={`pp-admin-comment-dropzone ${adminCommentDropActive[review.id] ? "dragging" : ""}`}
-                      onDragEnter={(event) => {
-                        event.preventDefault();
-                        setAdminCommentDropActive((prev) => ({ ...prev, [review.id]: true }));
-                      }}
-                      onDragOver={(event) => {
-                        event.preventDefault();
-                        setAdminCommentDropActive((prev) => ({ ...prev, [review.id]: true }));
-                      }}
-                      onDragLeave={() => setAdminCommentDropActive((prev) => ({ ...prev, [review.id]: false }))}
-                      onDrop={(event) => {
-                        event.preventDefault();
-                        setAdminCommentDropActive((prev) => ({ ...prev, [review.id]: false }));
-                        setAdminCommentPhotos((prev) => ({
-                          ...prev,
-                          [review.id]: Array.from(event.dataTransfer.files || []).filter((file) => file.type.startsWith("image/")),
-                        }));
-                      }}
+                  <>
+                    <button
+                      className="btn btn-secondary pp-admin-comment-toggle"
+                      type="button"
+                      onClick={() => setAdminCommentEditorOpen((prev) => ({ ...prev, [review.id]: !prev[review.id] }))}
                     >
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={(event) => setAdminCommentPhotos((prev) => ({
-                          ...prev,
-                          [review.id]: Array.from(event.target.files || []),
-                        }))}
-                      />
-                      {(adminCommentPhotos[review.id] || []).length > 0
-                        ? `Выбрано фото: ${adminCommentPhotos[review.id].length}`
-                        : "Перетащите фото или выберите файлы"}
-                    </label>
-                    <button className="btn btn-secondary" type="button" onClick={() => saveAdminComment(review.id)}>
-                      Сохранить комментарий
+                      Дать комментарий
                     </button>
-                  </div>
+                    {adminCommentEditorOpen[review.id] && (
+                      <div className="pp-admin-review-comment-form">
+                        <label>Комментарий администратора</label>
+                        <textarea
+                          rows={3}
+                          value={adminCommentDrafts[review.id] || ""}
+                          onChange={(event) => setAdminCommentDrafts((prev) => ({ ...prev, [review.id]: event.target.value }))}
+                          placeholder="Ответ магазина под отзывом"
+                        />
+                        {(adminCommentExistingPhotos[review.id] || []).length > 0 && (
+                          <div className="pp-admin-comment-files">
+                            {(adminCommentExistingPhotos[review.id] || []).map((photo) => (
+                              <div className="pp-admin-comment-file" key={photo.url}>
+                                <img src={photo.url} alt="Прикрепленное фото" />
+                                <button
+                                  type="button"
+                                  onClick={() => setAdminCommentExistingPhotos((prev) => ({
+                                    ...prev,
+                                    [review.id]: (prev[review.id] || []).filter((item) => item.url !== photo.url),
+                                  }))}
+                                >
+                                  Удалить
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <label
+                          className={`pp-admin-comment-dropzone ${adminCommentDropActive[review.id] ? "dragging" : ""}`}
+                          onDragEnter={(event) => {
+                            event.preventDefault();
+                            setAdminCommentDropActive((prev) => ({ ...prev, [review.id]: true }));
+                          }}
+                          onDragOver={(event) => {
+                            event.preventDefault();
+                            setAdminCommentDropActive((prev) => ({ ...prev, [review.id]: true }));
+                          }}
+                          onDragLeave={() => setAdminCommentDropActive((prev) => ({ ...prev, [review.id]: false }))}
+                          onDrop={(event) => {
+                            event.preventDefault();
+                            setAdminCommentDropActive((prev) => ({ ...prev, [review.id]: false }));
+                            setAdminCommentPhotos((prev) => ({
+                              ...prev,
+                              [review.id]: Array.from(event.dataTransfer.files || []).filter((file) => file.type.startsWith("image/")),
+                            }));
+                          }}
+                        >
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={(event) => setAdminCommentPhotos((prev) => ({
+                              ...prev,
+                              [review.id]: Array.from(event.target.files || []),
+                            }))}
+                          />
+                          {(adminCommentPhotos[review.id] || []).length > 0
+                            ? `Выбрано новых фото: ${adminCommentPhotos[review.id].length}`
+                            : "Перетащите фото или выберите файлы"}
+                        </label>
+                        <button className="btn btn-secondary" type="button" onClick={() => saveAdminComment(review.id)}>
+                          Сохранить комментарий
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
                 {review.photos?.length > 0 && (
                   <div className="pp-review-photos">

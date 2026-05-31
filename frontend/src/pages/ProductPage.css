@@ -355,6 +355,36 @@
   resize: vertical;
 }
 
+.pp-product-page .pp-admin-comment-toggle {
+  margin: 0.75rem 0;
+}
+
+.pp-product-page .pp-admin-comment-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.pp-product-page .pp-admin-comment-file {
+  display: grid;
+  gap: 0.35rem;
+  width: 104px;
+}
+
+.pp-product-page .pp-admin-comment-file img {
+  width: 104px;
+  height: 82px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.pp-product-page .pp-admin-comment-file button {
+  padding: 0.3rem;
+  border-radius: 6px;
+  background: var(--color-white);
+  color: var(--color-accent);
+}
+
 .pp-product-page .pp-admin-comment-dropzone {
   display: flex;
   align-items: center;

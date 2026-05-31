@@ -54,7 +54,9 @@ router.get("/settings/bonuses", adminController.getBonusSettings);
 router.put("/settings/bonuses", adminController.updateBonusSettings);
 
 // Reviews
+router.get("/notifications/counts", adminController.getAdminNotificationCounts);
 router.get("/reviews/pending", adminController.getPendingReviews);
+router.get("/reviews/approved", adminController.getApprovedReviews);
 router.put("/reviews/:id/comment", chatUpload.array("photos", 5), adminController.updateReviewAdminComment);
 router.put("/reviews/:id/approve", adminController.approveReview);
 router.put("/reviews/:id/reject", adminController.rejectReview);

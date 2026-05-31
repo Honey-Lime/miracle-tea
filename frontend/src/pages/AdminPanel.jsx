@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Routes, Route, NavLink } from "react-router-dom";
+import api from "../services/api";
 import OrdersPage from "./admin/OrdersPage";
 import EditPage from "./admin/EditPage";
 import StatisticsTab from "./admin/StatisticsTab";
@@ -11,6 +12,18 @@ import ChatsPage from "./admin/ChatsPage";
 
 const AdminPanel = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [counts, setCounts] = useState({ pendingReviews: 0, unreadChats: 0 });
+
+  useEffect(() => {
+    const loadCounts = () => {
+      api.get("/admin/notifications/counts")
+        .then((response) => setCounts(response.data))
+        .catch(() => {});
+    };
+    loadCounts();
+    const intervalId = setInterval(loadCounts, 30000);
+    return () => clearInterval(intervalId);
+  }, []);
 
   return (
     <div className="ap-admin-panel">
@@ -32,10 +45,10 @@ const AdminPanel = () => {
             Клиенты
           </NavLink>
           <NavLink to="/admin/reviews" className="ap-sidebar-link">
-            Отзывы
+            Отзывы {counts.pendingReviews > 0 && <span className="ap-nav-badge">{counts.pendingReviews}</span>}
           </NavLink>
           <NavLink to="/admin/chats" className="ap-sidebar-link">
-            Чаты
+            Чаты {counts.unreadChats > 0 && <span className="ap-nav-badge">{counts.unreadChats}</span>}
           </NavLink>
           <NavLink to="/admin/edit" className="ap-sidebar-link">
             Редактирование

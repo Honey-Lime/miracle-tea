@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
+import AdminUserMenu from "../../components/AdminUserMenu";
 
 const OrdersPage = () => {
   const { token } = useAuth();
@@ -191,7 +192,7 @@ const OrdersPage = () => {
                     })}
                   </span>
                   <span className="op-order-customer">
-                    {order.userId?.name || "Гость"} (
+                    <AdminUserMenu user={order.userId} fallback="Гость" /> (
                     {order.userId?.email || order.userId?.phone || "N/A"})
                   </span>
                   <span

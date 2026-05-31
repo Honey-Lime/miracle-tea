@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
+import AdminUserMenu from "../../components/AdminUserMenu";
 
 const ChatsPage = () => {
   const [chats, setChats] = useState([]);
@@ -47,7 +48,7 @@ const ChatsPage = () => {
           {chats.length === 0 && <p>Чатов пока нет</p>}
           {chats.map((chat) => (
             <button type="button" className={selectedChat?.id === chat.id ? "active" : ""} key={chat.id} onClick={() => openChat(chat.id)}>
-              <strong>{chat.user?.name || "Клиент"}</strong>
+              <strong><AdminUserMenu user={chat.user} /></strong>
               <span>{chat.user?.email || "без email"}</span>
               {chat.unreadForAdmin > 0 && <em>{chat.unreadForAdmin}</em>}
             </button>
@@ -61,7 +62,7 @@ const ChatsPage = () => {
               <div className="ap-chat-messages">
                 {selectedChat.messages.map((message) => (
                   <div className={`ap-chat-message ${message.sender}`} key={message.id}>
-                    <small>{message.sender === "admin" ? "Администратор" : selectedChat.user?.name || "Клиент"}</small>
+                    <small>{message.sender === "admin" ? "Администратор" : <AdminUserMenu user={selectedChat.user} />}</small>
                     {message.text && <p>{message.text}</p>}
                     {message.photos?.map((photo) => (
                       <a href={photo.url} target="_blank" rel="noreferrer" key={photo.url}>

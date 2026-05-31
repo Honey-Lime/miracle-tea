@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import AdminUserMenu from "../../components/AdminUserMenu";
 import api from "../../services/api";
 import { useToast } from "../../context/ToastContext";
 
@@ -7,6 +8,7 @@ const ReviewsPage = () => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [commentDrafts, setCommentDrafts] = useState({});
+  const [commentPhotos, setCommentPhotos] = useState({});
 
   const loadReviews = async () => {
     setLoading(true);
@@ -53,12 +55,16 @@ const ReviewsPage = () => {
   const saveAdminComment = async (reviewId) => {
     try {
       const text = commentDrafts[reviewId] || "";
-      const response = await api.put(`/admin/reviews/${reviewId}/comment`, { text });
+      const formData = new FormData();
+      formData.append("text", text);
+      (commentPhotos[reviewId] || []).forEach((photo) => formData.append("photos", photo));
+      const response = await api.put(`/admin/reviews/${reviewId}/comment`, formData);
       setReviews((prev) =>
         prev.map((review) =>
           review._id === reviewId ? { ...review, adminComment: response.data.adminComment } : review,
         ),
       );
+      setCommentPhotos((prev) => ({ ...prev, [reviewId]: [] }));
       addToast(text.trim() ? "Комментарий сохранён" : "Комментарий удалён", "success");
     } catch (error) {
       addToast(error.response?.data?.message || "Не удалось сохранить комментарий", "error");
@@ -75,7 +81,7 @@ const ReviewsPage = () => {
           <article className="ap-review-card" key={review._id}>
             <div>
               <strong>{review.productId?.name || "Товар"}</strong>
-              <span>{review.userId?.name || "Клиент"} · {review.userId?.email}</span>
+              <span><AdminUserMenu user={review.userId} /> · {review.userId?.email}</span>
             </div>
             <p>{review.text}</p>
             {review.photos?.length > 0 && (
@@ -98,6 +104,18 @@ const ReviewsPage = () => {
                 }
                 placeholder="Комментарий будет показан под отзывом на странице товара"
               />
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(event) => setCommentPhotos((prev) => ({
+                  ...prev,
+                  [review._id]: Array.from(event.target.files || []),
+                }))}
+              />
+              {(commentPhotos[review._id] || []).length > 0 && (
+                <small>Выбрано фото: {commentPhotos[review._id].length}</small>
+              )}
               <button className="btn btn-secondary" type="button" onClick={() => saveAdminComment(review._id)}>
                 Сохранить комментарий
               </button>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import api from "../../services/api";
 import { useToast } from "../../context/ToastContext";
 
@@ -6,9 +7,11 @@ const formatPrice = (value = 0) => `${Number(value || 0).toLocaleString("ru-RU")
 
 const CustomersPage = () => {
   const { addToast } = useToast();
+  const location = useLocation();
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [orders, setOrders] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [query, setQuery] = useState("");
   const [bonusAmount, setBonusAmount] = useState("");
   const [loading, setLoading] = useState(false);
@@ -32,6 +35,7 @@ const CustomersPage = () => {
       const response = await api.get(`/admin/customers/${customerId}`);
       setSelectedCustomer(response.data.customer);
       setOrders(response.data.orders || []);
+      setReviews(response.data.reviews || []);
       setBonusAmount("");
     } catch (error) {
       addToast(error.response?.data?.message || "Не удалось загрузить клиента", "error");
@@ -43,6 +47,11 @@ const CustomersPage = () => {
   useEffect(() => {
     loadCustomers("");
   }, []);
+
+  useEffect(() => {
+    const customerId = new URLSearchParams(location.search).get("customerId");
+    if (customerId) loadCustomerDetails(customerId);
+  }, [location.search]);
 
   const handleSearch = (event) => {
     event.preventDefault();
@@ -172,6 +181,37 @@ const CustomersPage = () => {
                           <td>{order.status}</td>
                           <td>{formatPrice(order.totalPrice)}</td>
                           <td>+{order.bonuses?.earned || 0} / -{order.bonuses?.spent || 0}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+              <div className="ap-customer-orders">
+                <h3>Отзывы клиента</h3>
+                {reviews.length === 0 ? (
+                  <p>Отзывов пока нет</p>
+                ) : (
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Товар</th>
+                        <th>Статус</th>
+                        <th>Дата</th>
+                        <th>Действие</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {reviews.map((review) => (
+                        <tr key={review._id}>
+                          <td>{review.productId?.name || "Товар"}</td>
+                          <td>{review.status}</td>
+                          <td>{new Date(review.createdAt).toLocaleDateString("ru-RU")}</td>
+                          <td>
+                            <a className="btn btn-secondary" href={`/product/${review.productId?._id}#review-${review._id}`} target="_blank" rel="noreferrer">
+                              Перейти
+                            </a>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
