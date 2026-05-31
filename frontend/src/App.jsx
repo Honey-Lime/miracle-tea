@@ -17,6 +17,7 @@ import PersonalDataPolicyPage from "./pages/PersonalDataPolicyPage";
 import RefundPolicyPage from "./pages/RefundPolicyPage";
 import AdminPanel from "./pages/AdminPanel";
 import LoginModal from "./components/LoginModal";
+import ChatWidget from "./components/ChatWidget";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
@@ -49,6 +50,7 @@ function AppContent() {
           </main>
           <Footer />
           <LoginModal />
+          <ChatWidget />
         </>
       )}
     </>

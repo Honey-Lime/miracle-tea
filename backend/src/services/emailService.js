@@ -31,7 +31,31 @@ const createTransporter = async () => {
   });
 };
 
+const sendEmail = async ({ to, subject, text }) => {
+  const transporter = await createTransporter();
+  const appName = process.env.EMAIL_FROM_NAME || "Miracle Tea";
+  const fromAddress = process.env.EMAIL_FROM_ADDRESS || process.env.SMTP_USER;
+
+  if (!transporter || !fromAddress || !to) {
+    return { success: false, error: "Email-сервис не настроен" };
+  }
+
+  try {
+    await transporter.sendMail({
+      from: `${appName} <${fromAddress}>`,
+      to,
+      subject,
+      text,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error(`[emailService] Ошибка отправки письма на ${to}: ${error.message}`);
+    return { success: false, error: error.message || "Ошибка отправки email" };
+  }
+};
+
 exports.generateCode = () => crypto.randomInt(100000, 999999).toString();
+exports.sendEmail = sendEmail;
 
 exports.sendVerificationEmail = async (email, code, purpose = "registration") => {
   const transporter = await createTransporter();

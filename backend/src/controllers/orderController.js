@@ -9,6 +9,7 @@ const {
   getBonusPercent,
   refundOrderSpentBonuses,
 } = require("../services/bonusService");
+const { notifyAdmin } = require("../services/adminNotificationService");
 
 const ID_COUNTER = "orderSequence";
 const LETTERS_COUNT = 26;
@@ -251,6 +252,11 @@ exports.createOrder = async (req, res) => {
         { $set: { list: [], totalPrice: 0 } },
       );
     }
+
+    notifyAdmin(
+      "Новый заказ",
+      `Создан заказ №${savedOrder._id} на сумму ${savedOrder.totalPrice} ₽`,
+    ).catch(() => {});
 
     res.status(201).json(savedOrder);
   } catch (error) {
@@ -517,6 +523,8 @@ exports.cancelUserOrder = async (req, res) => {
     await restoreOrderRemains(order);
     await refundOrderSpentBonuses(order);
     await recalculateUserTotal(req.userId);
+
+    notifyAdmin("Отмена заказа", `Клиент отменил заказ №${order._id}`).catch(() => {});
 
     res.json(updatedOrder);
   } catch (error) {

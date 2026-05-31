@@ -6,12 +6,19 @@ const ReviewsPage = () => {
   const { addToast } = useToast();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [commentDrafts, setCommentDrafts] = useState({});
 
   const loadReviews = async () => {
     setLoading(true);
     try {
       const response = await api.get("/admin/reviews/pending");
       setReviews(response.data);
+      setCommentDrafts(
+        response.data.reduce((drafts, review) => ({
+          ...drafts,
+          [review._id]: review.adminComment?.text || "",
+        }), {}),
+      );
     } catch (error) {
       addToast(error.response?.data?.message || "Не удалось загрузить отзывы", "error");
     } finally {
@@ -43,6 +50,21 @@ const ReviewsPage = () => {
     }
   };
 
+  const saveAdminComment = async (reviewId) => {
+    try {
+      const text = commentDrafts[reviewId] || "";
+      const response = await api.put(`/admin/reviews/${reviewId}/comment`, { text });
+      setReviews((prev) =>
+        prev.map((review) =>
+          review._id === reviewId ? { ...review, adminComment: response.data.adminComment } : review,
+        ),
+      );
+      addToast(text.trim() ? "Комментарий сохранён" : "Комментарий удалён", "success");
+    } catch (error) {
+      addToast(error.response?.data?.message || "Не удалось сохранить комментарий", "error");
+    }
+  };
+
   return (
     <section className="ap-reviews-page">
       <h1>Модерация отзывов</h1>
@@ -65,6 +87,21 @@ const ReviewsPage = () => {
                 ))}
               </div>
             )}
+            <div className="ap-review-admin-comment">
+              <label htmlFor={`admin-comment-${review._id}`}>Комментарий администратора</label>
+              <textarea
+                id={`admin-comment-${review._id}`}
+                rows={3}
+                value={commentDrafts[review._id] || ""}
+                onChange={(event) =>
+                  setCommentDrafts((prev) => ({ ...prev, [review._id]: event.target.value }))
+                }
+                placeholder="Комментарий будет показан под отзывом на странице товара"
+              />
+              <button className="btn btn-secondary" type="button" onClick={() => saveAdminComment(review._id)}>
+                Сохранить комментарий
+              </button>
+            </div>
             <small>Бонус за отзыв: {review.bonusAmount || 0}</small>
             <div className="ap-review-actions">
               <button className="btn btn-primary" type="button" onClick={() => approveReview(review._id)}>

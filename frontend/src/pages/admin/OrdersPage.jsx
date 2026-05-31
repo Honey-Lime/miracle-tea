@@ -33,7 +33,7 @@ const OrdersPage = () => {
 
   const handleUpdateStatus = async (id, newStatus) => {
     try {
-      await axios.put(
+      const response = await axios.put(
         `/api/admin/orders/${id}/status`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } },
@@ -42,7 +42,7 @@ const OrdersPage = () => {
       // Обновляем статус локально, чтобы не вызывать прыжок страницы
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
-          order.id === id ? { ...order, status: newStatus } : order,
+          order.id === id ? response.data : order,
         ),
       );
     } catch (err) {
@@ -234,6 +234,15 @@ const OrdersPage = () => {
                     <div className="op-order-row-item">
                       <strong>Стоимость доставки:</strong>{" "}
                       {formatPrice(order.delivery?.price || 0)}
+                    </div>
+                    {(order.bonuses?.spent || 0) > 0 && (
+                      <div className="op-order-row-item">
+                        <strong>Списано бонусов:</strong> -{order.bonuses.spent}
+                      </div>
+                    )}
+                    <div className="op-order-row-item">
+                      <strong>Будет начислено бонусов:</strong> {order.bonuses?.earned || 0}
+                      {order.bonuses?.credited ? " (начислены)" : ""}
                     </div>
                     <div className="op-order-row-item total">
                       <strong>Итого:</strong> {formatPrice(order.totalPrice)}

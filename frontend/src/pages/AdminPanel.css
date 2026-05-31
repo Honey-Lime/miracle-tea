@@ -291,11 +291,122 @@
   object-fit: cover;
 }
 
+.ap-review-card .ap-review-admin-comment {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.ap-review-card .ap-review-admin-comment label {
+  font-weight: 600;
+}
+
+.ap-review-card .ap-review-admin-comment textarea {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  resize: vertical;
+}
+
+.ap-review-card .ap-review-admin-comment button {
+  justify-self: flex-start;
+}
+
 .ap-review-card .ap-review-actions {
   display: flex;
   flex-direction: row;
   gap: 0.5rem;
   flex-wrap: wrap;
+}
+
+.ap-chats-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 1rem;
+}
+
+.ap-chats-list,
+.ap-chat-window {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--color-primary);
+}
+
+.ap-chats-list {
+  display: grid;
+  align-content: start;
+  overflow: hidden;
+}
+
+.ap-chats-list button {
+  position: relative;
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.85rem;
+  border-bottom: 1px solid var(--border-color);
+  background: transparent;
+  text-align: left;
+}
+
+.ap-chats-list button.active {
+  background: var(--color-secondary-light);
+}
+
+.ap-chats-list em {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  min-width: 22px;
+  border-radius: 999px;
+  background: var(--color-accent);
+  color: var(--color-white);
+  text-align: center;
+}
+
+.ap-chat-window {
+  display: grid;
+  grid-template-rows: minmax(320px, 55vh) auto;
+  overflow: hidden;
+}
+
+.ap-chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.ap-chat-message {
+  max-width: 70%;
+  padding: 0.7rem;
+  border-radius: 10px;
+  background: var(--color-gray-100);
+}
+
+.ap-chat-message.admin {
+  align-self: flex-end;
+  background: var(--color-secondary-light);
+}
+
+.ap-chat-message img {
+  max-width: 160px;
+  border-radius: 8px;
+}
+
+.ap-chat-form {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.ap-chat-form textarea {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  resize: vertical;
 }
 
 @media (max-width: 900px) {
@@ -306,6 +417,10 @@
   }
 
   .ap-customers-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ap-chats-layout {
     grid-template-columns: 1fr;
   }
 }

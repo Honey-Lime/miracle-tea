@@ -26,6 +26,17 @@ const reviewSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    adminComment: {
+      text: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+      updatedAt: {
+        type: Date,
+        default: null,
+      },
+    },
     photos: [
       {
         url: {

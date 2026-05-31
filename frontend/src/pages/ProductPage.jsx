@@ -14,6 +14,7 @@ const ProductPage = () => {
   const [selectedGrams, setSelectedGrams] = useState(50);
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
   const [reviews, setReviews] = useState([]);
+  const [reviewsSort, setReviewsSort] = useState("likes");
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -34,11 +35,13 @@ const ProductPage = () => {
   }, [id]);
 
   useEffect(() => {
-    fetch(`/api/reviews/product/${id}`)
+    fetch(`/api/reviews/product/${id}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
       .then((response) => response.json())
       .then((data) => setReviews(Array.isArray(data) ? data : []))
       .catch(() => setReviews([]));
-  }, [id]);
+  }, [id, token]);
 
   const handleGramChange = (delta) => {
     if (!product) return;
@@ -125,6 +128,21 @@ const ProductPage = () => {
   const hasSamplerInCart = cartItems.some(
     (item) => item.pid === product._id && item.isSampler === true,
   );
+  const sortedReviews = [...reviews].sort((firstReview, secondReview) => {
+    if (reviewsSort === "oldest") {
+      return new Date(firstReview.date) - new Date(secondReview.date);
+    }
+
+    if (reviewsSort === "newest") {
+      return new Date(secondReview.date) - new Date(firstReview.date);
+    }
+
+    if (reviewsSort === "dislikes") {
+      return (secondReview.dislikes || 0) - (firstReview.dislikes || 0);
+    }
+
+    return (secondReview.likes || 0) - (firstReview.likes || 0);
+  });
 
   return (
     <div className="pp-product-page container">
@@ -265,18 +283,37 @@ const ProductPage = () => {
         </div>
       </div>
       <section className="pp-reviews-section">
-        <h2>Отзывы</h2>
+        <div className="pp-reviews-header">
+          <h2>Отзывы</h2>
+          {reviews.length > 0 && (
+            <label className="pp-reviews-sort">
+              <span>Сортировка:</span>
+              <select value={reviewsSort} onChange={(event) => setReviewsSort(event.target.value)}>
+                <option value="likes">По лайкам</option>
+                <option value="dislikes">По дизлайкам</option>
+                <option value="newest">Сначала новые</option>
+                <option value="oldest">Сначала старые</option>
+              </select>
+            </label>
+          )}
+        </div>
         {reviews.length === 0 ? (
           <p>Отзывов пока нет.</p>
         ) : (
           <div className="pp-reviews-list">
-            {reviews.map((review) => (
+            {sortedReviews.map((review) => (
               <article className="pp-review-card" key={review.id}>
                 <div className="pp-review-header">
                   <strong>{review.name}</strong>
                   <span>{new Date(review.date).toLocaleDateString("ru-RU")}</span>
                 </div>
                 <p>{review.text}</p>
+                {review.adminComment?.text && (
+                  <div className="pp-review-admin-comment">
+                    <strong>Ответ магазина</strong>
+                    <p>{review.adminComment.text}</p>
+                  </div>
+                )}
                 {review.photos?.length > 0 && (
                   <div className="pp-review-photos">
                     {review.photos.map((photo, index) => (

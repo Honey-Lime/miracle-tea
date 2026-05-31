@@ -11,6 +11,11 @@ const {
   setBonusPercent,
   setReviewBonusAmount,
 } = require("../services/bonusService");
+const {
+  getNotificationEmail,
+  notifyAdmin,
+  setNotificationEmail,
+} = require("../services/adminNotificationService");
 const { getLogFilePath, logError } = require("../utils/logger");
 const path = require("path");
 const fs = require("fs");
@@ -132,11 +137,12 @@ exports.updateOrderStatus = async (req, res) => {
 
 exports.getBonusSettings = async (_req, res) => {
   try {
-    const [bonusPercent, reviewBonusAmount] = await Promise.all([
+    const [bonusPercent, reviewBonusAmount, notificationEmail] = await Promise.all([
       getBonusPercent(),
       getReviewBonusAmount(),
+      getNotificationEmail(),
     ]);
-    res.json({ bonusPercent, reviewBonusAmount });
+    res.json({ bonusPercent, reviewBonusAmount, notificationEmail });
   } catch (error) {
     logError(error, "getBonusSettings");
     res.status(500).json({ message: error.message });
@@ -145,11 +151,12 @@ exports.getBonusSettings = async (_req, res) => {
 
 exports.updateBonusSettings = async (req, res) => {
   try {
-    const [bonusPercent, reviewBonusAmount] = await Promise.all([
+    const [bonusPercent, reviewBonusAmount, notificationEmail] = await Promise.all([
       setBonusPercent(req.body.bonusPercent),
       setReviewBonusAmount(req.body.reviewBonusAmount),
+      setNotificationEmail(req.body.notificationEmail),
     ]);
-    res.json({ bonusPercent, reviewBonusAmount });
+    res.json({ bonusPercent, reviewBonusAmount, notificationEmail });
   } catch (error) {
     logError(error, "updateBonusSettings");
     res.status(500).json({ message: error.message });
@@ -210,6 +217,27 @@ exports.rejectReview = async (req, res) => {
   }
 };
 
+exports.updateReviewAdminComment = async (req, res) => {
+  try {
+    const review = await Review.findById(req.params.id);
+    if (!review) {
+      return res.status(404).json({ message: "Отзыв не найден" });
+    }
+
+    const text = String(req.body.text || "").trim();
+    review.adminComment = {
+      text,
+      updatedAt: text ? new Date() : null,
+    };
+
+    await review.save();
+    res.json(review);
+  } catch (error) {
+    logError(error, "updateReviewAdminComment");
+    res.status(500).json({ message: error.message });
+  }
+};
+
 exports.cancelOrder = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
@@ -226,6 +254,8 @@ exports.cancelOrder = async (req, res) => {
     await restoreOrderRemains(order);
     await refundOrderSpentBonuses(order);
     await recalculateUserTotal(order.userId);
+
+    notifyAdmin("Отмена заказа", `Администратор отменил заказ №${order._id}`).catch(() => {});
 
     res.json(updatedOrder);
   } catch (error) {

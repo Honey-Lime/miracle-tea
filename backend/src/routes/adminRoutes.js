@@ -4,6 +4,8 @@ const adminController = require("../controllers/adminController");
 const authMiddleware = require("../middleware/authMiddleware");
 const adminMiddleware = require("../middleware/adminMiddleware");
 const upload = require("../middleware/uploadMiddleware");
+const chatUpload = require("../middleware/chatUploadMiddleware");
+const chatController = require("../controllers/chatController");
 
 // All admin routes require authentication and admin privileges
 router.use(authMiddleware);
@@ -53,8 +55,14 @@ router.put("/settings/bonuses", adminController.updateBonusSettings);
 
 // Reviews
 router.get("/reviews/pending", adminController.getPendingReviews);
+router.put("/reviews/:id/comment", adminController.updateReviewAdminComment);
 router.put("/reviews/:id/approve", adminController.approveReview);
 router.put("/reviews/:id/reject", adminController.rejectReview);
+
+// Chats
+router.get("/chats", chatController.getAdminChats);
+router.get("/chats/:id", chatController.getAdminChat);
+router.post("/chats/:id/messages", chatUpload.array("photos", 5), chatController.sendAdminMessage);
 
 // Logs
 router.get("/logs", adminController.getLogs);

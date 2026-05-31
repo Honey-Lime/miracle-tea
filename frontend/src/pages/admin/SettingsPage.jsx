@@ -4,6 +4,7 @@ import api from "../../services/api";
 const SettingsPage = () => {
   const [bonusPercent, setBonusPercent] = useState("0");
   const [reviewBonusAmount, setReviewBonusAmount] = useState("0");
+  const [notificationEmail, setNotificationEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -17,6 +18,7 @@ const SettingsPage = () => {
         const response = await api.get("/admin/settings/bonuses");
         setBonusPercent(String(response.data.bonusPercent ?? 0));
         setReviewBonusAmount(String(response.data.reviewBonusAmount ?? 0));
+        setNotificationEmail(response.data.notificationEmail || "");
       } catch (requestError) {
         setError(requestError.response?.data?.message || "Не удалось загрузить настройки");
       } finally {
@@ -50,9 +52,11 @@ const SettingsPage = () => {
       const response = await api.put("/admin/settings/bonuses", {
         bonusPercent: normalizedPercent,
         reviewBonusAmount: normalizedReviewBonus,
+        notificationEmail,
       });
       setBonusPercent(String(response.data.bonusPercent ?? 0));
       setReviewBonusAmount(String(response.data.reviewBonusAmount ?? 0));
+      setNotificationEmail(response.data.notificationEmail || "");
       setMessage("Настройки бонусов сохранены");
     } catch (requestError) {
       setError(requestError.response?.data?.message || "Не удалось сохранить настройки");
@@ -87,6 +91,17 @@ const SettingsPage = () => {
           onChange={(event) => setReviewBonusAmount(event.target.value)}
           disabled={loading}
         />
+        <label>Email для уведомлений</label>
+        <input
+          type="email"
+          value={notificationEmail}
+          onChange={(event) => setNotificationEmail(event.target.value)}
+          disabled={loading}
+          placeholder="admin@example.com"
+        />
+        <small className="hint">
+          На этот адрес приходят уведомления о новых сообщениях, заказах, отменах и отзывах на модерации.
+        </small>
         {error && <p className="error">{error}</p>}
         {message && <p className="success-message">{message}</p>}
         <button type="submit" className="btn btn-primary" disabled={loading}>

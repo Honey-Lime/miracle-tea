@@ -336,11 +336,7 @@ const ProfilePage = () => {
       setReviewOpportunities((prev) =>
         prev.filter(
           (item) =>
-            !(
-              item.orderId === selectedReviewOpportunity.orderId &&
-              item.productId === selectedReviewOpportunity.productId &&
-              item.isSampler === selectedReviewOpportunity.isSampler
-            ),
+            String(item.productId) !== String(selectedReviewOpportunity.productId),
         ),
       );
       closeReviewModal();
@@ -889,6 +885,19 @@ const ProfilePage = () => {
                 <div className="prfp-total-row">
                   <span>Стоимость доставки:</span>
                   <span>{formatPrice(getDeliveryDetails(selectedOrder).price)}</span>
+                </div>
+                {(selectedOrder.bonuses?.spent || 0) > 0 && (
+                  <div className="prfp-total-row">
+                    <span>Списано бонусов:</span>
+                    <span>-{selectedOrder.bonuses.spent}</span>
+                  </div>
+                )}
+                <div className="prfp-total-row">
+                  <span>Будет начислено бонусов:</span>
+                  <span>
+                    {selectedOrder.bonuses?.earned || 0}
+                    {selectedOrder.bonuses?.credited ? " (начислены)" : ""}
+                  </span>
                 </div>
                 <div className="prfp-total-row grand-total">
                   <span>Итого:</span>

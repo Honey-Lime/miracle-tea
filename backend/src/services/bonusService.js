@@ -66,22 +66,15 @@ const creditOrderBonuses = async (order) => {
 
   const earned = Number(order.bonuses?.earned) || 0;
 
+  order.bonuses.credited = true;
+  order.bonuses.creditedAt = new Date();
+
   if (earned <= 0) {
-    order.bonuses = {
-      ...order.bonuses,
-      credited: true,
-      creditedAt: new Date(),
-    };
     await order.save();
     return 0;
   }
 
   await User.updateOne({ _id: order.userId }, { $inc: { bonusBalance: earned } });
-  order.bonuses = {
-    ...order.bonuses,
-    credited: true,
-    creditedAt: new Date(),
-  };
   await order.save();
 
   return earned;

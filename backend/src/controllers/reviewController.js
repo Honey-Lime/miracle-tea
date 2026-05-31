@@ -2,6 +2,7 @@ const Order = require("../models/Order");
 const Product = require("../models/Product");
 const Review = require("../models/Review");
 const { getReviewBonusAmount } = require("../services/bonusService");
+const { notifyAdmin } = require("../services/adminNotificationService");
 
 const applyReaction = (target, userId, type) => {
   const existingReaction = target.reactions.find(
@@ -27,10 +28,14 @@ const applyReaction = (target, userId, type) => {
 const getCompletedReviewOpportunities = async (userId) => {
   const orders = await Order.find({ userId, status: "completed" }).populate("list.pid", "name");
   const opportunities = [];
+  const productIdsWithOpportunity = new Set();
 
   for (const order of orders) {
     for (const item of order.list || []) {
       if (!item.pid) continue;
+
+      const productId = String(item.pid._id);
+      if (productIdsWithOpportunity.has(productId)) continue;
 
       const existingReview = await Review.findOne({
         userId,
@@ -40,6 +45,7 @@ const getCompletedReviewOpportunities = async (userId) => {
       });
 
       if (!existingReview) {
+        productIdsWithOpportunity.add(productId);
         opportunities.push({
           orderId: order._id,
           productId: item.pid._id,
@@ -65,6 +71,12 @@ exports.getProductReviews = async (req, res) => {
       date: review.createdAt,
       name: review.userId?.name || "Покупатель",
       text: review.text,
+      adminComment: review.adminComment?.text
+        ? {
+            text: review.adminComment.text,
+            updatedAt: review.adminComment.updatedAt,
+          }
+        : null,
       photos: review.photos || [],
       likes: review.likes || 0,
       dislikes: review.dislikes || 0,
@@ -153,10 +165,12 @@ exports.createReview = async (req, res) => {
       bonusAmount: await getReviewBonusAmount(),
     });
 
+    notifyAdmin("Новый отзыв на модерации", `Поступил новый отзыв на товар ${productId}:\n\n${normalizedText}`).catch(() => {});
+
     res.status(201).json(review);
   } catch (error) {
     if (error?.code === 11000) {
-      return res.status(400).json({ message: "Вы уже оставили отзыв по этой позиции заказа" });
+      return res.status(400).json({ message: "Вы уже оставили отзыв по этой покупке" });
     }
     res.status(500).json({ message: error.message });
   }
