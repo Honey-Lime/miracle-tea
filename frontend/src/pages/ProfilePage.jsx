@@ -4,8 +4,46 @@ import { useCart } from "../context/CartContext";
 import { cancelOrder, getMyOrders } from "../services/orderService";
 import { changePassword, updateName } from "../services/authService";
 
+const PasswordEyeIcon = ({ isOpen }) => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    {isOpen ? (
+      <>
+        <path
+          d="M2.5 12C4.5 7.8 7.7 5.7 12 5.7C16.3 5.7 19.5 7.8 21.5 12C19.5 16.2 16.3 18.3 12 18.3C7.7 18.3 4.5 16.2 2.5 12Z"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" />
+      </>
+    ) : (
+      <>
+        <path
+          d="M3 12C5.1 15.2 8.1 16.8 12 16.8C15.9 16.8 18.9 15.2 21 12"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path d="M6.5 15.2L5 17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M10 16.6L9.5 19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M14 16.6L14.5 19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M17.5 15.2L19 17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </>
+    )}
+  </svg>
+);
+
 const ProfilePage = () => {
-  const { user, logout, updateUser } = useContext(AuthContext);
+  const { user, logout, updateUser, openForgotPasswordModal } = useContext(AuthContext);
   const { addToCart } = useCart();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,6 +63,11 @@ const ProfilePage = () => {
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState("");
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [showPasswordFields, setShowPasswordFields] = useState({
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  });
 
   const getStatusLabel = (status) => {
     const labels = {
@@ -226,6 +269,13 @@ const ProfilePage = () => {
     }
   };
 
+  const togglePasswordField = (field) => {
+    setShowPasswordFields((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
+
   const handleNameChange = async (e) => {
     e.preventDefault();
     setNameError("");
@@ -352,47 +402,80 @@ const ProfilePage = () => {
             <form onSubmit={handlePasswordChange}>
               <div className="form-group">
                 <label>Текущий пароль</label>
-                <input
-                  type="password"
-                  value={passwordData.currentPassword}
-                  onChange={(e) =>
-                    setPasswordData({
-                      ...passwordData,
-                      currentPassword: e.target.value,
-                    })
-                  }
-                  required
-                />
+                <div className="password-input-wrapper">
+                  <input
+                    type={showPasswordFields.currentPassword ? "text" : "password"}
+                    value={passwordData.currentPassword}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        currentPassword: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => togglePasswordField("currentPassword")}
+                    aria-label={showPasswordFields.currentPassword ? "Скрыть пароль" : "Показать пароль"}
+                    title={showPasswordFields.currentPassword ? "Скрыть пароль" : "Показать пароль"}
+                  >
+                    <PasswordEyeIcon isOpen={showPasswordFields.currentPassword} />
+                  </button>
+                </div>
               </div>
               <div className="form-group">
                 <label>Новый пароль</label>
-                <input
-                  type="password"
-                  value={passwordData.newPassword}
-                  onChange={(e) =>
-                    setPasswordData({
-                      ...passwordData,
-                      newPassword: e.target.value,
-                    })
-                  }
-                  required
-                  minLength={6}
-                />
+                <div className="password-input-wrapper">
+                  <input
+                    type={showPasswordFields.newPassword ? "text" : "password"}
+                    value={passwordData.newPassword}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        newPassword: e.target.value,
+                      })
+                    }
+                    required
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => togglePasswordField("newPassword")}
+                    aria-label={showPasswordFields.newPassword ? "Скрыть пароль" : "Показать пароль"}
+                    title={showPasswordFields.newPassword ? "Скрыть пароль" : "Показать пароль"}
+                  >
+                    <PasswordEyeIcon isOpen={showPasswordFields.newPassword} />
+                  </button>
+                </div>
               </div>
               <div className="form-group">
                 <label>Подтвердите новый пароль</label>
-                <input
-                  type="password"
-                  value={passwordData.confirmPassword}
-                  onChange={(e) =>
-                    setPasswordData({
-                      ...passwordData,
-                      confirmPassword: e.target.value,
-                    })
-                  }
-                  required
-                  minLength={6}
-                />
+                <div className="password-input-wrapper">
+                  <input
+                    type={showPasswordFields.confirmPassword ? "text" : "password"}
+                    value={passwordData.confirmPassword}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        confirmPassword: e.target.value,
+                      })
+                    }
+                    required
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => togglePasswordField("confirmPassword")}
+                    aria-label={showPasswordFields.confirmPassword ? "Скрыть пароль" : "Показать пароль"}
+                    title={showPasswordFields.confirmPassword ? "Скрыть пароль" : "Показать пароль"}
+                  >
+                    <PasswordEyeIcon isOpen={showPasswordFields.confirmPassword} />
+                  </button>
+                </div>
               </div>
               {passwordError && (
                 <div className="error-message">{passwordError}</div>
@@ -400,6 +483,16 @@ const ProfilePage = () => {
               {passwordSuccess && (
                 <div className="success-message">{passwordSuccess}</div>
               )}
+              <button
+                type="button"
+                className="link-btn forgot-password-btn"
+                onClick={() => {
+                  setPasswordModalOpen(false);
+                  openForgotPasswordModal(user?.email || "");
+                }}
+              >
+                Забыли пароль?
+              </button>
               <div className="modal-actions">
                 <button
                   type="button"

@@ -23,6 +23,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [forgotPasswordModalOpen, setForgotPasswordModalOpen] = useState(false);
+  const [passwordResetEmail, setPasswordResetEmail] = useState("");
   const isAdmin = user?.isAdmin || false;
 
   const applyAuthResponse = (response) => {
@@ -75,7 +77,20 @@ export const AuthProvider = ({ children }) => {
   };
 
   const openLoginModal = () => setLoginModalOpen(true);
-  const closeLoginModal = () => setLoginModalOpen(false);
+  const openForgotPasswordModal = (email = "") => {
+    setPasswordResetEmail(email);
+    setForgotPasswordModalOpen(true);
+    setLoginModalOpen(true);
+  };
+  const closeLoginModal = () => {
+    setLoginModalOpen(false);
+    setForgotPasswordModalOpen(false);
+    setPasswordResetEmail("");
+  };
+  const closeForgotPasswordModal = () => {
+    setForgotPasswordModalOpen(false);
+    setPasswordResetEmail("");
+  };
 
   // Проверка токена при загрузке
   useEffect(() => {
@@ -98,8 +113,12 @@ export const AuthProvider = ({ children }) => {
     updateUser,
     logout,
     loginModalOpen,
+    forgotPasswordModalOpen,
+    passwordResetEmail,
     openLoginModal,
+    openForgotPasswordModal,
     closeLoginModal,
+    closeForgotPasswordModal,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

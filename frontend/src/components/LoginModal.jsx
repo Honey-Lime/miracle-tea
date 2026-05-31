@@ -45,7 +45,15 @@ const PasswordEyeIcon = ({ isOpen }) => (
 );
 
 const LoginModal = () => {
-  const { loginModalOpen, closeLoginModal, login, register } =
+  const {
+    loginModalOpen,
+    forgotPasswordModalOpen,
+    passwordResetEmail,
+    closeLoginModal,
+    closeForgotPasswordModal,
+    login,
+    register,
+  } =
     useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -244,6 +252,7 @@ const LoginModal = () => {
       });
       alert("Пароль успешно изменён. Теперь вы можете войти.");
       setIsForgotPassword(false);
+      closeForgotPasswordModal();
       setEmail("");
       setResetCode("");
       setNewPassword("");
@@ -275,6 +284,22 @@ const LoginModal = () => {
       setError("");
     }
   }, [loginModalOpen]);
+
+  useEffect(() => {
+    if (forgotPasswordModalOpen) {
+      setIsRegister(false);
+      setIsForgotPassword(true);
+      setResetCodeSent(false);
+      setResetCode("");
+      setNewPassword("");
+      setShowNewPassword(false);
+      setError("");
+
+      if (passwordResetEmail) {
+        setEmail(passwordResetEmail);
+      }
+    }
+  }, [forgotPasswordModalOpen, passwordResetEmail]);
 
   if (!loginModalOpen) return null;
 
@@ -463,12 +488,18 @@ const LoginModal = () => {
       {isForgotPassword && (
         <div
           className="modal-overlay"
-          onClick={() => setIsForgotPassword(false)}
+          onClick={() => {
+            setIsForgotPassword(false);
+            closeForgotPasswordModal();
+          }}
         >
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <button
               className="modal-close"
-              onClick={() => setIsForgotPassword(false)}
+              onClick={() => {
+                setIsForgotPassword(false);
+                closeForgotPasswordModal();
+              }}
             >
               x
             </button>
@@ -508,6 +539,7 @@ const LoginModal = () => {
                     className="btn btn-secondary"
                     onClick={() => {
                       setIsForgotPassword(false);
+                      closeForgotPasswordModal();
                       setError("");
                     }}
                   >
