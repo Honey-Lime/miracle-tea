@@ -70,6 +70,7 @@ const LoginModal = () => {
   const [resetCodeSent, setResetCodeSent] = useState(false);
   const [resetCode, setResetCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
@@ -270,6 +271,7 @@ const LoginModal = () => {
       setRegistrationStep(1);
       setShowPassword(false);
       setShowConfirmPassword(false);
+      setShowNewPassword(false);
       setError("");
     }
   }, [loginModalOpen]);
@@ -531,14 +533,25 @@ const LoginModal = () => {
 
                 <div className="form-group">
                   <label>Новый пароль</label>
-                  <input
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    required
-                    minLength={6}
-                    placeholder="Новый пароль"
-                  />
+                  <div className="password-input-wrapper">
+                    <input
+                      type={showNewPassword ? "text" : "password"}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required
+                      minLength={6}
+                      placeholder="Новый пароль"
+                    />
+                    <button
+                      type="button"
+                      className="password-toggle-btn"
+                      onClick={() => setShowNewPassword((prev) => !prev)}
+                      aria-label={showNewPassword ? "Скрыть пароль" : "Показать пароль"}
+                      title={showNewPassword ? "Скрыть пароль" : "Показать пароль"}
+                    >
+                      <PasswordEyeIcon isOpen={showNewPassword} />
+                    </button>
+                  </div>
                 </div>
 
                 {error && <p className="error">{error}</p>}
@@ -551,6 +564,7 @@ const LoginModal = () => {
                       setResetCodeSent(false);
                       setResetCode("");
                       setNewPassword("");
+                      setShowNewPassword(false);
                       setError("");
                     }}
                   >
