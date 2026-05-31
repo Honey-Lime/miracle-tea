@@ -1,0 +1,76 @@
+.puf-photo-upload-field {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.puf-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  min-height: 72px;
+  padding: 0.75rem;
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+  background: var(--color-gray-100);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s, background 0.2s;
+}
+
+.puf-dropzone.dragging {
+  border-color: #1d4ed8;
+  box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.16);
+  transform: scale(1.02);
+  background: rgba(29, 78, 216, 0.06);
+}
+
+.puf-dropzone input {
+  display: none;
+}
+
+.puf-icon {
+  font-size: 1.25rem;
+}
+
+.puf-dropzone small {
+  color: var(--color-text-secondary);
+  font-size: 0.82rem;
+}
+
+.puf-preview-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.puf-preview {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--color-gray-100);
+}
+
+.puf-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.puf-preview button {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.72);
+  color: var(--color-white);
+  line-height: 1;
+}

@@ -5,6 +5,8 @@ import { useAuth } from "../context/AuthContext";
 import { getProduct } from "../services/productService";
 import api from "../services/api";
 import AdminUserMenu from "../components/AdminUserMenu";
+import PhotoUploadField from "../components/PhotoUploadField";
+import { compressImageFiles } from "../utils/imageCompression";
 
 const ProductPage = () => {
   const { id } = useParams();
@@ -137,6 +139,31 @@ const ProductPage = () => {
     }
   };
 
+  const addAdminCommentPhotos = async (reviewId, files) => {
+    const compressedFiles = await compressImageFiles(files);
+    const allowedFiles = compressedFiles.filter((file) => file.size <= 4 * 1024 * 1024);
+    if (allowedFiles.length < compressedFiles.length) {
+      alert("Часть фото не прикреплена: после сжатия файл всё ещё больше 4 МБ.");
+    }
+    const nextPhotos = allowedFiles.map((file) => ({ file, previewUrl: URL.createObjectURL(file) }));
+    setAdminCommentPhotos((prev) => ({
+      ...prev,
+      [reviewId]: [...(prev[reviewId] || []), ...nextPhotos],
+    }));
+  };
+
+  const removeAdminCommentPhoto = (reviewId, index) => {
+    setAdminCommentPhotos((prev) => {
+      const photos = prev[reviewId] || [];
+      const photo = photos[index];
+      if (photo) URL.revokeObjectURL(photo.previewUrl);
+      return {
+        ...prev,
+        [reviewId]: photos.filter((_, photoIndex) => photoIndex !== index),
+      };
+    });
+  };
+
   const saveAdminComment = async (reviewId) => {
     const formData = new FormData();
     formData.append("text", adminCommentDrafts[reviewId] || "");
@@ -144,7 +171,7 @@ const ProductPage = () => {
       "keptPhotoUrls",
       JSON.stringify((adminCommentExistingPhotos[reviewId] || []).map((photo) => photo.url)),
     );
-    (adminCommentPhotos[reviewId] || []).forEach((photo) => formData.append("photos", photo));
+    (adminCommentPhotos[reviewId] || []).forEach((photo) => formData.append("photos", photo.file));
 
     try {
       const response = await api.put(`/admin/reviews/${reviewId}/comment`, formData);
@@ -155,7 +182,10 @@ const ProductPage = () => {
         ...prev,
         [reviewId]: response.data.adminComment?.photos || [],
       }));
-      setAdminCommentPhotos((prev) => ({ ...prev, [reviewId]: [] }));
+      setAdminCommentPhotos((prev) => {
+        (prev[reviewId] || []).forEach((photo) => URL.revokeObjectURL(photo.previewUrl));
+        return { ...prev, [reviewId]: [] };
+      });
       setAdminCommentEditorOpen((prev) => ({ ...prev, [reviewId]: false }));
     } catch (err) {
       alert(err.response?.data?.message || "Не удалось сохранить комментарий");
@@ -174,7 +204,10 @@ const ProductPage = () => {
       )));
       setAdminCommentDrafts((prev) => ({ ...prev, [reviewId]: "" }));
       setAdminCommentExistingPhotos((prev) => ({ ...prev, [reviewId]: [] }));
-      setAdminCommentPhotos((prev) => ({ ...prev, [reviewId]: [] }));
+      setAdminCommentPhotos((prev) => {
+        (prev[reviewId] || []).forEach((photo) => URL.revokeObjectURL(photo.previewUrl));
+        return { ...prev, [reviewId]: [] };
+      });
       setAdminCommentEditorOpen((prev) => ({ ...prev, [reviewId]: false }));
     } catch (err) {
       alert(err.response?.data?.message || "Не удалось удалить комментарий");
@@ -464,57 +497,15 @@ const ProductPage = () => {
                             ))}
                           </div>
                         )}
-                        {(adminCommentPhotos[review.id] || []).length > 0 && (
-                          <div className="pp-admin-comment-files">
-                            {(adminCommentPhotos[review.id] || []).map((photo, index) => (
-                              <div className="pp-admin-comment-file" key={`${photo.name}-${photo.lastModified}-${index}`}>
-                                <img src={URL.createObjectURL(photo)} alt="Новое прикрепленное фото" />
-                                <button
-                                  type="button"
-                                  onClick={() => setAdminCommentPhotos((prev) => ({
-                                    ...prev,
-                                    [review.id]: (prev[review.id] || []).filter((_, photoIndex) => photoIndex !== index),
-                                  }))}
-                                >
-                                  Удалить
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        <label
-                          className={`pp-admin-comment-dropzone ${adminCommentDropActive[review.id] ? "dragging" : ""}`}
-                          onDragEnter={(event) => {
-                            event.preventDefault();
-                            setAdminCommentDropActive((prev) => ({ ...prev, [review.id]: true }));
-                          }}
-                          onDragOver={(event) => {
-                            event.preventDefault();
-                            setAdminCommentDropActive((prev) => ({ ...prev, [review.id]: true }));
-                          }}
-                          onDragLeave={() => setAdminCommentDropActive((prev) => ({ ...prev, [review.id]: false }))}
-                          onDrop={(event) => {
-                            event.preventDefault();
-                            setAdminCommentDropActive((prev) => ({ ...prev, [review.id]: false }));
-                            setAdminCommentPhotos((prev) => ({
-                              ...prev,
-                              [review.id]: Array.from(event.dataTransfer.files || []).filter((file) => file.type.startsWith("image/")),
-                            }));
-                          }}
-                        >
-                          <input
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            onChange={(event) => setAdminCommentPhotos((prev) => ({
-                              ...prev,
-                              [review.id]: Array.from(event.target.files || []),
-                            }))}
-                          />
-                          {(adminCommentPhotos[review.id] || []).length > 0
-                            ? `Выбрано новых фото: ${adminCommentPhotos[review.id].length}`
-                            : "Перетащите фото или выберите файлы"}
-                        </label>
+                        <PhotoUploadField
+                          photos={adminCommentPhotos[review.id] || []}
+                          onAddFiles={(files) => addAdminCommentPhotos(review.id, files)}
+                          onRemovePhoto={(index) => removeAdminCommentPhoto(review.id, index)}
+                          dragging={adminCommentDropActive[review.id]}
+                          onDragChange={(value) => setAdminCommentDropActive((prev) => ({ ...prev, [review.id]: value }))}
+                          label="Перетащите фото или нажмите, чтобы выбрать"
+                          note="JPEG, PNG, WebP или GIF. Максимальный размер фото после сжатия — 4 МБ."
+                        />
                         <div className="pp-admin-comment-actions">
                           <button className="btn btn-secondary" type="button" onClick={() => saveAdminComment(review.id)}>
                             Сохранить комментарий

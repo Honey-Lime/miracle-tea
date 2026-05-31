@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
+import PhotoUploadField from "./PhotoUploadField";
 import { compressImageFiles } from "../utils/imageCompression";
 import "./ChatWidget.css";
 
@@ -31,6 +32,13 @@ const ChatWidget = () => {
       if (photo) URL.revokeObjectURL(photo.previewUrl);
       return prev.filter((_, photoIndex) => photoIndex !== index);
     });
+  };
+
+  const handleMessagePaste = (event) => {
+    const files = Array.from(event.clipboardData?.files || []).filter((file) => file.type.startsWith("image/"));
+    if (files.length === 0) return;
+    event.preventDefault();
+    addSelectedPhotos(files);
   };
 
   const loadChat = async (markRead = open) => {
@@ -127,46 +135,16 @@ const ChatWidget = () => {
             ))}
           </div>
           <form className="cw-chat-form" onSubmit={sendMessage}>
-            <textarea value={text} onChange={(event) => setText(event.target.value)} placeholder="Ваше сообщение" rows={2} />
-            <label
-              className={`cw-file-dropzone ${dropActive ? "dragging" : ""}`}
-              onDragEnter={(event) => {
-                event.preventDefault();
-                setDropActive(true);
-              }}
-              onDragOver={(event) => {
-                event.preventDefault();
-                setDropActive(true);
-              }}
-              onDragLeave={() => setDropActive(false)}
-              onDrop={(event) => {
-                event.preventDefault();
-                setDropActive(false);
-                addSelectedPhotos(event.dataTransfer.files);
-              }}
-            >
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={(event) => {
-                  addSelectedPhotos(event.target.files);
-                  event.target.value = "";
-                }}
-              />
-              {photos.length > 0 ? `Выбрано фото: ${photos.length}` : "Перетащите фото сюда или выберите файл"}
-              <small>Крупные фото автоматически уменьшаются перед отправкой.</small>
-            </label>
-            {photos.length > 0 && (
-              <div className="cw-selected-photos">
-                {photos.map((photo, index) => (
-                  <div className="cw-selected-photo" key={photo.previewUrl}>
-                    <img src={photo.previewUrl} alt={`Выбранное фото ${index + 1}`} />
-                    <button type="button" onClick={() => removeSelectedPhoto(index)}>×</button>
-                  </div>
-                ))}
-              </div>
-            )}
+            <textarea value={text} onChange={(event) => setText(event.target.value)} onPaste={handleMessagePaste} placeholder="Ваше сообщение" rows={2} />
+            <PhotoUploadField
+              photos={photos}
+              onAddFiles={addSelectedPhotos}
+              onRemovePhoto={removeSelectedPhoto}
+              dragging={dropActive}
+              onDragChange={setDropActive}
+              label="Перетащите фото, выберите файл или вставьте скриншот Ctrl+V в поле сообщения"
+              note="JPEG, PNG, WebP или GIF. Максимальный размер фото после сжатия — 4 МБ."
+            />
             <button className="btn btn-primary" type="submit">Отправить</button>
           </form>
         </div>

@@ -4,6 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { cancelOrder, getMyOrders } from "../services/orderService";
 import { changePassword, getProfile, updateName } from "../services/authService";
+import PhotoUploadField from "../components/PhotoUploadField";
 
 const PasswordEyeIcon = ({ isOpen }) => (
   <svg
@@ -513,47 +514,16 @@ const ProfilePage = () => {
               </div>
               <div className="form-group">
                 <label>Фото к отзыву (до 5 штук)</label>
-                <label
-                  className={`prfp-review-dropzone ${reviewDropActive ? "dragging" : ""}`}
-                  onDragEnter={(event) => {
-                    event.preventDefault();
-                    setReviewDropActive(true);
-                  }}
-                  onDragOver={(event) => {
-                    event.preventDefault();
-                    setReviewDropActive(true);
-                  }}
-                  onDragLeave={() => setReviewDropActive(false)}
-                  onDrop={(event) => {
-                    event.preventDefault();
-                    setReviewDropActive(false);
-                    addReviewPhotos(event.dataTransfer.files);
-                  }}
-                >
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={(event) => {
-                      addReviewPhotos(event.target.files);
-                      event.target.value = "";
-                    }}
-                  />
-                  <span>Перетащите фото сюда или нажмите, чтобы выбрать файлы</span>
-                  <small>JPEG, PNG, WebP или GIF. Максимум 5 фото.</small>
-                </label>
-                {reviewPhotos.length > 0 && (
-                  <div className="prfp-review-photo-preview-list">
-                    {reviewPhotos.map((photo, index) => (
-                      <div className="prfp-review-photo-preview" key={photo.previewUrl}>
-                        <img src={photo.previewUrl} alt={`Фото к отзыву ${index + 1}`} />
-                        <button type="button" onClick={() => removeReviewPhoto(index)}>
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <PhotoUploadField
+                  photos={reviewPhotos}
+                  onAddFiles={addReviewPhotos}
+                  onRemovePhoto={removeReviewPhoto}
+                  dragging={reviewDropActive}
+                  onDragChange={setReviewDropActive}
+                  maxCount={5}
+                  label="Перетащите фото или нажмите, чтобы выбрать"
+                  note="JPEG, PNG, WebP или GIF. Максимум 5 фото, до 10 МБ каждое."
+                />
               </div>
               {reviewError && <div className="error-message">{reviewError}</div>}
               <div className="modal-actions">

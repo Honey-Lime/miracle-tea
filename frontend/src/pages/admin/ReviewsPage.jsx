@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import AdminUserMenu from "../../components/AdminUserMenu";
+import PhotoUploadField from "../../components/PhotoUploadField";
 import api from "../../services/api";
 import { useToast } from "../../context/ToastContext";
+import { compressImageFiles } from "../../utils/imageCompression";
 
 const ReviewsPage = () => {
   const { addToast } = useToast();
@@ -9,6 +11,7 @@ const ReviewsPage = () => {
   const [loading, setLoading] = useState(false);
   const [commentDrafts, setCommentDrafts] = useState({});
   const [commentPhotos, setCommentPhotos] = useState({});
+  const [commentDropActive, setCommentDropActive] = useState({});
 
   const loadReviews = async () => {
     setLoading(true);
@@ -32,9 +35,13 @@ const ReviewsPage = () => {
     loadReviews();
   }, []);
 
-  const addCommentPhotos = (reviewId, files) => {
-    const nextPhotos = Array.from(files || [])
-      .filter((file) => file.type.startsWith("image/"))
+  const addCommentPhotos = async (reviewId, files) => {
+    const compressedFiles = await compressImageFiles(files);
+    const allowedFiles = compressedFiles.filter((file) => file.size <= 4 * 1024 * 1024);
+    if (allowedFiles.length < compressedFiles.length) {
+      addToast("Часть фото не прикреплена: после сжатия файл всё ещё больше 4 МБ.", "warning");
+    }
+    const nextPhotos = allowedFiles
       .map((file) => ({ file, previewUrl: URL.createObjectURL(file) }));
     setCommentPhotos((prev) => ({
       ...prev,
@@ -129,25 +136,15 @@ const ReviewsPage = () => {
                 }
                 placeholder="Комментарий будет показан под отзывом на странице товара"
               />
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={(event) => {
-                  addCommentPhotos(review._id, event.target.files);
-                  event.target.value = "";
-                }}
+              <PhotoUploadField
+                photos={commentPhotos[review._id] || []}
+                onAddFiles={(files) => addCommentPhotos(review._id, files)}
+                onRemovePhoto={(index) => removeCommentPhoto(review._id, index)}
+                dragging={commentDropActive[review._id]}
+                onDragChange={(value) => setCommentDropActive((prev) => ({ ...prev, [review._id]: value }))}
+                label="Перетащите фото или нажмите, чтобы выбрать"
+                note="JPEG, PNG, WebP или GIF. Максимальный размер фото после сжатия — 4 МБ."
               />
-              {(commentPhotos[review._id] || []).length > 0 && (
-                <div className="ap-review-selected-photos">
-                  {(commentPhotos[review._id] || []).map((photo, index) => (
-                    <div className="ap-review-selected-photo" key={photo.previewUrl}>
-                      <img src={photo.previewUrl} alt={`Выбранное фото ${index + 1}`} />
-                      <button type="button" onClick={() => removeCommentPhoto(review._id, index)}>×</button>
-                    </div>
-                  ))}
-                </div>
-              )}
               <button className="btn btn-secondary" type="button" onClick={() => saveAdminComment(review._id)}>
                 Сохранить комментарий
               </button>
