@@ -2,17 +2,22 @@ const Order = require("../models/Order");
 const Product = require("../models/Product");
 const Tag = require("../models/Tag");
 const User = require("../models/User");
+const Review = require("../models/Review");
 const {
   creditOrderBonuses,
   getBonusPercent,
+  getReviewBonusAmount,
   refundOrderSpentBonuses,
   setBonusPercent,
+  setReviewBonusAmount,
 } = require("../services/bonusService");
 const { getLogFilePath, logError } = require("../utils/logger");
 const path = require("path");
 const fs = require("fs");
 
 const PAID_TOTAL_STATUSES = ["paid", "assembled", "shipped", "completed"];
+
+const escapeRegex = (value = "") => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 function readLogTail(filePath, maxBytes = 200000) {
   if (!fs.existsSync(filePath)) {
@@ -127,7 +132,11 @@ exports.updateOrderStatus = async (req, res) => {
 
 exports.getBonusSettings = async (_req, res) => {
   try {
-    res.json({ bonusPercent: await getBonusPercent() });
+    const [bonusPercent, reviewBonusAmount] = await Promise.all([
+      getBonusPercent(),
+      getReviewBonusAmount(),
+    ]);
+    res.json({ bonusPercent, reviewBonusAmount });
   } catch (error) {
     logError(error, "getBonusSettings");
     res.status(500).json({ message: error.message });
@@ -136,10 +145,49 @@ exports.getBonusSettings = async (_req, res) => {
 
 exports.updateBonusSettings = async (req, res) => {
   try {
-    const bonusPercent = await setBonusPercent(req.body.bonusPercent);
-    res.json({ bonusPercent });
+    const [bonusPercent, reviewBonusAmount] = await Promise.all([
+      setBonusPercent(req.body.bonusPercent),
+      setReviewBonusAmount(req.body.reviewBonusAmount),
+    ]);
+    res.json({ bonusPercent, reviewBonusAmount });
   } catch (error) {
     logError(error, "updateBonusSettings");
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getPendingReviews = async (_req, res) => {
+  try {
+    const reviews = await Review.find({ status: "pending" })
+      .populate("userId", "name email")
+      .populate("productId", "name")
+      .sort({ createdAt: 1 });
+    res.json(reviews);
+  } catch (error) {
+    logError(error, "getPendingReviews");
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.approveReview = async (req, res) => {
+  try {
+    const review = await Review.findById(req.params.id);
+    if (!review) {
+      return res.status(404).json({ message: "Отзыв не найден" });
+    }
+
+    review.status = "approved";
+    review.moderatedAt = new Date();
+
+    if (!review.bonusCredited && review.bonusAmount > 0) {
+      await User.updateOne({ _id: review.userId }, { $inc: { bonusBalance: review.bonusAmount } });
+      review.bonusCredited = true;
+    }
+
+    await review.save();
+    res.json(review);
+  } catch (error) {
+    logError(error, "approveReview");
     res.status(500).json({ message: error.message });
   }
 };
@@ -164,6 +212,120 @@ exports.cancelOrder = async (req, res) => {
     res.json(updatedOrder);
   } catch (error) {
     logError(error, "cancelOrder");
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getCustomers = async (req, res) => {
+  try {
+    const query = String(req.query.query || "").trim();
+    const filter = query
+      ? {
+          $or: [
+            { name: { $regex: escapeRegex(query), $options: "i" } },
+            { email: { $regex: escapeRegex(query), $options: "i" } },
+          ],
+        }
+      : {};
+
+    const users = await User.find(filter)
+      .select("name email bonusBalance total isAdmin createdAt")
+      .sort({ createdAt: -1 })
+      .limit(100);
+    const orderStats = await Order.aggregate([
+      { $match: { userId: { $in: users.map((user) => user._id) }, status: { $nin: ["cart", "payment_pending"] } } },
+      { $group: { _id: "$userId", ordersCount: { $sum: 1 }, ordersTotal: { $sum: "$totalPrice" } } },
+    ]);
+    const statsByUser = new Map(orderStats.map((stat) => [String(stat._id), stat]));
+
+    res.json(
+      users.map((user) => {
+        const stats = statsByUser.get(String(user._id));
+        return {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          bonusBalance: user.bonusBalance || 0,
+          total: user.total || 0,
+          isAdmin: user.isAdmin,
+          createdAt: user.createdAt,
+          ordersCount: stats?.ordersCount || 0,
+          ordersTotal: stats?.ordersTotal || 0,
+        };
+      }),
+    );
+  } catch (error) {
+    logError(error, "getCustomers");
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getCustomerDetails = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "Клиент не найден" });
+    }
+
+    const orders = await Order.find({ userId: user._id, status: { $nin: ["cart"] } })
+      .populate("list.pid", "name price unit")
+      .sort({ date: -1 })
+      .limit(30);
+
+    res.json({
+      customer: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        bonusBalance: user.bonusBalance || 0,
+        total: user.total || 0,
+        isAdmin: user.isAdmin,
+        delivery: user.delivery,
+        consents: user.consents,
+        createdAt: user.createdAt,
+      },
+      orders,
+    });
+  } catch (error) {
+    logError(error, "getCustomerDetails");
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.adjustCustomerBonuses = async (req, res) => {
+  try {
+    const amount = Math.floor(Number(req.body.amount));
+    const operation = req.body.operation;
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return res.status(400).json({ message: "Укажите положительное количество бонусов" });
+    }
+
+    if (!["add", "subtract"].includes(operation)) {
+      return res.status(400).json({ message: "Неверная операция с бонусами" });
+    }
+
+    const user = await User.findById(req.params.id).select("name email bonusBalance");
+    if (!user) {
+      return res.status(404).json({ message: "Клиент не найден" });
+    }
+
+    const currentBalance = Number(user.bonusBalance) || 0;
+    if (operation === "subtract" && amount > currentBalance) {
+      return res.status(400).json({ message: "На балансе клиента недостаточно бонусов" });
+    }
+
+    user.bonusBalance = operation === "add" ? currentBalance + amount : currentBalance - amount;
+    await user.save();
+
+    res.json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      bonusBalance: user.bonusBalance,
+    });
+  } catch (error) {
+    logError(error, "adjustCustomerBonuses");
     res.status(500).json({ message: error.message });
   }
 };

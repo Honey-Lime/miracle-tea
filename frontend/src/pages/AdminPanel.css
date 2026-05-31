@@ -144,3 +144,140 @@
 .ap-logs-more:hover {
   background: var(--color-brand-dark);
 }
+
+.ap-customers-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.ap-customers-search {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ap-customers-search input,
+.ap-bonus-editor input {
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+}
+
+.ap-customers-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 360px) 1fr;
+  gap: 1.25rem;
+}
+
+.ap-customers-list,
+.ap-customer-details {
+  background: var(--color-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.ap-customer-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+  padding: 0.85rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--color-white);
+  text-align: left;
+  cursor: pointer;
+  margin-bottom: 0.65rem;
+}
+
+.ap-customer-card.active,
+.ap-customer-card:hover {
+  border-color: var(--color-brand);
+  background: var(--color-secondary-light);
+}
+
+.ap-customer-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.ap-customer-info-grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: var(--color-gray-100);
+}
+
+.ap-customer-info-grid span {
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+}
+
+.ap-bonus-editor {
+  margin: 1.25rem 0;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.ap-bonus-editor div {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.ap-customer-orders table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ap-customer-orders th,
+.ap-customer-orders td {
+  padding: 0.7rem;
+  border-bottom: 1px solid var(--color-gray-200);
+  text-align: left;
+}
+
+.ap-reviews-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.ap-review-card {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--color-primary);
+}
+
+.ap-review-card div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ap-review-card span,
+.ap-review-card small {
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 900px) {
+  .ap-customers-header,
+  .ap-customers-search {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ap-customers-layout {
+    grid-template-columns: 1fr;
+  }
+}

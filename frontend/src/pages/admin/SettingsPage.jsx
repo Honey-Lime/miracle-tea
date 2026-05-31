@@ -3,6 +3,7 @@ import api from "../../services/api";
 
 const SettingsPage = () => {
   const [bonusPercent, setBonusPercent] = useState("0");
+  const [reviewBonusAmount, setReviewBonusAmount] = useState("0");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -15,6 +16,7 @@ const SettingsPage = () => {
       try {
         const response = await api.get("/admin/settings/bonuses");
         setBonusPercent(String(response.data.bonusPercent ?? 0));
+        setReviewBonusAmount(String(response.data.reviewBonusAmount ?? 0));
       } catch (requestError) {
         setError(requestError.response?.data?.message || "Не удалось загрузить настройки");
       } finally {
@@ -31,9 +33,15 @@ const SettingsPage = () => {
     setError("");
 
     const normalizedPercent = Number(bonusPercent);
+    const normalizedReviewBonus = Math.floor(Number(reviewBonusAmount));
 
     if (!Number.isFinite(normalizedPercent) || normalizedPercent < 0) {
       setError("Введите процент не меньше 0");
+      return;
+    }
+
+    if (!Number.isFinite(normalizedReviewBonus) || normalizedReviewBonus < 0) {
+      setError("Введите бонус за отзыв не меньше 0");
       return;
     }
 
@@ -41,8 +49,10 @@ const SettingsPage = () => {
     try {
       const response = await api.put("/admin/settings/bonuses", {
         bonusPercent: normalizedPercent,
+        reviewBonusAmount: normalizedReviewBonus,
       });
       setBonusPercent(String(response.data.bonusPercent ?? 0));
+      setReviewBonusAmount(String(response.data.reviewBonusAmount ?? 0));
       setMessage("Настройки бонусов сохранены");
     } catch (requestError) {
       setError(requestError.response?.data?.message || "Не удалось сохранить настройки");
@@ -68,6 +78,15 @@ const SettingsPage = () => {
           Бонусы начисляются только на стоимость товаров. Если процент больше 0,
           клиент дополнительно получает +1 бонус за завершённый заказ.
         </small>
+        <label>Бонусы за одобренный отзыв</label>
+        <input
+          type="number"
+          min="0"
+          step="1"
+          value={reviewBonusAmount}
+          onChange={(event) => setReviewBonusAmount(event.target.value)}
+          disabled={loading}
+        />
         {error && <p className="error">{error}</p>}
         {message && <p className="success-message">{message}</p>}
         <button type="submit" className="btn btn-primary" disabled={loading}>

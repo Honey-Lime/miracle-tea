@@ -11,6 +11,7 @@ const ProductPage = () => {
   const [error, setError] = useState(null);
   const [selectedGrams, setSelectedGrams] = useState(50);
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
+  const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -28,6 +29,13 @@ const ProductPage = () => {
       }
     };
     fetchProduct();
+  }, [id]);
+
+  useEffect(() => {
+    fetch(`/api/reviews/product/${id}`)
+      .then((response) => response.json())
+      .then((data) => setReviews(Array.isArray(data) ? data : []))
+      .catch(() => setReviews([]));
   }, [id]);
 
   const handleGramChange = (delta) => {
@@ -222,6 +230,28 @@ const ProductPage = () => {
           </div>
         </div>
       </div>
+      <section className="pp-reviews-section">
+        <h2>Отзывы</h2>
+        {reviews.length === 0 ? (
+          <p>Отзывов пока нет.</p>
+        ) : (
+          <div className="pp-reviews-list">
+            {reviews.map((review) => (
+              <article className="pp-review-card" key={review.id}>
+                <div className="pp-review-header">
+                  <strong>{review.name}</strong>
+                  <span>{new Date(review.date).toLocaleDateString("ru-RU")}</span>
+                </div>
+                <p>{review.text}</p>
+                <div className="pp-review-reactions">
+                  <span>👍 {review.likes}</span>
+                  <span>👎 {review.dislikes}</span>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 };

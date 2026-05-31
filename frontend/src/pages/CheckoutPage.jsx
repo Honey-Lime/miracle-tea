@@ -1,5 +1,5 @@
 import { useContext, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
@@ -19,6 +19,7 @@ const CheckoutPage = () => {
   const { cartItems, totalPrice, clearCart } = useContext(CartContext);
   const { user, token, updateUser } = useContext(AuthContext);
   const { addToast } = useToast();
+  const navigate = useNavigate();
   const [deliveryData, setDeliveryData] = useState(null);
   const [personalDataAccepted, setPersonalDataAccepted] = useState(false);
   const [refundPolicyAccepted, setRefundPolicyAccepted] = useState(false);
@@ -135,6 +136,7 @@ const CheckoutPage = () => {
       if (user?.isAdmin && testOrder) {
         await clearCart();
         addToast("Тестовый заказ оформлен и отмечен оплаченным", "success");
+        navigate("/thank-you", { state: { testOrder: true, orderId: order.id } });
         return;
       }
 

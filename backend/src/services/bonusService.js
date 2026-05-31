@@ -2,6 +2,7 @@ const Setting = require("../models/Setting");
 const User = require("../models/User");
 
 const BONUS_PERCENT_SETTING = "bonusPercent";
+const REVIEW_BONUS_SETTING = "reviewBonusAmount";
 
 const normalizeBonusPercent = (value) => {
   const percent = Number(value);
@@ -26,6 +27,26 @@ const setBonusPercent = async (value) => {
     { upsert: true, new: true, runValidators: true },
   );
   return percent;
+};
+
+const normalizeBonusAmount = (value) => {
+  const amount = Math.floor(Number(value));
+  return Number.isFinite(amount) && amount > 0 ? amount : 0;
+};
+
+const getReviewBonusAmount = async () => {
+  const setting = await Setting.findById(REVIEW_BONUS_SETTING);
+  return normalizeBonusAmount(setting?.value);
+};
+
+const setReviewBonusAmount = async (value) => {
+  const amount = normalizeBonusAmount(value);
+  await Setting.findByIdAndUpdate(
+    REVIEW_BONUS_SETTING,
+    { value: amount },
+    { upsert: true, new: true, runValidators: true },
+  );
+  return amount;
 };
 
 const calculateBonusEarned = (itemsTotal, bonusPercent) => {
@@ -98,6 +119,8 @@ module.exports = {
   calculateBonusEarned,
   creditOrderBonuses,
   getBonusPercent,
+  getReviewBonusAmount,
   refundOrderSpentBonuses,
   setBonusPercent,
+  setReviewBonusAmount,
 };

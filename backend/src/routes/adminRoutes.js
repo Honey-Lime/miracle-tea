@@ -14,6 +14,11 @@ router.get("/orders", adminController.getAllOrders);
 router.put("/orders/:id/cancel", adminController.cancelOrder);
 router.put("/orders/:id/status", adminController.updateOrderStatus);
 
+// Customers
+router.get("/customers", adminController.getCustomers);
+router.get("/customers/:id", adminController.getCustomerDetails);
+router.put("/customers/:id/bonuses", adminController.adjustCustomerBonuses);
+
 // Products
 router.get("/products", adminController.getAllProducts);
 router.post("/products", adminController.addProduct);
@@ -45,6 +50,10 @@ router.get("/statistics", adminController.getStatistics);
 // Settings
 router.get("/settings/bonuses", adminController.getBonusSettings);
 router.put("/settings/bonuses", adminController.updateBonusSettings);
+
+// Reviews
+router.get("/reviews/pending", adminController.getPendingReviews);
+router.put("/reviews/:id/approve", adminController.approveReview);
 
 // Logs
 router.get("/logs", adminController.getLogs);

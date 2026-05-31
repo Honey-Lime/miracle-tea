@@ -51,6 +51,12 @@ const ProfilePage = () => {
   const [nameModalOpen, setNameModalOpen] = useState(false);
   const [orderModalOpen, setOrderModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [reviewOpportunities, setReviewOpportunities] = useState([]);
+  const [reviewBonusAmount, setReviewBonusAmount] = useState(0);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedReviewOpportunity, setSelectedReviewOpportunity] = useState(null);
+  const [reviewText, setReviewText] = useState("");
+  const [reviewError, setReviewError] = useState("");
   const [nameValue, setNameValue] = useState(user?.name || "");
   const [nameError, setNameError] = useState("");
   const [nameSuccess, setNameSuccess] = useState("");
@@ -102,6 +108,24 @@ const ProfilePage = () => {
   const handleViewOrder = (order) => {
     setSelectedOrder(order);
     setOrderModalOpen(true);
+  };
+
+  const loadReviewOpportunities = async () => {
+    if (!user) return;
+
+    try {
+      const response = await fetch("/api/reviews/my-opportunities", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        setReviewOpportunities(data.opportunities || []);
+        setReviewBonusAmount(data.reviewBonusAmount || 0);
+      }
+    } catch (error) {
+      console.error("Не удалось загрузить уведомления об отзывах", error);
+    }
   };
 
   const canCancelOrder = (order) => order.status === "paid";
@@ -229,6 +253,50 @@ const ProfilePage = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    loadReviewOpportunities();
+  }, [user]);
+
+  const handleSubmitReview = async (event) => {
+    event.preventDefault();
+    setReviewError("");
+
+    try {
+      const response = await fetch("/api/reviews", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          ...selectedReviewOpportunity,
+          text: reviewText,
+        }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Не удалось отправить отзыв");
+      }
+
+      setReviewOpportunities((prev) =>
+        prev.filter(
+          (item) =>
+            !(
+              item.orderId === selectedReviewOpportunity.orderId &&
+              item.productId === selectedReviewOpportunity.productId &&
+              item.isSampler === selectedReviewOpportunity.isSampler
+            ),
+        ),
+      );
+      setReviewModalOpen(false);
+      setReviewText("");
+      setSelectedReviewOpportunity(null);
+    } catch (error) {
+      setReviewError(error.message);
+    }
+  };
+
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     setPasswordError("");
@@ -319,6 +387,9 @@ const ProfilePage = () => {
         <h2>Привет, {user.name}!</h2>
         <p>Email: {user.email}</p>
         <p>Общая сумма покупок: {formatPrice(paidOrdersTotal)}</p>
+        <p className="prfp-bonus-balance">
+          Бонусов на балансе: <strong>{Number(user.bonusBalance) || 0}</strong>
+        </p>
         <div className="prfp-profile-actions">
           <button
             className="btn btn-secondary"
@@ -340,6 +411,60 @@ const ProfilePage = () => {
           </button>
         </div>
       </div>
+
+      <div className="prfp-notifications">
+        <h2>Уведомления</h2>
+        {reviewOpportunities.length === 0 ? (
+          <p>Новых уведомлений нет.</p>
+        ) : (
+          reviewOpportunities.map((item) => (
+            <div className="prfp-notification-item" key={`${item.orderId}-${item.productId}-${item.isSampler}`}>
+              <span>Вам понравился {item.productName}?</span>
+              <button
+                className="btn btn-primary"
+                type="button"
+                onClick={() => {
+                  setSelectedReviewOpportunity(item);
+                  setReviewText("");
+                  setReviewError("");
+                  setReviewModalOpen(true);
+                }}
+              >
+                Оставить отзыв +{reviewBonusAmount} Бонусов
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+
+      {reviewModalOpen && selectedReviewOpportunity && (
+        <div className="modal-overlay" onClick={() => setReviewModalOpen(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="prfp-modal-header">
+              <h2>Отзыв о {selectedReviewOpportunity.productName}</h2>
+              <button className="prfp-modal-close" onClick={() => setReviewModalOpen(false)}>×</button>
+            </div>
+            <form onSubmit={handleSubmitReview}>
+              <div className="form-group">
+                <label>Текст отзыва</label>
+                <textarea
+                  value={reviewText}
+                  onChange={(event) => setReviewText(event.target.value)}
+                  rows={5}
+                  required
+                />
+              </div>
+              {reviewError && <div className="error-message">{reviewError}</div>}
+              <div className="modal-actions">
+                <button type="button" className="btn btn-secondary" onClick={() => setReviewModalOpen(false)}>
+                  Отмена
+                </button>
+                <button type="submit" className="btn btn-primary">Отправить на модерацию</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Модальное окно смены имени */}
       {nameModalOpen && (

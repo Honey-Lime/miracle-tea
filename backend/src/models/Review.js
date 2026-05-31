@@ -1,0 +1,63 @@
+const mongoose = require("mongoose");
+
+const reviewSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    productId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+      required: true,
+    },
+    orderId: {
+      type: String,
+      ref: "Order",
+      required: true,
+    },
+    isSampler: {
+      type: Boolean,
+      default: false,
+    },
+    text: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    likes: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    dislikes: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    status: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+    },
+    bonusAmount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    bonusCredited: {
+      type: Boolean,
+      default: false,
+    },
+    moderatedAt: {
+      type: Date,
+      default: null,
+    },
+  },
+  { timestamps: true },
+);
+
+reviewSchema.index({ userId: 1, productId: 1, orderId: 1, isSampler: 1 }, { unique: true });
+
+module.exports = mongoose.model("Review", reviewSchema);

@@ -16,6 +16,11 @@ const ThankYouPage = () => {
 
     clearStartedRef.current = true;
 
+    if (location.state?.testOrder) {
+      setLoading(false);
+      return;
+    }
+
     const handleSuccessfulPaymentReturn = async () => {
       try {
         const lastPayment = JSON.parse(sessionStorage.getItem("lastPayment") || "null");

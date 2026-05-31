@@ -521,6 +521,7 @@ const orderRoutes = require("./routes/orderRoutes");
 const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const emailRoutes = require("./routes/emailRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
 
 console.log("Routes imported");
 
@@ -531,6 +532,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/email", emailRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 console.log("Routes registered");
 
