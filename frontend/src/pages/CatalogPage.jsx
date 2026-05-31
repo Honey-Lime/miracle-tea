@@ -9,7 +9,7 @@ const CatalogPage = () => {
   const [gramCounts, setGramCounts] = useState({});
   const [selectedTag, setSelectedTag] = useState(null);
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { addToCart, cartItems } = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -44,12 +44,16 @@ const CatalogPage = () => {
   const handleGramChange = (product, delta) => {
     setGramCounts((prev) => {
       const minCount = (product.unit || "grams") === "grams" ? 50 : 1;
+      const alreadyInCart = cartItems
+        .filter((item) => item.pid === product._id)
+        .reduce((sum, item) => sum + item.count, 0);
+      const availableToAdd = Math.max(product.remains - alreadyInCart, 0);
       const currentGrams = prev[product._id] || minCount;
       const newGrams = currentGrams + delta;
       if (newGrams < minCount) {
         return { ...prev, [product._id]: minCount };
-      } else if (newGrams > product.remains) {
-        return { ...prev, [product._id]: product.remains };
+      } else if (newGrams > availableToAdd) {
+        return { ...prev, [product._id]: availableToAdd };
       }
       return { ...prev, [product._id]: newGrams };
     });
@@ -126,6 +130,10 @@ const CatalogPage = () => {
             const step = isGrams ? 50 : 1;
             const minCount = isGrams ? 50 : 1;
             const unitLabel = isGrams ? "г" : "шт";
+            const alreadyInCart = cartItems
+              .filter((item) => item.pid === product._id)
+              .reduce((sum, item) => sum + item.count, 0);
+            const availableToAdd = Math.max(product.remains - alreadyInCart, 0);
             const currentCount = gramCounts[product._id] || minCount;
             return (
             <div
@@ -183,7 +191,7 @@ const CatalogPage = () => {
                       onClick={() =>
                         handleGramChange(product, step)
                       }
-                      disabled={currentCount + step > product.remains}
+                      disabled={currentCount + step > availableToAdd}
                     >
                       +{step}
                     </button>
@@ -193,7 +201,7 @@ const CatalogPage = () => {
                     onClick={() =>
                       handleAddToCart(product, currentCount)
                     }
-                    disabled={currentCount > product.remains}
+                    disabled={currentCount > availableToAdd || currentCount < minCount}
                     title="Добавить в корзину"
                   >
                     🛒

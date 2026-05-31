@@ -130,7 +130,7 @@ exports.createOrder = async (req, res) => {
 
     // Validate products and calculate total
     let itemsTotal = 0;
-    const productsToUpdate = [];
+    const requestedByProduct = new Map();
     for (const item of list) {
       const product = await Product.findById(item.pid);
       if (!product) {
@@ -138,7 +138,10 @@ exports.createOrder = async (req, res) => {
           .status(404)
           .json({ message: `Product ${item.pid} not found` });
       }
-      if (product.remains < item.count) {
+      const productId = String(item.pid);
+      const requestedCount = (requestedByProduct.get(productId) || 0) + item.count;
+      requestedByProduct.set(productId, requestedCount);
+      if (product.remains < requestedCount) {
         return res
           .status(400)
           .json({ message: `Insufficient stock for ${product.name}` });
@@ -152,7 +155,6 @@ exports.createOrder = async (req, res) => {
       }
       const itemPrice = (unit === "grams" ? product.price / 100 : product.price) * item.count;
       itemsTotal += itemPrice;
-      productsToUpdate.push({ product, count: item.count });
     }
 
     let bonusSpent = Math.floor(Number(bonuses?.spent) || 0);
@@ -179,7 +181,8 @@ exports.createOrder = async (req, res) => {
       await User.updateOne({ _id: req.userId }, { $inc: { bonusBalance: -bonusSpent } });
     }
 
-    for (const { product, count } of productsToUpdate) {
+    for (const [productId, count] of requestedByProduct.entries()) {
+      const product = await Product.findById(productId);
       product.remains -= count;
       await product.save();
     }
@@ -325,6 +328,16 @@ exports.addToCart = async (req, res) => {
       (item) => item.pid.toString() === pid && item.isSampler === isSampler,
     );
 
+    const sameProductCurrentCount = cart.list
+      .filter((item) => item.pid.toString() === pid)
+      .reduce((sum, item) => sum + item.count, 0);
+    const addedCount = existingIndex >= 0 && isSampler ? 0 : count;
+    const sameProductCount = sameProductCurrentCount + addedCount;
+
+    if (sameProductCount > product.remains) {
+      return res.status(400).json({ message: "Insufficient stock" });
+    }
+
     if (existingIndex >= 0) {
       // Если это пробник, запрещаем добавление ещё одного
       if (isSampler) {
@@ -340,7 +353,6 @@ exports.addToCart = async (req, res) => {
           .status(400)
           .json({ message: `Минимальное количество — ${minCount} ${unit === "grams" ? "г" : "шт"}` });
       }
-      // Ensure not exceeding stock (optional)
     } else {
       // Для пробника проверяем, что количество равно 10 г
       if (isSampler && count !== 10) {
@@ -443,7 +455,10 @@ exports.updateCartItem = async (req, res) => {
       } else {
         // Validate stock
         const product = await Product.findById(pid);
-        if (product.remains < count) {
+        const sameProductOtherCount = cart.list
+          .filter((cartItem) => cartItem.pid.toString() === pid && cartItem.isSampler !== isSampler)
+          .reduce((sum, cartItem) => sum + cartItem.count, 0);
+        if (product.remains < count + sameProductOtherCount) {
           return res.status(400).json({ message: "Insufficient stock" });
         }
         const unit = product.unit || "grams";

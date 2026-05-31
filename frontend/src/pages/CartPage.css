@@ -31,6 +31,21 @@
   width: 100%;
 }
 
+.crt-cart-page .crt-removed-notice {
+  margin: -1.5rem 0 2rem;
+  padding: 1rem 1.25rem;
+  color: #8a5a00;
+  background: #fff4d6;
+  border: 1px solid #f0c36d;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.crt-cart-page.crt-empty .crt-removed-notice {
+  margin: 0 auto 1.5rem;
+  max-width: 560px;
+}
+
 .crt-cart-page .crt-item {
   display: flex;
   justify-content: space-between;
@@ -43,6 +58,40 @@
   margin-bottom: 1rem;
   width: 100%;
   box-sizing: border-box;
+}
+
+.crt-cart-page .crt-item.crt-item-stock-warning {
+  border-color: #dc5656;
+  background: #fff7f7;
+}
+
+.crt-cart-page .crt-stock-warning-message {
+  margin-top: 0.75rem;
+  color: #a93d3d;
+}
+
+.crt-cart-page .crt-stock-warning-message p {
+  margin: 0 0 0.75rem;
+  font-weight: 600;
+}
+
+.crt-cart-page .crt-stock-warning-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.crt-cart-page .crt-item .crt-btn-keep {
+  background: var(--color-brand);
+  color: var(--color-white);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.crt-cart-page .crt-item .crt-btn-keep:hover {
+  background: var(--color-brand-dark);
 }
 
 .crt-cart-page .crt-item .crt-item-info h3 {

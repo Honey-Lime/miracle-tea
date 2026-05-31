@@ -79,11 +79,15 @@ const ProductPage = () => {
     const unit = product.unit || "grams";
     const step = unit === "grams" ? 50 : 1;
     const minCount = unit === "grams" ? 50 : 1;
+    const alreadyInCart = cartItems
+      .filter((item) => item.pid === product._id)
+      .reduce((sum, item) => sum + item.count, 0);
+    const availableToAdd = Math.max(product.remains - alreadyInCart, 0);
     const newGrams = selectedGrams + delta;
     if (newGrams < minCount) {
       setSelectedGrams(minCount);
-    } else if (newGrams > product.remains) {
-      setSelectedGrams(product.remains);
+    } else if (newGrams > availableToAdd) {
+      setSelectedGrams(availableToAdd);
     } else {
       setSelectedGrams(newGrams);
     }
@@ -102,8 +106,12 @@ const ProductPage = () => {
   const handleSetGrams = (value) => {
     if (!product) return;
     const minCount = (product.unit || "grams") === "grams" ? 50 : 1;
+    const alreadyInCart = cartItems
+      .filter((item) => item.pid === product._id)
+      .reduce((sum, item) => sum + item.count, 0);
+    const availableToAdd = Math.max(product.remains - alreadyInCart, 0);
     if (value < minCount) value = minCount;
-    if (value > product.remains) value = product.remains;
+    if (value > availableToAdd) value = availableToAdd;
     setSelectedGrams(value);
   };
 
@@ -230,7 +238,11 @@ const ProductPage = () => {
   const pricePerUnit = isGrams ? product.price / 100 : product.price;
   const totalPrice = (pricePerUnit * selectedGrams).toFixed(2);
   const media = product.images || [];
-  const isSamplerAvailable = product.remains >= 10;
+  const productCountInCart = cartItems
+    .filter((item) => item.pid === product._id)
+    .reduce((sum, item) => sum + item.count, 0);
+  const availableToAdd = Math.max(product.remains - productCountInCart, 0);
+  const isSamplerAvailable = availableToAdd >= 10;
   const hasSamplerInCart = cartItems.some(
     (item) => item.pid === product._id && item.isSampler === true,
   );
@@ -349,7 +361,7 @@ const ProductPage = () => {
                 <input
                   type="number"
                   min={minCount}
-                  max={product.remains}
+                  max={availableToAdd}
                   step={step}
                   value={selectedGrams}
                   onChange={(e) => handleSetGrams(Number(e.target.value))}
@@ -359,7 +371,7 @@ const ProductPage = () => {
               <button
                 className="pp-gram-btn plus50"
                 onClick={() => handleGramChange(step)}
-                disabled={selectedGrams + step > product.remains}
+                disabled={selectedGrams + step > availableToAdd}
               >
                 +{step} {unitLabel}
               </button>
@@ -377,7 +389,7 @@ const ProductPage = () => {
               <button
                 className="pp-btn pp-btn-primary"
                 onClick={() => handleAddToCart(false)}
-                disabled={selectedGrams > product.remains}
+                disabled={selectedGrams > availableToAdd || selectedGrams < minCount}
                 title="Добавить в корзину"
               >
                 🛒

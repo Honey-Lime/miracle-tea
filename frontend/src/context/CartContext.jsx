@@ -75,6 +75,19 @@ export const CartProvider = ({ children }) => {
     const pricePerUnit = unit === "grams" ? product.price / 100 : product.price;
     // Для пробника фиксируем количество 10 г
     const finalCount = isSampler ? 10 : count;
+    const sameProductCount = cartItems
+      .filter((item) => item.pid === product._id)
+      .reduce((sum, item) => sum + item.count, 0);
+
+    if (sameProductCount + finalCount > product.remains) {
+      const unitLabel = unit === "grams" ? "г" : "шт";
+      addToast(
+        `На складе доступно только ${product.remains} ${unitLabel} с учетом уже добавленного в корзину`,
+        "warning",
+      );
+      return;
+    }
+
     const newItem = {
       pid: product._id,
       name: product.name,
@@ -96,8 +109,8 @@ export const CartProvider = ({ children }) => {
           addToast(`Пробник "${product.name}" уже в корзине`, "warning");
           return prev;
         }
-        // Для обычного товара увеличиваем количество
-        const newCount = Math.min(existing.count + finalCount, product.remains);
+        // Для обычного товара увеличиваем количество, учитывая пробник этого же чая
+        const newCount = existing.count + finalCount;
         return prev.map((item) =>
           item.pid === product._id && item.isSampler === isSampler
             ? { ...item, count: newCount }
@@ -167,6 +180,18 @@ export const CartProvider = ({ children }) => {
       if (newCount < minCount) {
         const unitLabel = unit === "grams" ? "г" : "шт";
         addToast(`Минимальное количество — ${minCount} ${unitLabel}`, "warning");
+        return;
+      }
+      const sameProductOtherCount = cartItems
+        .filter((cartItem) => cartItem.pid === pid && cartItem.isSampler !== isSampler)
+        .reduce((sum, cartItem) => sum + cartItem.count, 0);
+      const maxRemains = Number(item?.maxRemains) || 0;
+      if (newCount + sameProductOtherCount > maxRemains) {
+        const unitLabel = unit === "grams" ? "г" : "шт";
+        addToast(
+          `На складе доступно только ${maxRemains} ${unitLabel} с учетом пробника`,
+          "warning",
+        );
         return;
       }
     }
