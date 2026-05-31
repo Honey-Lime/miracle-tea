@@ -212,7 +212,7 @@
 .cp-catalog-page .gram-count.disabled {
   color: var(--gram-btn-disabled-text);
   cursor: not-allowed;
-  opacity: 0.65;
+  /* opacity: 0.65; */
 }
 
 .cp-catalog-page .gram-count.disabled:hover .current,

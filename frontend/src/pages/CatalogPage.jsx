@@ -201,7 +201,7 @@ const CatalogPage = () => {
                       -{step}
                     </button>
                     <span className={`gram-count ${!canAddCurrentCount ? "disabled" : ""}`}
-                      aria-disabled={!canAddCurrentCount}
+                      // aria-disabled={!canAddCurrentCount}
                       onClick={(e) => {
                         e.stopPropagation();
                         if (!canAddCurrentCount) return;
