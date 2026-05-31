@@ -58,6 +58,7 @@ const LoginModal = () => {
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [registrationStep, setRegistrationStep] = useState(1);
 
   const [emailVerified, setEmailVerified] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
@@ -74,6 +75,8 @@ const LoginModal = () => {
     setEmail(e.target.value);
     setEmailVerified(false);
     setCodeSent(false);
+    setVerificationCode("");
+    setRegistrationStep(1);
   };
 
   const getNormalizedEmail = () => email.trim().toLowerCase();
@@ -84,18 +87,21 @@ const LoginModal = () => {
 
     if (!emailPattern.test(normalizedEmail)) {
       setError("Введите корректный email");
-      return;
+      return false;
     }
 
     setLoading(true);
     try {
       const response = await sendEmailCode(normalizedEmail);
       setCodeSent(true);
+      setRegistrationStep(2);
       if (response.data.canResendAt) {
         setCanResendAt(new Date(response.data.canResendAt));
       }
+      return true;
     } catch (err) {
       setError(err.response?.data?.message || "Ошибка отправки кода");
+      return false;
     } finally {
       setLoading(false);
     }
@@ -105,12 +111,20 @@ const LoginModal = () => {
     setError("");
     const normalizedEmail = getNormalizedEmail();
 
+    if (!verificationCode.trim()) {
+      setError("Введите код из письма");
+      return false;
+    }
+
     setLoading(true);
     try {
       await verifyEmailCode(normalizedEmail, verificationCode);
       setEmailVerified(true);
+      setRegistrationStep(3);
+      return true;
     } catch (err) {
       setError(err.response?.data?.message || "Неверный код");
+      return false;
     } finally {
       setLoading(false);
     }
@@ -119,6 +133,16 @@ const LoginModal = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (isRegister && registrationStep === 1) {
+      await handleSendCode();
+      return;
+    }
+
+    if (isRegister && registrationStep === 2) {
+      await handleVerifyCode();
+      return;
+    }
 
     if (isRegister && !emailVerified) {
       if (!codeSent) {
@@ -243,6 +267,7 @@ const LoginModal = () => {
       setNewPassword("");
       setConfirmPassword("");
       setPersonalDataAccepted(false);
+      setRegistrationStep(1);
       setShowPassword(false);
       setShowConfirmPassword(false);
       setError("");
@@ -250,6 +275,9 @@ const LoginModal = () => {
   }, [loginModalOpen]);
 
   if (!loginModalOpen) return null;
+
+  const registrationSubmitLabel =
+    registrationStep === 3 ? "Зарегистрироваться" : "Далее";
 
   return (
     <div className="modal-overlay" onClick={closeLoginModal}>
@@ -259,66 +287,53 @@ const LoginModal = () => {
         </button>
         <h2>{isRegister ? "Регистрация" : "Вход"}</h2>
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Email</label>
-            <div className="phone-input-wrapper">
-              <input
-                type="email"
-                value={email}
-                onChange={handleEmailChange}
-                required
-                placeholder="you@example.com"
-                disabled={emailVerified}
-              />
-            </div>
-            {isRegister && !emailVerified && (
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={handleSendCode}
-                disabled={loading || codeSent}
-              >
-                {codeSent ? "Отправлено" : "Получить код"}
-              </button>
-            )}
-            {isRegister && !emailVerified && codeSent && (
-              <div className="form-group">
-                <label>Код из письма</label>
-                <div className="code-input-wrapper">
-                  <input
-                    type="text"
-                    value={verificationCode}
-                    onChange={(e) => setVerificationCode(e.target.value)}
-                    placeholder="123456"
-                    maxLength={6}
-                    className="code-input"
-                  />
-                  <button
-                    type="button"
-                    className="btn btn-secondary btn-sm"
-                    onClick={handleVerifyCode}
-                    disabled={loading || !verificationCode}
-                  >
-                    Проверить
-                  </button>
-                </div>
+          {(!isRegister || registrationStep === 1) && (
+            <div className="form-group">
+              <label>Email</label>
+              <div className="phone-input-wrapper">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={handleEmailChange}
+                  required
+                  placeholder="you@example.com"
+                  disabled={emailVerified}
+                />
               </div>
-            )}
-            {canResendAt && timeLeft > 0 && (
-              <small className="hint">Повторная отправка через {timeLeft} сек.</small>
-            )}
-            {!canResendAt && codeSent && (
-              <button
-                type="button"
-                className="link-btn"
-                onClick={handleSendCode}
-              >
-                Отправить код повторно
-              </button>
-            )}
-          </div>
+            </div>
+          )}
 
-          {isRegister && (
+          {isRegister && registrationStep === 2 && (
+            <div className="form-group">
+              <label>Код из письма</label>
+              <div className="code-input-wrapper">
+                <input
+                  type="text"
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value)}
+                  placeholder="123456"
+                  maxLength={6}
+                  className="code-input"
+                  required
+                />
+              </div>
+              {canResendAt && timeLeft > 0 && (
+                <small className="hint">Повторная отправка через {timeLeft} сек.</small>
+              )}
+              {!canResendAt && (
+                <button
+                  type="button"
+                  className="link-btn"
+                  onClick={handleSendCode}
+                  disabled={loading}
+                >
+                  Отправить код ещё раз
+                </button>
+              )}
+            </div>
+          )}
+
+          {isRegister && registrationStep === 3 && (
             <div className="form-group">
               <label>Имя</label>
               <input
@@ -330,6 +345,7 @@ const LoginModal = () => {
             </div>
           )}
 
+          {(!isRegister || registrationStep === 3) && (
           <div className="form-group">
             <label>Пароль</label>
             <div className="password-input-wrapper">
@@ -361,8 +377,9 @@ const LoginModal = () => {
               </button>
             )}
           </div>
+          )}
 
-          {isRegister && (
+          {isRegister && registrationStep === 3 && (
             <div className="form-group">
               <label>Повторите пароль</label>
               <div className="password-input-wrapper">
@@ -387,7 +404,7 @@ const LoginModal = () => {
             </div>
           )}
 
-          {isRegister && (
+          {isRegister && registrationStep === 3 && (
             <label className="registration-policy-consent">
               <input
                 type="checkbox"
@@ -406,16 +423,16 @@ const LoginModal = () => {
 
           {error && <p className="error">{error}</p>}
 
-          {isRegister && emailVerified && (
+          {isRegister && registrationStep === 3 && emailVerified && (
             <p className="success-message">✓ Email подтверждён</p>
           )}
 
           <button
             type="submit"
             className={`btn btn-primary ${loading ? "btn-loading" : ""}`}
-            disabled={loading || (isRegister && (!emailVerified || !personalDataAccepted))}
+            disabled={loading || (isRegister && registrationStep === 3 && !personalDataAccepted)}
           >
-            {loading ? "" : isRegister ? "Зарегистрироваться" : "Войти"}
+            {loading ? "" : isRegister ? registrationSubmitLabel : "Войти"}
           </button>
         </form>
 
@@ -430,6 +447,7 @@ const LoginModal = () => {
               setVerificationCode("");
               setConfirmPassword("");
               setPersonalDataAccepted(false);
+              setRegistrationStep(1);
               setShowPassword(false);
               setShowConfirmPassword(false);
               setError("");

@@ -174,7 +174,9 @@ const CatalogPage = () => {
                       -{step}
                     </button>
                     <span className="gram-count">
-                      {currentCount}{unitLabel}
+                      <span className="current">{currentCount}{unitLabel}</span>
+                      <span className="line"></span>
+                      <span className="price">{product.price * currentCount * 0.01}₽</span>
                     </span>
                     <button
                       className="gram-btn gram-btn_plus"

@@ -113,6 +113,17 @@ const mongoURI = process.env.MONGODB_URI;
 console.log(
   `Connecting to MongoDB at ${mongoURI.replace(/\/\/([^:]+):([^@]+)@/, "//***:***@")}`,
 );
+
+const removeUserPhoneIndex = async () => {
+  const indexes = await User.collection.indexes();
+  const phoneIndex = indexes.find((index) => index.name === "phone_1");
+
+  if (phoneIndex) {
+    console.warn("Found obsolete users.phone index. Dropping it.");
+    await User.collection.dropIndex("phone_1");
+  }
+};
+
 mongoose
   .connect(mongoURI, {
     serverSelectionTimeoutMS: 5000,
@@ -120,7 +131,10 @@ mongoose
     family: 4,
     autoIndex: true,
   })
-  .then(() => console.log("MongoDB connected successfully"))
+  .then(async () => {
+    console.log("MongoDB connected successfully");
+    await removeUserPhoneIndex();
+  })
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // Handle connection events

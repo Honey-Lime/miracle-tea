@@ -169,15 +169,30 @@
 }
 
 .cp-catalog-page .gram-count {
+  display: flex;
+  flex-direction: column;
+
   background: var(--gram-value-bg);
   color: var(--gram-value-text);
   /* padding: 0.5rem 1rem; */
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 600;
   min-width: 3.5rem;
   text-align: center;
   transition: background 0.2s ease;
   aspect-ratio: 1/1;
+}
+
+.cp-catalog-page .gram-count .line {
+  width: 80%;
+  height: 2px;
+  border-radius: 2px;
+
+  background-color: white;
+}
+
+.cp-catalog-page .gram-count .price {
+  font-size: 0.6rem;
 }
 
 .cp-catalog-page .gram-controls:hover .gram-count {
