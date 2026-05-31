@@ -3,6 +3,12 @@ const Product = require("../models/Product");
 const User = require("../models/User");
 const Counter = require("../models/Counter");
 const { logError } = require("../utils/logger");
+const {
+  calculateBonusEarned,
+  creditOrderBonuses,
+  getBonusPercent,
+  refundOrderSpentBonuses,
+} = require("../services/bonusService");
 
 const ID_COUNTER = "orderSequence";
 const LETTERS_COUNT = 26;
@@ -102,7 +108,7 @@ const restoreOrderRemains = async (order) => {
 
 // Create a new order
 exports.createOrder = async (req, res) => {
-  const { list, delivery, consents } = req.body;
+  const { list, delivery, consents, bonuses, testOrder } = req.body;
   const customerType = req.userId ? "user" : "guest";
 
   try {
@@ -112,8 +118,18 @@ exports.createOrder = async (req, res) => {
       });
     }
 
+    const user = req.userId
+      ? await User.findById(req.userId).select("bonusBalance isAdmin delivery total")
+      : null;
+    const isTestOrder = Boolean(testOrder && user?.isAdmin);
+
+    if (testOrder && !isTestOrder) {
+      return res.status(403).json({ message: "Тестовый заказ доступен только администратору" });
+    }
+
     // Validate products and calculate total
-    let totalPrice = 0;
+    let itemsTotal = 0;
+    const productsToUpdate = [];
     for (const item of list) {
       const product = await Product.findById(item.pid);
       if (!product) {
@@ -134,14 +150,42 @@ exports.createOrder = async (req, res) => {
           .json({ message: `Минимальное количество — ${minCount} ${unit === "grams" ? "г" : "шт"}` });
       }
       const itemPrice = (unit === "grams" ? product.price / 100 : product.price) * item.count;
-      totalPrice += itemPrice;
-      // Update remains
-      product.remains -= item.count;
+      itemsTotal += itemPrice;
+      productsToUpdate.push({ product, count: item.count });
+    }
+
+    let bonusSpent = Math.floor(Number(bonuses?.spent) || 0);
+    if (bonusSpent < 0) {
+      bonusSpent = 0;
+    }
+
+    if (bonusSpent > 0) {
+      if (!req.userId) {
+        return res.status(400).json({ message: "Списывать бонусы могут только авторизованные пользователи" });
+      }
+
+      const bonusBalance = Number(user?.bonusBalance) || 0;
+      const maxBonusSpent = Math.floor(itemsTotal * 0.5);
+
+      if (bonusSpent > bonusBalance) {
+        return res.status(400).json({ message: "Недостаточно бонусов для списания" });
+      }
+
+      if (bonusSpent > maxBonusSpent) {
+        return res.status(400).json({ message: "Бонусами можно оплатить не более 50% стоимости товаров" });
+      }
+
+      await User.updateOne({ _id: req.userId }, { $inc: { bonusBalance: -bonusSpent } });
+    }
+
+    for (const { product, count } of productsToUpdate) {
+      product.remains -= count;
       await product.save();
     }
 
-    // Add delivery cost
-    totalPrice += delivery.price || 0;
+    const bonusPercent = await getBonusPercent();
+    const bonusEarned = req.userId ? calculateBonusEarned(itemsTotal, bonusPercent) : 0;
+    const totalPrice = Math.max(0, itemsTotal - bonusSpent) + (delivery.price || 0);
 
     // Build list with priceAtOrder (price per gram)
     const listWithPrices = await Promise.all(
@@ -162,16 +206,51 @@ exports.createOrder = async (req, res) => {
       customerType,
       list: listWithPrices,
       delivery,
+      itemsTotal,
+      bonuses: {
+        spent: bonusSpent,
+        earned: bonusEarned,
+        percent: bonusPercent,
+        credited: false,
+      },
       consents: {
         personalData: true,
         refundPolicy: true,
         acceptedAt: consents.acceptedAt || new Date(),
       },
       totalPrice,
-      status: "payment_pending",
+      status: isTestOrder ? "paid" : "payment_pending",
+      payment: isTestOrder
+        ? {
+            paymentId: `test-${Date.now()}`,
+            status: "test_paid",
+            raw: { testOrder: true },
+          }
+        : undefined,
     });
 
     const savedOrder = await order.save();
+
+    if (isTestOrder) {
+      user.delivery.last = order.delivery?.address || null;
+      user.delivery.history.push({
+        date: new Date(),
+        order: order.id,
+      });
+      const paidOrders = await Order.find({
+        userId: order.userId,
+        status: { $in: PAID_TOTAL_STATUSES },
+      }).select("totalPrice");
+      user.total = paidOrders.reduce(
+        (sum, paidOrder) => sum + (paidOrder.totalPrice || 0),
+        0,
+      );
+      await user.save();
+      await Order.updateOne(
+        { userId: order.userId, status: "cart" },
+        { $set: { list: [], totalPrice: 0 } },
+      );
+    }
 
     res.status(201).json(savedOrder);
   } catch (error) {
@@ -436,6 +515,7 @@ exports.cancelUserOrder = async (req, res) => {
     order.status = "cancelled";
     const updatedOrder = await order.save();
     await restoreOrderRemains(order);
+    await refundOrderSpentBonuses(order);
     await recalculateUserTotal(req.userId);
 
     res.json(updatedOrder);
@@ -494,8 +574,14 @@ exports.updateOrderStatus = async (req, res) => {
       return res.status(404).json({ message: "Заказ не найден" });
     }
 
+    const previousStatus = order.status;
     order.status = status;
-    const updatedOrder = await order.save();
+    let updatedOrder = await order.save();
+
+    if (status === "completed" && previousStatus !== "completed") {
+      await creditOrderBonuses(order);
+      updatedOrder = await Order.findById(order._id);
+    }
     res.json(updatedOrder);
   } catch (error) {
     res.status(400).json({ message: error.message });

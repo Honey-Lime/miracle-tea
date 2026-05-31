@@ -4,6 +4,7 @@ import OrdersPage from "./admin/OrdersPage";
 import EditPage from "./admin/EditPage";
 import StatisticsTab from "./admin/StatisticsTab";
 import LogsPage from "./admin/LogsPage";
+import SettingsPage from "./admin/SettingsPage";
 
 const AdminPanel = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -30,6 +31,9 @@ const AdminPanel = () => {
           <NavLink to="/admin/statistics" className="ap-sidebar-link">
             Статистика
           </NavLink>
+          <NavLink to="/admin/settings" className="ap-sidebar-link">
+            Настройки
+          </NavLink>
           <NavLink to="/admin/logs" className="ap-sidebar-link">
             Логи
           </NavLink>
@@ -40,6 +44,7 @@ const AdminPanel = () => {
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="/edit" element={<EditPage />} />
           <Route path="/statistics" element={<StatisticsTab />} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="/logs" element={<LogsPage />} />
           <Route path="/" element={<OrdersPage />} />
         </Routes>

@@ -2,6 +2,12 @@ const Order = require("../models/Order");
 const Product = require("../models/Product");
 const Tag = require("../models/Tag");
 const User = require("../models/User");
+const {
+  creditOrderBonuses,
+  getBonusPercent,
+  refundOrderSpentBonuses,
+  setBonusPercent,
+} = require("../services/bonusService");
 const { getLogFilePath, logError } = require("../utils/logger");
 const path = require("path");
 const fs = require("fs");
@@ -102,11 +108,38 @@ exports.updateOrderStatus = async (req, res) => {
       return res.status(404).json({ message: "Заказ не найден" });
     }
 
+    const previousStatus = order.status;
     order.status = status;
-    const updatedOrder = await order.save();
+    let updatedOrder = await order.save();
+
+    if (status === "completed" && previousStatus !== "completed") {
+      await creditOrderBonuses(order);
+      updatedOrder = await Order.findById(order._id)
+        .populate("userId", "name email")
+        .populate("list.pid", "name price unit");
+    }
     res.json(updatedOrder);
   } catch (error) {
     logError(error, "updateOrderStatus");
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getBonusSettings = async (_req, res) => {
+  try {
+    res.json({ bonusPercent: await getBonusPercent() });
+  } catch (error) {
+    logError(error, "getBonusSettings");
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.updateBonusSettings = async (req, res) => {
+  try {
+    const bonusPercent = await setBonusPercent(req.body.bonusPercent);
+    res.json({ bonusPercent });
+  } catch (error) {
+    logError(error, "updateBonusSettings");
     res.status(500).json({ message: error.message });
   }
 };
@@ -125,6 +158,7 @@ exports.cancelOrder = async (req, res) => {
     order.status = "cancelled";
     const updatedOrder = await order.save();
     await restoreOrderRemains(order);
+    await refundOrderSpentBonuses(order);
     await recalculateUserTotal(order.userId);
 
     res.json(updatedOrder);

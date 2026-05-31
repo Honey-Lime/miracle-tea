@@ -42,6 +42,10 @@ router.put("/products/:id/delete-media", adminController.deleteProductImage);
 // Statistics
 router.get("/statistics", adminController.getStatistics);
 
+// Settings
+router.get("/settings/bonuses", adminController.getBonusSettings);
+router.put("/settings/bonuses", adminController.updateBonusSettings);
+
 // Logs
 router.get("/logs", adminController.getLogs);
 

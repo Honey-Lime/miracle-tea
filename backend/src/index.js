@@ -16,6 +16,7 @@ const crypto = require("crypto");
 const Order = require("./models/Order");
 const Product = require("./models/Product");
 const User = require("./models/User");
+const { getBonusPercent } = require("./services/bonusService");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -222,6 +223,14 @@ async function restoreOrderProducts(order) {
   );
 }
 
+async function restoreOrderBonuses(order) {
+  const spent = Number(order?.bonuses?.spent) || 0;
+
+  if (order?.userId && spent > 0) {
+    await User.updateOne({ _id: order.userId }, { $inc: { bonusBalance: spent } });
+  }
+}
+
 async function markOrderAsPaid(order, paymentUpdate = {}) {
   const wasAlreadyPaid = order.status === "paid";
 
@@ -269,12 +278,11 @@ app.post('/api/create-payment', async(req, res) => {
 
   try {
     const {
-      amount,
       id,
       deliveryData
     } = req.body;
 
-    if (!amount || !id || !deliveryData) {
+    if (!id || !deliveryData) {
       return res.status(400).json({
         error: "Недостаточно данных для создания платежа",
       });
@@ -289,6 +297,7 @@ app.post('/api/create-payment', async(req, res) => {
     }
 
     const bankOrderId = order.id;
+    const amount = Math.round((Number(order.totalPrice) || 0) * 100);
     const paymentData = {
       TerminalKey: TERMINAL_KEY,
       Amount: Number(amount),
@@ -342,6 +351,7 @@ app.post('/api/create-payment', async(req, res) => {
     if (!response.ok || result.Success === false) {
       console.error("Ошибка создания платежа при ответе банка:", result);
       await restoreOrderProducts(order);
+      await restoreOrderBonuses(order);
       await order.deleteOne();
 
       return res.status(400).json({
@@ -378,6 +388,7 @@ app.post('/api/create-payment', async(req, res) => {
 
     if (order?.status === "payment_pending") {
       await restoreOrderProducts(order);
+      await restoreOrderBonuses(order);
       await order.deleteOne();
     }
 
@@ -414,6 +425,7 @@ app.post('/api/create-delivery-order', async(req, res) => {
     } else if (["REJECTED", "DEADLINE_EXPIRED", "CANCELED"].includes(notification.Status)) {
       if (order.status === "payment_pending") {
         await restoreOrderProducts(order);
+        await restoreOrderBonuses(order);
         await order.deleteOne();
         return res.status(200).send('OK');
       }
@@ -491,6 +503,14 @@ app.post('/api/check-payment', async(req, res) => {
   } catch (error) {
     console.error('Ошибка проверки платежа:', error.message);
     res.status(500).json({ error: 'Не удалось проверить платеж' });
+  }
+});
+
+app.get("/api/bonus-settings", async (_req, res) => {
+  try {
+    res.json({ bonusPercent: await getBonusPercent() });
+  } catch (error) {
+    res.status(500).json({ message: "Не удалось загрузить настройки бонусов" });
   }
 });
 

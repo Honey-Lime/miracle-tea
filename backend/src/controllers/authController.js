@@ -95,6 +95,7 @@ const buildAuthResponse = async (user) => {
     id: user._id,
     name: user.name,
     email: user.email,
+    bonusBalance: user.bonusBalance || 0,
     total,
     isAdmin: user.isAdmin,
   };

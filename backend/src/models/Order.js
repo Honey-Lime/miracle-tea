@@ -82,6 +82,44 @@ const orderSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    itemsTotal: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    bonuses: {
+      spent: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+      spentRefunded: {
+        type: Boolean,
+        default: false,
+      },
+      spentRefundedAt: {
+        type: Date,
+        default: null,
+      },
+      earned: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+      percent: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+      credited: {
+        type: Boolean,
+        default: false,
+      },
+      creditedAt: {
+        type: Date,
+        default: null,
+      },
+    },
     payment: {
       paymentId: {
         type: String,

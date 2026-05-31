@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
@@ -16,12 +16,15 @@ const YANDEX_API_KEY = "d748d3d0-760c-44fa-923c-d865d6017c60";
 // ];
 
 const CheckoutPage = () => {
-  const { cartItems, totalPrice } = useContext(CartContext);
-  const { user, token } = useContext(AuthContext);
+  const { cartItems, totalPrice, clearCart } = useContext(CartContext);
+  const { user, token, updateUser } = useContext(AuthContext);
   const { addToast } = useToast();
   const [deliveryData, setDeliveryData] = useState(null);
   const [personalDataAccepted, setPersonalDataAccepted] = useState(false);
   const [refundPolicyAccepted, setRefundPolicyAccepted] = useState(false);
+  const [bonusPercent, setBonusPercent] = useState(0);
+  const [bonusSpent, setBonusSpent] = useState(0);
+  const [testOrder, setTestOrder] = useState(false);
   const canPay = Boolean(
     deliveryData?.checked && personalDataAccepted && refundPolicyAccepted,
   );
@@ -29,6 +32,28 @@ const CheckoutPage = () => {
   const totalWeight = cartItems
     .filter((item) => (item.unit || "grams") === "grams")
     .reduce((sum, item) => sum + item.count, 0);
+  const userBonusBalance = Number(user?.bonusBalance) || 0;
+  const maxBonusSpent = Math.min(userBonusBalance, Math.floor(totalPrice * 0.5));
+  const requestedBonusSpent = Math.floor(Number(bonusSpent) || 0);
+  const normalizedBonusSpent = Math.min(requestedBonusSpent, maxBonusSpent);
+  const deliveryPrice = deliveryData?.price || 0;
+  const finalTotal = Math.max(0, totalPrice - normalizedBonusSpent) + deliveryPrice;
+  const expectedBonusEarned = useMemo(() => {
+    const percent = Number(bonusPercent) || 0;
+
+    if (!user || percent <= 0) {
+      return 0;
+    }
+
+    return Math.floor(totalPrice * (percent / 100)) + 1;
+  }, [bonusPercent, totalPrice, user]);
+
+  useEffect(() => {
+    fetch("/api/bonus-settings")
+      .then((response) => response.json())
+      .then((data) => setBonusPercent(Number(data.bonusPercent) || 0))
+      .catch(() => setBonusPercent(0));
+  }, []);
 
   // Оформление заказа
   const handlePlaceOrder = async () => {
@@ -45,6 +70,11 @@ const CheckoutPage = () => {
 
       if (!personalDataAccepted || !refundPolicyAccepted) {
         addToast("Перед оплатой нужно принять обе политики", "warning");
+        return;
+      }
+
+      if (normalizedBonusSpent !== requestedBonusSpent) {
+        addToast(`Можно списать не более ${maxBonusSpent} бонусов`, "warning");
         return;
       }
 
@@ -73,6 +103,10 @@ const CheckoutPage = () => {
           refundPolicy: refundPolicyAccepted,
           acceptedAt: new Date().toISOString(),
         },
+        bonuses: {
+          spent: normalizedBonusSpent,
+        },
+        testOrder: Boolean(user?.isAdmin && testOrder),
       };
 
       const response = await fetch("/api/orders", {
@@ -91,6 +125,18 @@ const CheckoutPage = () => {
       }
 
       const order = await response.json();
+      if (normalizedBonusSpent > 0) {
+        updateUser({
+          ...user,
+          bonusBalance: Math.max(0, userBonusBalance - normalizedBonusSpent),
+        });
+      }
+
+      if (user?.isAdmin && testOrder) {
+        await clearCart();
+        addToast("Тестовый заказ оформлен и отмечен оплаченным", "success");
+        return;
+      }
 
       const payment = await fetch("/api/create-payment", {
         method: "POST",
@@ -99,7 +145,6 @@ const CheckoutPage = () => {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
-          amount: Math.round((totalPrice + (deliveryData?.price || 0)) * 100),
           id: order.id,
           deliveryData: deliveryData
         }),
@@ -155,6 +200,12 @@ const CheckoutPage = () => {
             <strong>Сумма товаров: {totalPrice} ₽</strong>
             <br />
             <small>Общий вес: {totalWeight} г</small>
+            {user && (
+              <>
+                <br />
+                <small>Будет начислено бонусов: {expectedBonusEarned}</small>
+              </>
+            )}
           </div>
         </div>
 
@@ -186,17 +237,46 @@ const CheckoutPage = () => {
                   <span>{deliveryData.price} ₽</span>
                 </div>
               )}
+              {user && (
+                <div className="chp-bonus-control">
+                  <label htmlFor="bonusSpent">Списать бонусы:</label>
+                  <input
+                    id="bonusSpent"
+                    type="number"
+                    min="0"
+                    max={maxBonusSpent}
+                    step="1"
+                    value={bonusSpent}
+                    onChange={(event) => setBonusSpent(event.target.value)}
+                  />
+                  <small>
+                    Доступно: {userBonusBalance}. Можно списать до {maxBonusSpent} бонусов
+                  </small>
+                </div>
+              )}
+              {normalizedBonusSpent > 0 && (
+                <div>
+                  <span>Списание бонусов: </span>
+                  <span>-{normalizedBonusSpent} ₽</span>
+                </div>
+              )}
+              {user && (
+                <div>
+                  <span>Начислится бонусов: </span>
+                  <span>{expectedBonusEarned}</span>
+                </div>
+              )}
               <div>
                 <span>Оплата:</span>
                 <span>
-                  Картой
+                  {user?.isAdmin && testOrder ? "Тестовый заказ" : "Картой"}
                   {/* {PAYMENT_OPTIONS.find(
                     (option) => option.value === paymentMethod,
                   )?.label || "Не выбрано"} */}
                 </span>
               </div>
               <div className="chp-grand-total">
-                Всего: {totalPrice + (deliveryData?.price || 0)} ₽
+                Всего: {finalTotal} ₽
               </div>
             </div>
 
@@ -229,6 +309,17 @@ const CheckoutPage = () => {
                 </span>
               </label>
             </div>
+
+            {user?.isAdmin && (
+              <label className="chp-policy-consent">
+                <input
+                  type="checkbox"
+                  checked={testOrder}
+                  onChange={(event) => setTestOrder(event.target.checked)}
+                />
+                <span>Тестовый заказ</span>
+              </label>
+            )}
 
             <button
               className="btn btn-primary chp-btn-large"
