@@ -33,6 +33,16 @@ const ReviewsPage = () => {
     }
   };
 
+  const rejectReview = async (reviewId) => {
+    try {
+      await api.put(`/admin/reviews/${reviewId}/reject`);
+      setReviews((prev) => prev.filter((review) => review._id !== reviewId));
+      addToast("Отзыв отклонён", "success");
+    } catch (error) {
+      addToast(error.response?.data?.message || "Не удалось отклонить отзыв", "error");
+    }
+  };
+
   return (
     <section className="ap-reviews-page">
       <h1>Модерация отзывов</h1>
@@ -46,10 +56,24 @@ const ReviewsPage = () => {
               <span>{review.userId?.name || "Клиент"} · {review.userId?.email}</span>
             </div>
             <p>{review.text}</p>
+            {review.photos?.length > 0 && (
+              <div className="ap-review-photos">
+                {review.photos.map((photo, index) => (
+                  <a href={photo.url} target="_blank" rel="noreferrer" key={`${review._id}-${photo.url}`}>
+                    <img src={photo.url} alt={`Фото к отзыву ${index + 1}`} />
+                  </a>
+                ))}
+              </div>
+            )}
             <small>Бонус за отзыв: {review.bonusAmount || 0}</small>
-            <button className="btn btn-primary" type="button" onClick={() => approveReview(review._id)}>
-              Одобрить
-            </button>
+            <div className="ap-review-actions">
+              <button className="btn btn-primary" type="button" onClick={() => approveReview(review._id)}>
+                Одобрить
+              </button>
+              <button className="btn btn-secondary" type="button" onClick={() => rejectReview(review._id)}>
+                Отклонить
+              </button>
+            </div>
           </article>
         ))}
       </div>

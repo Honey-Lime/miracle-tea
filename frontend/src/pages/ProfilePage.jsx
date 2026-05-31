@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { cancelOrder, getMyOrders } from "../services/orderService";
@@ -56,6 +56,8 @@ const ProfilePage = () => {
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [selectedReviewOpportunity, setSelectedReviewOpportunity] = useState(null);
   const [reviewText, setReviewText] = useState("");
+  const [reviewPhotos, setReviewPhotos] = useState([]);
+  const reviewPhotosRef = useRef([]);
   const [reviewError, setReviewError] = useState("");
   const [nameValue, setNameValue] = useState(user?.name || "");
   const [nameError, setNameError] = useState("");
@@ -257,21 +259,73 @@ const ProfilePage = () => {
     loadReviewOpportunities();
   }, [user]);
 
+  useEffect(() => {
+    reviewPhotosRef.current = reviewPhotos;
+  }, [reviewPhotos]);
+
+  useEffect(() => () => {
+    reviewPhotosRef.current.forEach((photo) => URL.revokeObjectURL(photo.previewUrl));
+  }, []);
+
+  const addReviewPhotos = (files) => {
+    const imageFiles = Array.from(files || []).filter((file) => file.type.startsWith("image/"));
+    if (imageFiles.length === 0) return;
+
+    setReviewPhotos((prevPhotos) => {
+      const availableSlots = 5 - prevPhotos.length;
+      if (availableSlots <= 0) {
+        setReviewError("К отзыву можно добавить не больше 5 фото");
+        return prevPhotos;
+      }
+
+      const nextFiles = imageFiles.slice(0, availableSlots).map((file) => ({
+        file,
+        previewUrl: URL.createObjectURL(file),
+      }));
+
+      if (imageFiles.length > availableSlots) {
+        setReviewError("Добавлены первые 5 фото. Лишние файлы не прикреплены.");
+      }
+
+      return [...prevPhotos, ...nextFiles];
+    });
+  };
+
+  const removeReviewPhoto = (index) => {
+    setReviewPhotos((prevPhotos) => {
+      const photo = prevPhotos[index];
+      if (photo) URL.revokeObjectURL(photo.previewUrl);
+      return prevPhotos.filter((_, photoIndex) => photoIndex !== index);
+    });
+  };
+
+  const closeReviewModal = () => {
+    reviewPhotos.forEach((photo) => URL.revokeObjectURL(photo.previewUrl));
+    setReviewModalOpen(false);
+    setReviewText("");
+    setReviewPhotos([]);
+    setReviewError("");
+    setSelectedReviewOpportunity(null);
+  };
+
   const handleSubmitReview = async (event) => {
     event.preventDefault();
     setReviewError("");
 
     try {
+      const formData = new FormData();
+      formData.append("orderId", selectedReviewOpportunity.orderId);
+      formData.append("productId", selectedReviewOpportunity.productId);
+      formData.append("isSampler", selectedReviewOpportunity.isSampler);
+      formData.append("text", reviewText);
+      reviewPhotos.forEach((photo) => formData.append("photos", photo.file));
+
       const response = await fetch("/api/reviews", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify({
-          ...selectedReviewOpportunity,
-          text: reviewText,
-        }),
+        body: formData,
       });
       const data = await response.json();
 
@@ -289,9 +343,7 @@ const ProfilePage = () => {
             ),
         ),
       );
-      setReviewModalOpen(false);
-      setReviewText("");
-      setSelectedReviewOpportunity(null);
+      closeReviewModal();
     } catch (error) {
       setReviewError(error.message);
     }
@@ -426,6 +478,7 @@ const ProfilePage = () => {
                 onClick={() => {
                   setSelectedReviewOpportunity(item);
                   setReviewText("");
+                  setReviewPhotos([]);
                   setReviewError("");
                   setReviewModalOpen(true);
                 }}
@@ -438,11 +491,11 @@ const ProfilePage = () => {
       </div>
 
       {reviewModalOpen && selectedReviewOpportunity && (
-        <div className="modal-overlay" onClick={() => setReviewModalOpen(false)}>
+        <div className="modal-overlay" onClick={closeReviewModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="prfp-modal-header">
               <h2>Отзыв о {selectedReviewOpportunity.productName}</h2>
-              <button className="prfp-modal-close" onClick={() => setReviewModalOpen(false)}>×</button>
+              <button className="prfp-modal-close" onClick={closeReviewModal}>×</button>
             </div>
             <form onSubmit={handleSubmitReview}>
               <div className="form-group">
@@ -454,9 +507,44 @@ const ProfilePage = () => {
                   required
                 />
               </div>
+              <div className="form-group">
+                <label>Фото к отзыву (до 5 штук)</label>
+                <label
+                  className="prfp-review-dropzone"
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    addReviewPhotos(event.dataTransfer.files);
+                  }}
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(event) => {
+                      addReviewPhotos(event.target.files);
+                      event.target.value = "";
+                    }}
+                  />
+                  <span>Перетащите фото сюда или нажмите, чтобы выбрать файлы</span>
+                  <small>JPEG, PNG, WebP или GIF. Максимум 5 фото.</small>
+                </label>
+                {reviewPhotos.length > 0 && (
+                  <div className="prfp-review-photo-preview-list">
+                    {reviewPhotos.map((photo, index) => (
+                      <div className="prfp-review-photo-preview" key={photo.previewUrl}>
+                        <img src={photo.previewUrl} alt={`Фото к отзыву ${index + 1}`} />
+                        <button type="button" onClick={() => removeReviewPhoto(index)}>
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
               {reviewError && <div className="error-message">{reviewError}</div>}
               <div className="modal-actions">
-                <button type="button" className="btn btn-secondary" onClick={() => setReviewModalOpen(false)}>
+                <button type="button" className="btn btn-secondary" onClick={closeReviewModal}>
                   Отмена
                 </button>
                 <button type="submit" className="btn btn-primary">Отправить на модерацию</button>

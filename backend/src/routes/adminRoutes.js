@@ -54,6 +54,7 @@ router.put("/settings/bonuses", adminController.updateBonusSettings);
 // Reviews
 router.get("/reviews/pending", adminController.getPendingReviews);
 router.put("/reviews/:id/approve", adminController.approveReview);
+router.put("/reviews/:id/reject", adminController.rejectReview);
 
 // Logs
 router.get("/logs", adminController.getLogs);

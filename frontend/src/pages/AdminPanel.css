@@ -270,6 +270,34 @@
   color: var(--color-text-secondary);
 }
 
+.ap-review-card .ap-review-photos {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.ap-review-card .ap-review-photos a {
+  width: 96px;
+  height: 96px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--color-gray-100);
+}
+
+.ap-review-card .ap-review-photos img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ap-review-card .ap-review-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
 @media (max-width: 900px) {
   .ap-customers-header,
   .ap-customers-search {

@@ -162,7 +162,7 @@ exports.getPendingReviews = async (_req, res) => {
       .populate("userId", "name email")
       .populate("productId", "name")
       .sort({ createdAt: 1 });
-    res.json(reviews);
+    res.json(reviews.map((review) => ({ ...review.toObject(), type: "review" })));
   } catch (error) {
     logError(error, "getPendingReviews");
     res.status(500).json({ message: error.message });
@@ -188,6 +188,24 @@ exports.approveReview = async (req, res) => {
     res.json(review);
   } catch (error) {
     logError(error, "approveReview");
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.rejectReview = async (req, res) => {
+  try {
+    const review = await Review.findById(req.params.id);
+    if (!review) {
+      return res.status(404).json({ message: "Отзыв не найден" });
+    }
+
+    review.status = "rejected";
+    review.moderatedAt = new Date();
+    await review.save();
+
+    res.json(review);
+  } catch (error) {
+    logError(error, "rejectReview");
     res.status(500).json({ message: error.message });
   }
 };

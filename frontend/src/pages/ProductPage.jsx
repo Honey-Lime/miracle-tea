@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 import { getProduct } from "../services/productService";
 
 const ProductPage = () => {
   const { id } = useParams();
   const { addToCart, cartItems } = useCart();
+  const { user, token } = useAuth();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -69,6 +71,38 @@ const ProductPage = () => {
     if (value < minCount) value = minCount;
     if (value > product.remains) value = product.remains;
     setSelectedGrams(value);
+  };
+
+  const handleReviewReaction = async (reviewId, type) => {
+    if (!user || !token) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/reviews/${reviewId}/reaction`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ type }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Не удалось сохранить реакцию");
+      }
+
+      setReviews((prev) =>
+        prev.map((review) =>
+          review.id === reviewId
+            ? { ...review, likes: data.likes, dislikes: data.dislikes, myReaction: data.myReaction }
+            : review,
+        ),
+      );
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   if (loading) {
@@ -243,9 +277,34 @@ const ProductPage = () => {
                   <span>{new Date(review.date).toLocaleDateString("ru-RU")}</span>
                 </div>
                 <p>{review.text}</p>
+                {review.photos?.length > 0 && (
+                  <div className="pp-review-photos">
+                    {review.photos.map((photo, index) => (
+                      <a href={photo.url} target="_blank" rel="noreferrer" key={`${review.id}-${photo.url}`}>
+                        <img src={photo.url} alt={`Фото к отзыву ${index + 1}`} />
+                      </a>
+                    ))}
+                  </div>
+                )}
                 <div className="pp-review-reactions">
-                  <span>👍 {review.likes}</span>
-                  <span>👎 {review.dislikes}</span>
+                  <button
+                    type="button"
+                    className={review.myReaction === "like" ? "active" : ""}
+                    onClick={() => handleReviewReaction(review.id, "like")}
+                    disabled={!user}
+                    title={user ? "Нравится" : "Войдите, чтобы поставить лайк"}
+                  >
+                    👍 {review.likes}
+                  </button>
+                  <button
+                    type="button"
+                    className={review.myReaction === "dislike" ? "active" : ""}
+                    onClick={() => handleReviewReaction(review.id, "dislike")}
+                    disabled={!user}
+                    title={user ? "Не нравится" : "Войдите, чтобы поставить дизлайк"}
+                  >
+                    👎 {review.dislikes}
+                  </button>
                 </div>
               </article>
             ))}

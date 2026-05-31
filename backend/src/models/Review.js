@@ -26,6 +26,14 @@ const reviewSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    photos: [
+      {
+        url: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
     likes: {
       type: Number,
       default: 0,
@@ -36,6 +44,20 @@ const reviewSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    reactions: [
+      {
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        type: {
+          type: String,
+          enum: ["like", "dislike"],
+          required: true,
+        },
+      },
+    ],
     status: {
       type: String,
       enum: ["pending", "approved", "rejected"],
