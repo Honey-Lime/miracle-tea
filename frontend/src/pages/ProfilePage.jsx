@@ -532,6 +532,32 @@ const ProfilePage = () => {
         </div>
       </div>
 
+      <div className="prfp-notifications">
+        <h2>Уведомления</h2>
+        {reviewOpportunities.length === 0 ? (
+          <p>Новых уведомлений нет.</p>
+        ) : (
+          reviewOpportunities.map((item) => (
+            <div className="prfp-notification-item" key={`${item.orderId}-${item.productId}-${item.isSampler}`}>
+              <span>Вам понравился {item.productName}?</span>
+              <button
+                className="btn btn-primary"
+                type="button"
+                onClick={() => {
+                  setSelectedReviewOpportunity(item);
+                  setReviewText("");
+                  setReviewPhotos([]);
+                  setReviewError("");
+                  setReviewModalOpen(true);
+                }}
+              >
+                Оставить отзыв +{reviewBonusAmount} Бонусов
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+
       <div className="prfp-reviews-summary">
         <div className="prfp-reviews-summary-header">
           <div>
@@ -561,32 +587,6 @@ const ProfilePage = () => {
           </div>
         ) : (
           <p>У вас пока нет опубликованных отзывов.</p>
-        )}
-      </div>
-
-      <div className="prfp-notifications">
-        <h2>Уведомления</h2>
-        {reviewOpportunities.length === 0 ? (
-          <p>Новых уведомлений нет.</p>
-        ) : (
-          reviewOpportunities.map((item) => (
-            <div className="prfp-notification-item" key={`${item.orderId}-${item.productId}-${item.isSampler}`}>
-              <span>Вам понравился {item.productName}?</span>
-              <button
-                className="btn btn-primary"
-                type="button"
-                onClick={() => {
-                  setSelectedReviewOpportunity(item);
-                  setReviewText("");
-                  setReviewPhotos([]);
-                  setReviewError("");
-                  setReviewModalOpen(true);
-                }}
-              >
-                Оставить отзыв +{reviewBonusAmount} Бонусов
-              </button>
-            </div>
-          ))
         )}
       </div>
 

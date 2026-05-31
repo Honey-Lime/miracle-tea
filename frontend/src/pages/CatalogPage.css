@@ -215,10 +215,16 @@
   /* opacity: 0.65; */
 }
 
+.cp-catalog-page .gram-count.disabled .current,
+.cp-catalog-page .gram-count.disabled .line,
+.cp-catalog-page .gram-count.disabled .price {
+  display: none;
+}
+
 .cp-catalog-page .gram-count.disabled:hover .current,
 .cp-catalog-page .gram-count.disabled:hover .line,
 .cp-catalog-page .gram-count.disabled:hover .price {
-  display: initial;
+  display: none;
 }
 
 .cp-catalog-page .gram-count.disabled:hover .hover {
