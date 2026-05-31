@@ -32,6 +32,28 @@ const ReviewsPage = () => {
     loadReviews();
   }, []);
 
+  const addCommentPhotos = (reviewId, files) => {
+    const nextPhotos = Array.from(files || [])
+      .filter((file) => file.type.startsWith("image/"))
+      .map((file) => ({ file, previewUrl: URL.createObjectURL(file) }));
+    setCommentPhotos((prev) => ({
+      ...prev,
+      [reviewId]: [...(prev[reviewId] || []), ...nextPhotos],
+    }));
+  };
+
+  const removeCommentPhoto = (reviewId, index) => {
+    setCommentPhotos((prev) => {
+      const photos = prev[reviewId] || [];
+      const photo = photos[index];
+      if (photo) URL.revokeObjectURL(photo.previewUrl);
+      return {
+        ...prev,
+        [reviewId]: photos.filter((_, photoIndex) => photoIndex !== index),
+      };
+    });
+  };
+
   const approveReview = async (reviewId) => {
     try {
       await api.put(`/admin/reviews/${reviewId}/approve`);
@@ -57,14 +79,17 @@ const ReviewsPage = () => {
       const text = commentDrafts[reviewId] || "";
       const formData = new FormData();
       formData.append("text", text);
-      (commentPhotos[reviewId] || []).forEach((photo) => formData.append("photos", photo));
+      (commentPhotos[reviewId] || []).forEach((photo) => formData.append("photos", photo.file));
       const response = await api.put(`/admin/reviews/${reviewId}/comment`, formData);
       setReviews((prev) =>
         prev.map((review) =>
           review._id === reviewId ? { ...review, adminComment: response.data.adminComment } : review,
         ),
       );
-      setCommentPhotos((prev) => ({ ...prev, [reviewId]: [] }));
+      setCommentPhotos((prev) => {
+        (prev[reviewId] || []).forEach((photo) => URL.revokeObjectURL(photo.previewUrl));
+        return { ...prev, [reviewId]: [] };
+      });
       addToast(text.trim() ? "Комментарий сохранён" : "Комментарий удалён", "success");
     } catch (error) {
       addToast(error.response?.data?.message || "Не удалось сохранить комментарий", "error");
@@ -108,13 +133,20 @@ const ReviewsPage = () => {
                 type="file"
                 accept="image/*"
                 multiple
-                onChange={(event) => setCommentPhotos((prev) => ({
-                  ...prev,
-                  [review._id]: Array.from(event.target.files || []),
-                }))}
+                onChange={(event) => {
+                  addCommentPhotos(review._id, event.target.files);
+                  event.target.value = "";
+                }}
               />
               {(commentPhotos[review._id] || []).length > 0 && (
-                <small>Выбрано фото: {commentPhotos[review._id].length}</small>
+                <div className="ap-review-selected-photos">
+                  {(commentPhotos[review._id] || []).map((photo, index) => (
+                    <div className="ap-review-selected-photo" key={photo.previewUrl}>
+                      <img src={photo.previewUrl} alt={`Выбранное фото ${index + 1}`} />
+                      <button type="button" onClick={() => removeCommentPhoto(review._id, index)}>×</button>
+                    </div>
+                  ))}
+                </div>
               )}
               <button className="btn btn-secondary" type="button" onClick={() => saveAdminComment(review._id)}>
                 Сохранить комментарий

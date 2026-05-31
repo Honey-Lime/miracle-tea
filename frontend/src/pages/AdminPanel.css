@@ -361,6 +361,43 @@
   justify-self: flex-start;
 }
 
+.ap-review-selected-photos,
+.ap-chat-selected-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ap-review-selected-photo,
+.ap-chat-selected-photo {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--color-gray-100);
+}
+
+.ap-review-selected-photo img,
+.ap-chat-selected-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ap-review-selected-photo button,
+.ap-chat-selected-photo button {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.7);
+  color: var(--color-white);
+  line-height: 1;
+}
+
 .ap-review-card .ap-review-actions {
   display: flex;
   flex-direction: row;
@@ -438,9 +475,83 @@
   background: var(--color-secondary-light);
 }
 
-.ap-chat-message img {
+.ap-chat-photo-thumb {
+  display: block;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.ap-chat-photo-thumb img {
   max-width: 160px;
   border-radius: 8px;
+}
+
+.ap-chat-photo-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.78);
+}
+
+.ap-chat-photo-modal-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: min(980px, 96vw);
+  max-height: 92vh;
+}
+
+.ap-chat-photo-modal-content img {
+  max-width: 100%;
+  max-height: 92vh;
+  border-radius: 12px;
+  object-fit: contain;
+}
+
+.ap-chat-photo-close,
+.ap-chat-photo-nav {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--color-text-primary);
+  font-size: 2rem;
+}
+
+.ap-chat-photo-close {
+  top: -12px;
+  right: -12px;
+}
+
+.ap-chat-photo-nav.prev {
+  left: -58px;
+}
+
+.ap-chat-photo-nav.next {
+  right: -58px;
+}
+
+.ap-chat-photo-counter {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.62);
+  color: var(--color-white);
 }
 
 .ap-chat-form {
