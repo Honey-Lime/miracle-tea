@@ -50,6 +50,113 @@
   box-shadow: 0 4px 8px var(--shadow-color);
 }
 
+.prfp-profile-page .prfp-reviews-summary {
+  background: var(--color-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 8px var(--shadow-color);
+}
+
+.prfp-profile-page .prfp-reviews-summary-header,
+.prfp-profile-page .prfp-my-review-head,
+.prfp-profile-page .prfp-review-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.prfp-profile-page .prfp-reviews-summary h2,
+.prfp-profile-page .prfp-reviews-summary h3 {
+  color: var(--color-brand);
+}
+
+.prfp-profile-page .prfp-reviews-all-btn {
+  position: relative;
+}
+
+.prfp-profile-page .prfp-review-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.prfp-profile-page .prfp-top-review {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  background: var(--color-gray-100);
+}
+
+.prfp-profile-page .prfp-review-product {
+  color: var(--color-brand);
+  font-weight: 600;
+}
+
+.prfp-profile-page .prfp-reviews-modal {
+  max-width: 760px;
+  max-height: 82vh;
+  overflow-y: auto;
+}
+
+.prfp-profile-page .prfp-my-reviews-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.prfp-profile-page .prfp-my-review-card {
+  padding: 1rem;
+  border: 1px solid var(--color-gray-200);
+  border-radius: 10px;
+  background: var(--color-primary);
+}
+
+.prfp-profile-page .prfp-my-review-card h3 {
+  margin-bottom: 0.25rem;
+  color: var(--color-brand);
+}
+
+.prfp-profile-page .prfp-admin-answer {
+  margin: 1rem 0;
+  padding: 0.9rem;
+  border-left: 4px solid var(--color-brand);
+  border-radius: 8px;
+  background: var(--color-gray-100);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.prfp-profile-page .prfp-admin-answer.highlighted {
+  background: #dbeafe;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+}
+
+.prfp-profile-page .prfp-admin-answer-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.prfp-profile-page .prfp-admin-answer-photos img {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
 .prfp-profile-page .prfp-notification-item {
   display: flex;
   align-items: center;

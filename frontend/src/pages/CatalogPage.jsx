@@ -65,10 +65,15 @@ const CatalogPage = () => {
     setGramCounts((prev) => ({ ...prev, [product._id]: minCount }));
   };
 
+  const handleAddSamplerToCart = (product) => {
+    addToCart(product, 10, true);
+  };
+
   const handleCardClick = (e, productId) => {
     // Не переходим на страницу товара, если кликнули на кнопки управления
     if (
       e.target.closest(".gram-btn") ||
+      e.target.closest(".gram-count") ||
       e.target.closest(".cp-add-to-cart-btn")
     ) {
       return;
@@ -135,6 +140,10 @@ const CatalogPage = () => {
               .reduce((sum, item) => sum + item.count, 0);
             const availableToAdd = Math.max(product.remains - alreadyInCart, 0);
             const currentCount = gramCounts[product._id] || minCount;
+            const isSamplerAvailable = isGrams && availableToAdd >= 10;
+            const hasSamplerInCart = cartItems.some(
+              (item) => item.pid === product._id && item.isSampler === true,
+            );
             return (
             <div
               key={product._id}
@@ -181,10 +190,16 @@ const CatalogPage = () => {
                     >
                       -{step}
                     </button>
-                    <span className="gram-count">
+                    <span className="gram-count" 
+                      disabled={currentCount > availableToAdd || currentCount < minCount}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddToCart(product, currentCount);
+                      }}>
                       <span className="current">{currentCount}{unitLabel}</span>
                       <span className="line"></span>
                       <span className="price">{product.price * currentCount * 0.01}₽</span>
+                      <span className="hover">🛒</span>
                     </span>
                     <button
                       className="gram-btn gram-btn_plus"
@@ -199,12 +214,16 @@ const CatalogPage = () => {
                   <button
                     className="btn btn-primary cp-add-to-cart-btn"
                     onClick={() =>
-                      handleAddToCart(product, currentCount)
+                      handleAddSamplerToCart(product)
                     }
-                    disabled={currentCount > availableToAdd || currentCount < minCount}
-                    title="Добавить в корзину"
+                    disabled={!isSamplerAvailable || hasSamplerInCart}
+                    title={
+                      hasSamplerInCart
+                        ? "Пробник уже добавлен"
+                        : "Добавить пробник 10 г"
+                    }
                   >
-                    🛒
+                    🛒ПРОБНИК
                   </button>
                 </div>
               </div>

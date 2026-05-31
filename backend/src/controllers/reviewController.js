@@ -132,6 +132,82 @@ exports.getMyReviewOpportunities = async (req, res) => {
   }
 };
 
+const mapMyReview = (review) => {
+  const hasAdminComment = Boolean(
+    review.adminComment?.text || review.adminComment?.photos?.length > 0,
+  );
+  const adminCommentUpdatedAt = review.adminComment?.updatedAt || null;
+  const adminCommentSeenAt = review.adminComment?.seenByUserAt || null;
+
+  return {
+    id: review._id,
+    date: review.createdAt,
+    product: review.productId
+      ? {
+          id: review.productId._id,
+          name: review.productId.name,
+        }
+      : null,
+    text: review.text,
+    photos: review.photos || [],
+    likes: review.likes || 0,
+    dislikes: review.dislikes || 0,
+    adminComment: hasAdminComment
+      ? {
+          text: review.adminComment.text,
+          photos: review.adminComment.photos || [],
+          updatedAt: adminCommentUpdatedAt,
+          isUnread: !adminCommentSeenAt || new Date(adminCommentSeenAt) < new Date(adminCommentUpdatedAt),
+        }
+      : null,
+  };
+};
+
+exports.getMyReviewsSummary = async (req, res) => {
+  try {
+    const reviews = await Review.find({ userId: req.userId, status: "approved" })
+      .populate("productId", "name")
+      .sort({ createdAt: -1 });
+
+    const mappedReviews = reviews.map(mapMyReview);
+    const totalLikes = mappedReviews.reduce((sum, review) => sum + review.likes, 0);
+    const topReview = mappedReviews.reduce((best, review) => {
+      if (!best) return review;
+      if (review.likes !== best.likes) return review.likes > best.likes ? review : best;
+      return new Date(review.date) > new Date(best.date) ? review : best;
+    }, null);
+    const unreadAdminCommentsCount = mappedReviews.filter(
+      (review) => review.adminComment?.isUnread,
+    ).length;
+
+    res.json({ reviews: mappedReviews, totalLikes, topReview, unreadAdminCommentsCount });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.markMyReviewAdminCommentsSeen = async (req, res) => {
+  try {
+    await Review.updateMany(
+      {
+        userId: req.userId,
+        status: "approved",
+        "adminComment.updatedAt": { $ne: null },
+        $or: [
+          { "adminComment.seenByUserAt": null },
+          { "adminComment.seenByUserAt": { $exists: false } },
+          { $expr: { $lt: ["$adminComment.seenByUserAt", "$adminComment.updatedAt"] } },
+        ],
+      },
+      { $set: { "adminComment.seenByUserAt": new Date() } },
+    );
+
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 exports.createReview = async (req, res) => {
   try {
     const { orderId, productId, isSampler, text } = req.body;

@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
@@ -47,6 +47,7 @@ const PasswordEyeIcon = ({ isOpen }) => (
 
 const ProfilePage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, logout, updateUser, openForgotPasswordModal } = useContext(AuthContext);
   const { addToCart } = useCart();
   const { addToast } = useToast();
@@ -65,6 +66,14 @@ const ProfilePage = () => {
   const [reviewDropActive, setReviewDropActive] = useState(false);
   const reviewPhotosRef = useRef([]);
   const [reviewError, setReviewError] = useState("");
+  const [myReviews, setMyReviews] = useState([]);
+  const [reviewStats, setReviewStats] = useState({
+    totalLikes: 0,
+    topReview: null,
+    unreadAdminCommentsCount: 0,
+  });
+  const [reviewsModalOpen, setReviewsModalOpen] = useState(false);
+  const [highlightedAdminComments, setHighlightedAdminComments] = useState([]);
   const [nameValue, setNameValue] = useState(user?.name || "");
   const [nameError, setNameError] = useState("");
   const [nameLoading, setNameLoading] = useState(false);
@@ -132,6 +141,64 @@ const ProfilePage = () => {
     } catch (error) {
       console.error("Не удалось загрузить уведомления об отзывах", error);
     }
+  };
+
+  const loadMyReviewsSummary = async () => {
+    if (!user) return;
+
+    try {
+      const response = await fetch("/api/reviews/my-summary", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        setMyReviews(data.reviews || []);
+        setReviewStats({
+          totalLikes: data.totalLikes || 0,
+          topReview: data.topReview || null,
+          unreadAdminCommentsCount: data.unreadAdminCommentsCount || 0,
+        });
+      }
+    } catch (error) {
+      console.error("Не удалось загрузить статистику отзывов", error);
+    }
+  };
+
+  const openReviewsModal = async () => {
+    const unreadIds = myReviews
+      .filter((review) => review.adminComment?.isUnread)
+      .map((review) => review.id);
+
+    setHighlightedAdminComments(unreadIds);
+    setReviewsModalOpen(true);
+
+    if (unreadIds.length > 0) {
+      setReviewStats((prev) => ({ ...prev, unreadAdminCommentsCount: 0 }));
+      setMyReviews((prev) =>
+        prev.map((review) =>
+          unreadIds.includes(review.id)
+            ? { ...review, adminComment: { ...review.adminComment, isUnread: false } }
+            : review,
+        ),
+      );
+
+      try {
+        await fetch("/api/reviews/my-admin-comments/seen", {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+      } catch (error) {
+        console.error("Не удалось отметить ответы администрации просмотренными", error);
+      }
+
+      setTimeout(() => setHighlightedAdminComments([]), 5000);
+    }
+  };
+
+  const goToReview = (review) => {
+    if (!review?.product?.id) return;
+    navigate(`/product/${review.product.id}#review-${review.id}`);
   };
 
   const canCancelOrder = (order) => order.status === "paid";
@@ -266,6 +333,10 @@ const ProfilePage = () => {
 
   useEffect(() => {
     loadReviewOpportunities();
+  }, [user]);
+
+  useEffect(() => {
+    loadMyReviewsSummary();
   }, [user]);
 
   useEffect(() => {
@@ -461,6 +532,38 @@ const ProfilePage = () => {
         </div>
       </div>
 
+      <div className="prfp-reviews-summary">
+        <div className="prfp-reviews-summary-header">
+          <div>
+            <h2>Ваши отзывы</h2>
+            <p>
+              Ваши отзывы лайкнули <strong>{reviewStats.totalLikes}</strong> раз
+            </p>
+          </div>
+          <button className="btn btn-secondary prfp-reviews-all-btn" onClick={openReviewsModal}>
+            Все отзывы
+            {reviewStats.unreadAdminCommentsCount > 0 && (
+              <span className="prfp-review-badge">{reviewStats.unreadAdminCommentsCount}</span>
+            )}
+          </button>
+        </div>
+        {reviewStats.topReview ? (
+          <div className="prfp-top-review">
+            <h3>Наиболее оцененный отзыв:</h3>
+            <p className="prfp-review-product">{reviewStats.topReview.product?.name || "Товар удалён"}</p>
+            <p>{reviewStats.topReview.text}</p>
+            <div className="prfp-review-footer">
+              <span>👍 {reviewStats.topReview.likes}</span>
+              <button className="btn btn-primary" onClick={() => goToReview(reviewStats.topReview)}>
+                Перейти
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p>У вас пока нет опубликованных отзывов.</p>
+        )}
+      </div>
+
       <div className="prfp-notifications">
         <h2>Уведомления</h2>
         {reviewOpportunities.length === 0 ? (
@@ -486,6 +589,58 @@ const ProfilePage = () => {
           ))
         )}
       </div>
+
+      {reviewsModalOpen && (
+        <div className="modal-overlay" onClick={() => setReviewsModalOpen(false)}>
+          <div
+            className="modal-content prfp-reviews-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="prfp-modal-header">
+              <h2>Все отзывы</h2>
+              <button className="prfp-modal-close" onClick={() => setReviewsModalOpen(false)}>×</button>
+            </div>
+            {myReviews.length === 0 ? (
+              <p>У вас пока нет опубликованных отзывов.</p>
+            ) : (
+              <div className="prfp-my-reviews-list">
+                {myReviews.map((review) => (
+                  <article className="prfp-my-review-card" key={review.id}>
+                    <div className="prfp-my-review-head">
+                      <div>
+                        <h3>{review.product?.name || "Товар удалён"}</h3>
+                        <small>{new Date(review.date).toLocaleDateString("ru-RU")}</small>
+                      </div>
+                      <span>👍 {review.likes}</span>
+                    </div>
+                    <p>{review.text}</p>
+                    {review.adminComment && (
+                      <div
+                        className={`prfp-admin-answer ${
+                          highlightedAdminComments.includes(review.id) ? "highlighted" : ""
+                        }`}
+                      >
+                        <strong>Ответ администрации</strong>
+                        {review.adminComment.text && <p>{review.adminComment.text}</p>}
+                        {review.adminComment.photos?.length > 0 && (
+                          <div className="prfp-admin-answer-photos">
+                            {review.adminComment.photos.map((photo) => (
+                              <img src={photo.url} alt="Фото ответа администрации" key={photo.url} />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <button className="btn btn-secondary" onClick={() => goToReview(review)}>
+                      Перейти
+                    </button>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {reviewModalOpen && selectedReviewOpportunity && (
         <div className="modal-overlay" onClick={closeReviewModal}>

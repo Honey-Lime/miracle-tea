@@ -267,6 +267,7 @@ exports.updateReviewAdminComment = async (req, res) => {
       text,
       photos,
       updatedAt: text || photos.length > 0 ? new Date() : null,
+      seenByUserAt: null,
     };
 
     await review.save();

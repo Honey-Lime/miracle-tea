@@ -44,6 +44,10 @@ const reviewSchema = new mongoose.Schema(
         type: Date,
         default: null,
       },
+      seenByUserAt: {
+        type: Date,
+        default: null,
+      },
     },
     photos: [
       {

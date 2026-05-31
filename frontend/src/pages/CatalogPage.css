@@ -171,7 +171,6 @@
 .cp-catalog-page .gram-count {
   display: flex;
   flex-direction: column;
-
   background: var(--gram-value-bg);
   color: var(--gram-value-text);
   /* padding: 0.5rem 1rem; */
@@ -195,7 +194,23 @@
   font-size: 0.6rem;
 }
 
+.cp-catalog-page .gram-count:hover .current, 
+.cp-catalog-page .gram-count:hover .line, 
+.cp-catalog-page .gram-count:hover .price {
+  display: none;
+}
+
+.cp-catalog-page .gram-count .hover {
+  display: none;
+  font-size: 1.6rem;
+}
+
+.cp-catalog-page .gram-count:hover .hover {
+  display: flex;
+}
+
 .cp-catalog-page .gram-controls:hover .gram-count {
+  content: "🛒";
   background: var(--gram-value-hover-bg);
 }
 
@@ -205,8 +220,8 @@
   justify-content: center;
   width: 100%;
   padding: 2.5rem 0 0.25rem 0;
-  margin-top: -2.68rem;
-  font-size: 0.95rem;
+  margin-top: -2.65rem;
+  font-size: 0.8rem;
   border-radius: 18px;
   background: var(--cart-btn-bg);
   color: var(--cart-btn-text);
