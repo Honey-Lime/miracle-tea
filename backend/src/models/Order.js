@@ -138,6 +138,14 @@ const orderSchema = new mongoose.Schema(
         default: null,
       },
     },
+    stockReserved: {
+      type: Boolean,
+      default: false,
+    },
+    stockReservedAt: {
+      type: Date,
+      default: null,
+    },
     consents: {
       personalData: {
         type: Boolean,

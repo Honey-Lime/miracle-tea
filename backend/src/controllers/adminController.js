@@ -43,6 +43,10 @@ function readLogTail(filePath, maxBytes = 200000) {
 }
 
 const restoreOrderRemains = async (order) => {
+  if (!order.stockReserved) {
+    return;
+  }
+
   const operations = order.list
     .filter((item) => item.pid && item.count > 0)
     .map((item) => ({
@@ -55,6 +59,51 @@ const restoreOrderRemains = async (order) => {
   if (operations.length > 0) {
     await Product.bulkWrite(operations);
   }
+
+  order.stockReserved = false;
+  order.stockReservedAt = null;
+  await order.save();
+};
+
+const reserveOrderRemains = async (order) => {
+  if (order.stockReserved) {
+    return;
+  }
+
+  const requestedByProduct = new Map();
+  for (const item of order.list) {
+    if (!item.pid || item.count <= 0) {
+      continue;
+    }
+
+    const productId = item.pid.toString();
+    requestedByProduct.set(productId, (requestedByProduct.get(productId) || 0) + item.count);
+  }
+
+  for (const [productId, count] of requestedByProduct.entries()) {
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new Error(`Product ${productId} not found`);
+    }
+    if (product.remains < count) {
+      throw new Error(`Insufficient stock for ${product.name}`);
+    }
+  }
+
+  const operations = Array.from(requestedByProduct.entries()).map(([productId, count]) => ({
+    updateOne: {
+      filter: { _id: productId },
+      update: { $inc: { remains: -count } },
+    },
+  }));
+
+  if (operations.length > 0) {
+    await Product.bulkWrite(operations);
+  }
+
+  order.stockReserved = true;
+  order.stockReservedAt = new Date();
+  await order.save();
 };
 
 const recalculateUserTotal = async (userId) => {
@@ -119,8 +168,20 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     const previousStatus = order.status;
+    let updatedOrder;
+
+    if (status === "paid" && previousStatus !== "paid") {
+      await reserveOrderRemains(order);
+    }
+
+    if (["cancelled", "refunded"].includes(status) && !["shipped", "completed", "cancelled", "refunded"].includes(previousStatus)) {
+      await restoreOrderRemains(order);
+      await refundOrderSpentBonuses(order);
+      await recalculateUserTotal(order.userId);
+    }
+
     order.status = status;
-    let updatedOrder = await order.save();
+    updatedOrder = await order.save();
 
     if (status === "completed" && previousStatus !== "completed") {
       await creditOrderBonuses(order);

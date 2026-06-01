@@ -93,6 +93,10 @@ const recalculateUserTotal = async (userId) => {
 };
 
 const restoreOrderRemains = async (order) => {
+  if (!order.stockReserved) {
+    return;
+  }
+
   const operations = order.list
     .filter((item) => item.pid && item.count > 0)
     .map((item) => ({
@@ -105,6 +109,51 @@ const restoreOrderRemains = async (order) => {
   if (operations.length > 0) {
     await Product.bulkWrite(operations);
   }
+
+  order.stockReserved = false;
+  order.stockReservedAt = null;
+  await order.save();
+};
+
+const reserveOrderRemains = async (order) => {
+  if (order.stockReserved) {
+    return;
+  }
+
+  const requestedByProduct = new Map();
+  for (const item of order.list) {
+    if (!item.pid || item.count <= 0) {
+      continue;
+    }
+
+    const productId = item.pid.toString();
+    requestedByProduct.set(productId, (requestedByProduct.get(productId) || 0) + item.count);
+  }
+
+  for (const [productId, count] of requestedByProduct.entries()) {
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new Error(`Product ${productId} not found`);
+    }
+    if (product.remains < count) {
+      throw new Error(`Insufficient stock for ${product.name}`);
+    }
+  }
+
+  const operations = Array.from(requestedByProduct.entries()).map(([productId, count]) => ({
+    updateOne: {
+      filter: { _id: productId },
+      update: { $inc: { remains: -count } },
+    },
+  }));
+
+  if (operations.length > 0) {
+    await Product.bulkWrite(operations);
+  }
+
+  order.stockReserved = true;
+  order.stockReservedAt = new Date();
+  await order.save();
 };
 
 // Create a new order
@@ -181,12 +230,6 @@ exports.createOrder = async (req, res) => {
       await User.updateOne({ _id: req.userId }, { $inc: { bonusBalance: -bonusSpent } });
     }
 
-    for (const [productId, count] of requestedByProduct.entries()) {
-      const product = await Product.findById(productId);
-      product.remains -= count;
-      await product.save();
-    }
-
     const bonusPercent = await getBonusPercent();
     const bonusEarned = req.userId ? calculateBonusEarned(itemsTotal, bonusPercent) : 0;
     const totalPrice = Math.max(0, itemsTotal - bonusSpent) + (delivery.price || 0);
@@ -236,6 +279,7 @@ exports.createOrder = async (req, res) => {
     const savedOrder = await order.save();
 
     if (isTestOrder) {
+      await reserveOrderRemains(order);
       user.delivery.last = order.delivery?.address || null;
       user.delivery.history.push({
         date: new Date(),
@@ -529,8 +573,8 @@ exports.cancelUserOrder = async (req, res) => {
       return res.status(404).json({ message: "Заказ не найден" });
     }
 
-    if (order.status !== "paid") {
-      return res.status(400).json({ message: "Отменить можно только оплаченный заказ до сборки" });
+    if (!["payment_pending", "created", "paid", "assembled"].includes(order.status)) {
+      return res.status(400).json({ message: "Отменить можно только до отправки заказа" });
     }
 
     order.status = "cancelled";
@@ -598,8 +642,20 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     const previousStatus = order.status;
+    let updatedOrder;
+
+    if (status === "paid" && previousStatus !== "paid") {
+      await reserveOrderRemains(order);
+    }
+
+    if (["cancelled", "refunded"].includes(status) && !["shipped", "completed", "cancelled", "refunded"].includes(previousStatus)) {
+      await restoreOrderRemains(order);
+      await refundOrderSpentBonuses(order);
+      await recalculateUserTotal(order.userId);
+    }
+
     order.status = status;
-    let updatedOrder = await order.save();
+    updatedOrder = await order.save();
 
     if (status === "completed" && previousStatus !== "completed") {
       await creditOrderBonuses(order);

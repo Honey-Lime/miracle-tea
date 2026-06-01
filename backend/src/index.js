@@ -209,7 +209,7 @@ function generateTBankToken(params, password) {
 }
 
 async function restoreOrderProducts(order) {
-  if (!order?.list?.length) {
+  if (!order?.stockReserved || !order?.list?.length) {
     return;
   }
 
@@ -221,6 +221,49 @@ async function restoreOrderProducts(order) {
       ),
     ),
   );
+
+  order.stockReserved = false;
+  order.stockReservedAt = null;
+  await order.save();
+}
+
+async function reserveOrderProducts(order) {
+  if (order.stockReserved) {
+    return;
+  }
+
+  const requestedByProduct = new Map();
+  for (const item of order.list || []) {
+    if (!item.pid || item.count <= 0) {
+      continue;
+    }
+
+    const productId = item.pid.toString();
+    requestedByProduct.set(productId, (requestedByProduct.get(productId) || 0) + item.count);
+  }
+
+  for (const [productId, count] of requestedByProduct.entries()) {
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new Error(`Product ${productId} not found`);
+    }
+    if (product.remains < count) {
+      throw new Error(`Insufficient stock for ${product.name}`);
+    }
+  }
+
+  await Promise.all(
+    Array.from(requestedByProduct.entries()).map(([productId, count]) =>
+      Product.updateOne(
+        { _id: productId },
+        { $inc: { remains: -count } },
+      ),
+    ),
+  );
+
+  order.stockReserved = true;
+  order.stockReservedAt = new Date();
+  await order.save();
 }
 
 async function restoreOrderBonuses(order) {
@@ -233,6 +276,10 @@ async function restoreOrderBonuses(order) {
 
 async function markOrderAsPaid(order, paymentUpdate = {}) {
   const wasAlreadyPaid = order.status === "paid";
+
+  if (!wasAlreadyPaid) {
+    await reserveOrderProducts(order);
+  }
 
   order.status = "paid";
   order.payment = {
