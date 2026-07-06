@@ -3,27 +3,27 @@
    =================================== */
 :root {
   /* Primary Colors - Background */
-  --color-primary: #fefcf3; /* Светлый, цвет слоновой кости - мягкий фон */
-  --color-primary-subtle: #f5f0e6; /* Легкий подтон фона */
+  --color-primary: #8b9674; /* Оливковый фон из макета */
+  --color-primary-subtle: #778a3a; /* Нижний/админский оливковый тон */
 
   /* Brand Color - Main Accent (Teal / Морская волна) */
-  --color-brand: #1b7b6e; /* Ключевой цвет - кнопки, заголовки */
-  --color-brand-dark: #145a52; /* Темный вариант для hover */
-  --color-brand-light: #2a9d8f; /* Светлый вариант для акцентов */
+  --color-brand: #6f8731; /* Ключевой оливковый цвет */
+  --color-brand-dark: #52651f; /* Темный вариант для hover */
+  --color-brand-light: #a8b67b; /* Светлый вариант для акцентов */
 
   /* Secondary Color - Laguna Blue */
-  --color-secondary: #489fb5; /* Ярко-голубой/цвет лагуны - иконки, акции */
-  --color-secondary-dark: #3a7f91; /* Темный вариант для hover */
-  --color-secondary-light: #e8f4f8; /* Светлый фон */
+  --color-secondary: #aab77b; /* Светлый оливковый */
+  --color-secondary-dark: #718538; /* Темный вариант для hover */
+  --color-secondary-light: #d9dccb; /* Светлый фон */
 
   /* Text Colors */
-  --color-text-primary: #2f4858; /* Charcoal - мягкий темно-серый с синим отливом */
-  --color-text-secondary: #5a7080; /* Второстепенный текст - для описаний */
+  --color-text-primary: #f0eee7; /* Светлый текст на оливковом фоне */
+  --color-text-secondary: #d8d5ca; /* Второстепенный текст */
 
   /* CTA Accent - Dynamic (Terracotta / Имбирь) */
-  --color-cta: #f4a261; /* Теплый терракотовый - кнопка «Оформить заказ» */
-  --color-cta-dark: #d98a4a; /* Темный вариант для hover */
-  --color-cta-light: #f9d5b5; /* Светлый вариант для фона */
+  --color-cta: #f4aa32; /* Оранжевый акцент из макета */
+  --color-cta-dark: #d88d19; /* Темный вариант для hover */
+  --color-cta-light: #dfd2c4; /* Светлый бежевый вариант */
 
   /* Neutral Colors */
   --color-white: #ffffff;
@@ -37,15 +37,15 @@
   --color-gray-700: #333333;
 
   /* Border & Shadow */
-  --border-color: #d4dcd0;
-  --border-color-light: #e8ede6;
-  --shadow-color: rgba(27, 123, 110, 0.1);
-  --shadow-dark: rgba(27, 123, 110, 0.15);
+  --border-color: rgba(240, 238, 231, 0.32);
+  --border-color-light: rgba(240, 238, 231, 0.18);
+  --shadow-color: rgba(24, 31, 14, 0.24);
+  --shadow-dark: rgba(24, 31, 14, 0.38);
   --overlay-color: rgba(0, 0, 0, 0.5);
 
   /* Component Specific Colors */
-  --header-bg: var(--color-brand);
-  --footer-bg: var(--color-brand);
+  --header-bg: rgba(36, 42, 25, 0.48);
+  --footer-bg: #6f8731;
   --btn-primary-bg: var(--color-brand);
   --btn-primary-hover: var(--color-brand-dark);
   --btn-primary-text: var(--color-white);

@@ -2,79 +2,247 @@
     HOME PAGE
     =================================== */
 .hp-hero {
-  background: linear-gradient(
-    135deg,
-    var(--color-brand),
-    var(--color-brand-dark)
-  );
+  min-height: 560px;
+  margin: 0 calc(50% - 50vw);
+  padding: 5.8rem 0 3rem;
   color: var(--color-white);
-  text-align: center;
-  padding: 4rem 0;
+  /* background:
+    linear-gradient(180deg, rgba(20, 27, 13, 0.08), rgba(139, 150, 116, 0.58) 88%),
+    url("/first-screen-bg.png") center top / cover no-repeat; */
+  background:
+    url("/first-screen-bg.png") center top / cover no-repeat;
+  overflow: hidden;
+}
+
+.hp-hero-content {
+  display: flex;
+  /* grid-template-columns: minmax(300px, 0.9fr) minmax(420px, 1.1fr); */
+  align-items: center;
+}
+
+.hp-hero-copy {
+  padding-left: 1rem;
 }
 
 .hp-hero h1 {
-  font-size: 3.5rem;
-  margin-bottom: 1rem;
+  font-size: clamp(4.2rem, 9vw, 8.5rem);
+  margin-bottom: -0.75rem;
+  color: rgba(244, 242, 234, 0.92);
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  text-shadow: 0 5px 10px rgba(0, 0, 0, 0.52);
 }
 
 .hp-hero .hp-subtitle {
-  font-size: 1.5rem;
+  margin-left: 11.5rem;
+  color: rgba(241, 238, 229, 0.82);
+  font-size: 1.35rem;
+  line-height: 1.2;
+  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.45);
+}
+
+.hp-hero-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  max-width: 210px;
+  margin-top: 3.3rem;
+}
+
+.hp-hero-actions a {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 0.45rem 1rem 0.45rem 3rem;
+  border-radius: 999px;
+  background: rgba(184, 196, 134, 0.2);
+  backdrop-filter: blur(3px);
+  color: rgba(244, 242, 234, 0.88);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* .hp-hero-actions a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  background: rgba(184, 196, 134, 0.2);
+  filter: blur(5px);
+} */
+
+.hp-hero-actions a::before {
+  content: "";
+  position: absolute;
+  left: 0.35rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e9e4dc;
+}
+
+.hp-hero-photo {
+  position: relative;
+  min-height: 460px;
+}
+
+.hp-hero-photo::before,
+.hp-hero-photo::after,
+.hp-feature-row::after {
+  content: "";
+  position: absolute;
+  width: 170px;
+  height: 85px;
+  background: url("../assets/home-design-reference.png") center 10% / 1200px auto no-repeat;
+  filter: drop-shadow(0 8px 7px rgba(0, 0, 0, 0.3));
   opacity: 0.9;
 }
 
-.hp-benefits {
-  padding: 4rem 0;
+.hp-hero-photo::before {
+  left: -20px;
+  bottom: 90px;
+  transform: rotate(-18deg);
 }
 
-.hp-benefits h2 {
-  text-align: center;
-  margin-bottom: 3rem;
-  font-size: 2.5rem;
-  color: var(--color-text-primary);
+.hp-hero-photo::after {
+  right: 30px;
+  bottom: 8px;
+  transform: rotate(-14deg);
 }
 
-.hp-benefits .hp-benefits-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
+.hp-hero-photo-slice {
+  position: absolute;
+  border-radius: 18px;
+  background: url("../assets/home-design-reference.png") 69% 7% / 1600px auto no-repeat;
+  box-shadow: 0 16px 24px rgba(0, 0, 0, 0.42);
 }
 
-.hp-benefits .hp-benefit-card {
+.hp-hero-photo-slice-one {
+  left: 2rem;
+  top: 0;
+  width: 310px;
+  height: 440px;
+  clip-path: polygon(18% 0, 100% 0, 82% 100%, 0 100%);
+}
+
+.hp-hero-photo-slice-two {
+  right: 0;
+  top: 3.6rem;
+  width: 340px;
+  height: 340px;
+  clip-path: polygon(22% 0, 100% 0, 80% 100%, 0 100%);
+}
+
+.hp-home-page {
+  margin: 0 calc(50% - 50vw);
   background: var(--color-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 2rem;
-  text-align: center;
-  box-shadow: 0 6px 12px var(--shadow-color);
-  transition: transform 0.3s;
 }
 
-.hp-benefits .hp-benefit-card:hover {
-  transform: translateY(-5px);
+.hp-feature-row {
+  position: relative;
+  padding: 5.2rem 0;
 }
 
-.hp-benefits .hp-benefit-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+.hp-feature-row .container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 5rem;
 }
 
-.hp-benefits .hp-benefit-card h3 {
-  margin-bottom: 1rem;
-  color: var(--color-brand);
+.hp-feature-image {
+  min-height: 360px;
+  background-image: url("../assets/home-design-reference.png");
+  background-size: 1200px auto;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.35);
 }
 
-.hp-about h2 {
-  text-align: center;
-  margin-bottom: 2rem;
-  color: var(--color-text-primary);
+.hp-feature-image-left {
+  margin-left: calc(50% - 50vw);
+  border-radius: 0 0 220px 0;
+  background-position: 0 34%;
 }
 
-.hp-about {
-  padding: 4rem 0;
-  text-align: center;
+.hp-feature-image-right {
+  margin-right: calc(50% - 50vw);
+  border-radius: 220px 0 0 220px;
+  background-position: 100% 52%;
 }
 
-.hp-about a {
-  color: var(--color-brand);
-  font-weight: 600;
+.hp-feature-image-bottom {
+  margin-left: calc(50% - 50vw);
+  border-radius: 0 220px 220px 0;
+  background-position: 0 65%;
+}
+
+.hp-feature-text {
+  max-width: 520px;
+}
+
+.hp-feature-text-left {
+  justify-self: end;
+  text-align: right;
+}
+
+.hp-feature-text h2 {
+  margin-bottom: 1.6rem;
+  color: var(--color-cta);
+  font-size: clamp(2.8rem, 5vw, 4.6rem);
+  font-style: italic;
+  font-weight: 500;
+  line-height: 0.95;
+  text-shadow: 0 4px 5px rgba(0, 0, 0, 0.42);
+}
+
+.hp-feature-text p {
+  color: rgba(242, 240, 232, 0.72);
+  font-size: 1.14rem;
+  line-height: 1.55;
+}
+
+.hp-benefits::after {
+  left: 7vw;
+  bottom: 2.5rem;
+  transform: rotate(-8deg);
+}
+
+.hp-sampler::after {
+  right: 14vw;
+  bottom: 5rem;
+  transform: rotate(-16deg);
+}
+
+.hp-sampler {
+  min-height: 760px;
+}
+
+@media (max-width: 900px) {
+  .hp-hero-content,
+  .hp-feature-row .container {
+    grid-template-columns: 1fr;
+  }
+
+  .hp-hero-photo {
+    display: none;
+  }
+
+  .hp-hero .hp-subtitle {
+    margin-left: 0;
+  }
+
+  .hp-feature-text-left {
+    justify-self: start;
+    text-align: left;
+  }
+
+  .hp-feature-image,
+  .hp-feature-image-left,
+  .hp-feature-image-right,
+  .hp-feature-image-bottom {
+    margin: 0;
+    border-radius: 42px;
+  }
 }

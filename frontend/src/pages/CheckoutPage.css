@@ -156,7 +156,8 @@
   gap: 0.75rem;
   font-size: 0.95rem;
   line-height: 1.4;
-  color: var(--color-text-primary);
+  /* color: var(--color-text-primary); */
+  color: grey;
 }
 
 .chp-checkout-page .chp-policy-consent input {

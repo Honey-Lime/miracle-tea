@@ -105,16 +105,17 @@ const CatalogPage = () => {
   if (loading) return <div className="loading">Загрузка...</div>;
 
   return (
-    <div className="cp-catalog-page container">
-      <nav className="breadcrumbs">
-        <Link to="/catalog">Каталог</Link>
-      </nav>
-      <h1>Каталог чая</h1>
-      <p className="cp-price-note">*Цена указана за 100г</p>
+    <div className="cp-catalog-page">
+      <div className="container">
+        <nav className="breadcrumbs">
+          <Link to="/catalog">Каталог</Link>
+        </nav>
+        <h1>Каталог чая</h1>
+        <p className="cp-price-note">*Цена указана за 100г</p>
 
       {/* Фильтр по тегам */}
-      {allTags.length > 0 && (
-        <div className="cp-tags-filter">
+        {allTags.length > 0 && (
+          <div className="cp-tags-filter">
           <button
             className={`cp-tag-filter-btn ${!selectedTag ? "active" : ""}`}
             onClick={() => setSelectedTag(null)}
@@ -132,10 +133,10 @@ const CatalogPage = () => {
               {tag}
             </button>
           ))}
-        </div>
-      )}
+          </div>
+        )}
 
-      <div className="cp-products-grid">
+        <div className="cp-products-grid">
         {filteredProducts.length === 0 ? (
           <p className="cp-no-products">Товары с выбранным тегом не найдены</p>
         ) : (
@@ -210,7 +211,7 @@ const CatalogPage = () => {
                       <span className="current">{currentCount}{unitLabel}</span>
                       <span className="line"></span>
                       <span className="price">{product.price * currentCount * 0.01}₽</span>
-                      <span className="hover">🛒</span>
+                      <span className="hover">В корзину</span>
                     </span>
                     <button
                       className="gram-btn gram-btn_plus"
@@ -245,6 +246,7 @@ const CatalogPage = () => {
             </div>
           );})
         )}
+        </div>
       </div>
     </div>
   );
