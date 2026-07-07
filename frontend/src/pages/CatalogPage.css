@@ -7,7 +7,7 @@
   padding: 14rem 0 8rem;
   background:
     linear-gradient(180deg, rgba(27, 34, 14, 0.06) 0, rgba(139, 150, 116, 0.72) 260px, var(--color-primary) 520px),
-    url("../assets/catalog-design-reference.png") center top / 100% auto no-repeat;
+    url("/first-screen-bg.png") center top / 100% auto no-repeat;
 }
 
 .cp-catalog-page h1 {

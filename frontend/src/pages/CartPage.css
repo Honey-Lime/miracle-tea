@@ -2,7 +2,7 @@
    CART PAGE
    =================================== */
 .crt-cart-page {
-  padding: 2rem 0;
+  padding: 10rem 0;
   width: 100%;
 }
 
@@ -13,7 +13,7 @@
 .crt-cart-page.empty,
 .crt-cart-page.crt-empty {
   text-align: center;
-  padding: 4rem 0;
+  padding: 10rem 0;
 }
 
 .crt-cart-page.empty p,

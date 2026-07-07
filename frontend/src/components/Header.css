@@ -12,8 +12,8 @@
   background-color: rgba(255, 255, 255, 0.05);
   color: white;
   padding: 0;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(3px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
   /* position: sticky; */
   top: 0;
   z-index: 900;
@@ -71,6 +71,10 @@
   width: auto;
   flex: 0 0 auto;
   object-fit: contain;
+  border: 2px solid white;
+  border-radius: 50%;
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.3);
 }
 
 .hdr-header .hdr-logo .hdr-tagline {

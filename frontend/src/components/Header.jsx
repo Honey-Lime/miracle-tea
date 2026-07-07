@@ -4,7 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import { CartContext } from "../context/CartContext";
 import cartSVG from "/cart.svg";
 import userSVG from "/user.svg";
-import logoSVG from "/logo.svg";
+import logoPNG from "/logo.png";
 // import background from "/first-screen-bg.png";
 
 
@@ -18,7 +18,7 @@ const Header = () => {
         <div className="hdr-content">
           <div className="hdr-logo">
             <Link className="logo-block" to="/">
-              <img className="hdr-cart-icon" src={logoSVG} alt="" />
+              <img className="hdr-cart-icon" src={logoPNG} alt="" />
               <h1 className="logo-miracle">Чудо</h1>
               <h1 className="logo-tea">чай</h1>
             </Link>

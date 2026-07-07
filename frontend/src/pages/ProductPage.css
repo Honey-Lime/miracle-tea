@@ -2,7 +2,7 @@
    PRODUCT PAGE
    =================================== */
 .pp-product-page {
-  padding: 2rem 0;
+  padding: 10rem 0;
 }
 
 .pp-product-page .pp-product-container {
@@ -90,7 +90,7 @@
 .pp-product-page .pp-product-title {
   font-size: 2.5rem;
   margin-bottom: 0.5rem;
-  color: var(--color-text-primary);
+  color: var(--btn-secondary-bg);
 }
 
 .pp-product-page .pp-product-price {
@@ -110,7 +110,7 @@
 .pp-product-page .pp-product-description {
   margin-bottom: 2.5rem;
   line-height: 1.6;
-  color: var(--color-text-secondary);
+  color: var(--btn-secondary-bg);
 }
 
 .pp-product-page .pp-product-description h3 {
@@ -120,6 +120,7 @@
 
 .pp-product-page .pp-gram-selection {
   /* background: var(--color-gray-100); */
+  color: var(--btn-secondary-bg);
   border-radius: 12px;
   margin-bottom: 2rem;
 }

@@ -2,7 +2,7 @@
    CHECKOUT PAGE
    =================================== */
 .chp-checkout-page {
-  padding: 2rem 0;
+  padding: 10rem 0;
 }
 
 .chp-checkout-page h1 {
@@ -36,7 +36,7 @@
 .chp-checkout-page .chp-checkout-settings h2,
 .chp-checkout-page .chp-final-total h2 {
   margin-bottom: 1.5rem;
-  color: var(--color-brand);
+  color: var(--color-white);
 }
 
 .chp-checkout-page .chp-checkout-sidebar {
