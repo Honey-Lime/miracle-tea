@@ -21,7 +21,8 @@
 
 .policy-page h2 {
   margin-bottom: 0.75rem;
-  color: var(--color-brand);
+  /* color: var(--color-brand); */
+  color: #070707;
   font-size: 1.25rem;
 }
 

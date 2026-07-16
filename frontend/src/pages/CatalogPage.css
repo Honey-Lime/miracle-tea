@@ -44,16 +44,17 @@
   border: 18px solid rgba(192, 204, 164, 0.3);
   border-radius: 42px;
   box-shadow: 0 15px 28px rgba(0, 0, 0, 0.18);
-  transition: 0.2s ease-in-out;
+  transition: 0.3s ease-in-out;
 }
 
 .cp-catalog-page .cp-product-card:hover {
   background-color: rgba(209, 217, 189, 0.44);
-  transform: translateY(-8px);
+  transform: translateY(-5px);
 }
 
 .cp-catalog-page .cp-product-card:hover .cp-product-image {
-  border-radius: 8px;
+  border-radius: 24px;
+  /* border-radius: unset; */
 }
 
 .cp-catalog-page .cp-product-image {
@@ -66,6 +67,7 @@
   transition: 0.2s ease-in-out;
   aspect-ratio: 1 / 1;
   overflow: hidden;
+  margin: -2.4rem -1.8rem 0;
 }
 
 .cp-catalog-page .cp-product-image img {
@@ -199,7 +201,7 @@
   color: var(--color-cta);
   font-size: 1.25rem;
   font-weight: 800;
-  min-width: 4.7rem;
+  min-width: 6.5rem;
   text-align: center;
   transition: background 0.2s ease;
   aspect-ratio: 1/1;
@@ -269,11 +271,11 @@
   display: flex;
   justify-content: center;
   width: 100%;
-  padding: 2.75rem 0.9rem 0.65rem;
-  margin-top: -2.8rem;
+  padding: 4.5rem 0.9rem 0.4rem;
+  margin-top: -4.5rem;
   font-size: 1.2rem;
   font-weight: 800;
-  border-radius: 26px;
+  border-radius: 30px;
   background: #708834;
   color: var(--color-cta);
   border: none;

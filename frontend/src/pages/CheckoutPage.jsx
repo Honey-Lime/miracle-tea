@@ -156,6 +156,9 @@ const CheckoutPage = () => {
         const error = await payment.json();
         throw new Error(error.message || "Ошибка при оплате");
       }
+
+      console.log("Оформляем доставку");
+      
       
       addToast("Заказ успешно оформлен!", "success");
       const paymentResponse = await payment.json();
@@ -304,9 +307,9 @@ const CheckoutPage = () => {
                   onChange={(event) => setRefundPolicyAccepted(event.target.checked)}
                 />
                 <span>
-                  Я принимаю{" "}
+                  Я согласен(на) с{" "}
                   <Link to="/refund-policy" target="_blank" rel="noopener noreferrer">
-                    политику возврата средств
+                    политикой возврата средств
                   </Link>
                 </span>
               </label>

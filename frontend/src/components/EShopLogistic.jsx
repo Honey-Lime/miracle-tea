@@ -1312,12 +1312,15 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
                       : renderValue(selectedTerminal.phones)}
                   </li>
                   <q>{renderValue(selectedTerminal.note)}</q>
-                  <li>Оплата: {renderValue(selectedTerminal.payment?.possible)}</li>
-                  <li>
-                    Методы оплаты: {Array.isArray(selectedTerminal.payment?.methods)
-                      ? selectedTerminal.payment.methods.join(", ")
-                      : renderValue(selectedTerminal.payment?.methods)}
-                  </li>
+                  {/* <li>Оплата: {renderValue(selectedTerminal.payment?.possible)}</li> */}
+                  
+                  {/* {selectedTerminal.payment?.possible == "yes" ? (
+                    <li>
+                      Методы оплаты: {Array.isArray(selectedTerminal.payment?.methods)
+                        ? selectedTerminal.payment.methods.join(", ")
+                        : renderValue(selectedTerminal.payment?.methods)}
+                    </li>
+                  ) : ("")} */}
                 </>
               )}
 

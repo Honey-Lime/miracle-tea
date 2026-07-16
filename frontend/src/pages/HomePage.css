@@ -3,7 +3,7 @@
     =================================== */
 .hp-hero {
   position: relative;
-  height: 60vh;
+  height: 75vh;
   margin: 0 calc(50% - 50vw);
   padding: 5.8rem 0 3rem;
   color: var(--color-white);
@@ -27,7 +27,7 @@
   z-index: 7;
   /* top: 10%; */
   /* bottom: 50%; */
-  left: 40%;
+  left: 30%;
   max-height: 100%;
   max-width: 70%;
 }
@@ -63,8 +63,8 @@
 .hp-hero-copy {
   z-index: 77;
   padding-left: 1rem;
-  max-width: 45%;
-  padding-left: 10%;
+  max-width: 50%;
+  padding-left: 15%;
 }
 
 .hp-hero h1 {
