@@ -154,11 +154,32 @@
   margin: 0;
 }
 
-.ap-logs-header select {
-  padding: 0.5rem 0.75rem;
+.ap-logs-tabs {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
   border: 1px solid var(--color-border, #d0d7de);
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--color-white);
+}
+
+.ap-logs-tab {
+  padding: 0.5rem 0.9rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text, #111827);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.ap-logs-tab.active {
+  background: var(--color-brand);
+  color: var(--color-white);
+}
+
+.ap-logs-tab:not(.active):hover {
+  background: #f3f4f6;
 }
 
 .ap-logs-error {

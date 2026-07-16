@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import api from "../../services/api";
 
 const logTypes = [
-  { value: "errors", label: "Ошибки пользователей" },
-  { value: "app", label: "Все логи" },
+  { value: "errors", label: "Ошибки" },
+  { value: "app", label: "Логи" },
 ];
 
 const INITIAL_LOG_BYTES = 200000;
@@ -30,7 +30,7 @@ const LogsPage = () => {
       try {
         const response = await api.get("/admin/logs", { params: { type, maxBytes } });
         const nextContent = response.data.content || "";
-        setContent(type === "errors" ? formatErrorLogs(nextContent) : nextContent);
+        setContent(formatErrorLogs(nextContent));
         setHasMore(Boolean(response.data.hasMore));
       } catch (requestError) {
         setError(requestError.response?.data?.message || "Не удалось загрузить логи");
@@ -42,8 +42,8 @@ const LogsPage = () => {
     loadLogs();
   }, [type, maxBytes]);
 
-  const handleTypeChange = (event) => {
-    setType(event.target.value);
+  const handleTypeChange = (nextType) => {
+    setType(nextType);
     setMaxBytes(INITIAL_LOG_BYTES);
   };
 
@@ -51,13 +51,20 @@ const LogsPage = () => {
     <section className="ap-logs-page">
       <div className="ap-logs-header">
         <h1>Логи</h1>
-        <select value={type} onChange={handleTypeChange}>
+        <div className="ap-logs-tabs" role="tablist" aria-label="Тип логов">
           {logTypes.map((logType) => (
-            <option key={logType.value} value={logType.value}>
+            <button
+              key={logType.value}
+              type="button"
+              className={`ap-logs-tab${type === logType.value ? " active" : ""}`}
+              role="tab"
+              aria-selected={type === logType.value}
+              onClick={() => handleTypeChange(logType.value)}
+            >
               {logType.label}
-            </option>
+            </button>
           ))}
-        </select>
+        </div>
       </div>
 
       {loading && <p>Загрузка...</p>}

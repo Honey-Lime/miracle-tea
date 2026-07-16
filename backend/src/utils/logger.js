@@ -9,6 +9,13 @@ if (!fs.existsSync(logDir)) {
 
 const logFile = path.join(logDir, "app.log");
 const errorLogFile = path.join(logDir, "errors.log");
+const originalConsole = {
+  log: console.log.bind(console),
+  info: console.info.bind(console),
+  warn: console.warn.bind(console),
+  error: console.error.bind(console),
+};
+let consoleCaptureInstalled = false;
 
 function safeJson(value) {
   try {
@@ -24,23 +31,61 @@ function appendLine(filePath, message) {
   fs.appendFileSync(filePath, logMessage, "utf8");
 }
 
+function formatConsoleArg(value) {
+  if (value instanceof Error) {
+    return value.stack || value.message;
+  }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  return safeJson(value);
+}
+
+function formatConsoleMessage(args) {
+  return args.map(formatConsoleArg).join(" ");
+}
+
 function logToFile(message) {
   appendLine(logFile, message);
+}
+
+function installConsoleCapture() {
+  if (consoleCaptureInstalled) {
+    return;
+  }
+
+  consoleCaptureInstalled = true;
+
+  ["log", "info", "warn", "error"].forEach((level) => {
+    console[level] = (...args) => {
+      const message = `CONSOLE_${level.toUpperCase()} ${formatConsoleMessage(args)}`;
+
+      appendLine(logFile, message);
+
+      if (level === "error") {
+        appendLine(errorLogFile, message);
+      }
+
+      originalConsole[level](...args);
+    };
+  });
 }
 
 function logDBOperation(operation, collection, query, result) {
   const message = `DB ${operation} on ${collection}: ${safeJson(query)} -> ${safeJson(result)}`;
   logToFile(message);
-  console.log(message);
+  originalConsole.log(message);
 }
 
 function logHTTPRequest(method, url, status, responseTime, meta = {}) {
   const message = `HTTP ${method} ${url} ${status} ${responseTime}ms ${safeJson(meta)}`;
   logToFile(message);
   if (status >= 500) {
-    console.error(message);
+    originalConsole.error(message);
   } else {
-    console.log(message);
+    originalConsole.log(message);
   }
 }
 
@@ -64,7 +109,7 @@ function logError(error, context = "", req = null, extra = {}) {
   const message = `ERROR ${context}: ${normalizedError.message} ${safeJson(meta)}\nStack: ${normalizedError.stack}`;
   logToFile(message);
   appendLine(errorLogFile, message);
-  console.error(message);
+  originalConsole.error(message);
 }
 
 function logClientError(payload = {}, req = null) {
@@ -79,7 +124,7 @@ function logClientError(payload = {}, req = null) {
   })}`;
   logToFile(message);
   appendLine(errorLogFile, message);
-  console.error(message);
+  originalConsole.error(message);
 }
 
 function getLogFilePath(type = "app") {
@@ -88,6 +133,7 @@ function getLogFilePath(type = "app") {
 
 module.exports = {
   logToFile,
+  installConsoleCapture,
   logDBOperation,
   logHTTPRequest,
   logError,

@@ -7,11 +7,13 @@ const morgan = require("morgan");
 const path = require("path");
 require("dotenv").config();
 const {
+  installConsoleCapture,
   logDBOperation,
   logHTTPRequest,
   logError,
   logClientError,
 } = require("./utils/logger");
+installConsoleCapture();
 const crypto = require("crypto");
 const Order = require("./models/Order");
 const Product = require("./models/Product");
