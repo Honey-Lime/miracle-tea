@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import api from "../../services/api";
 
 const logTypes = [
@@ -15,6 +15,7 @@ const formatErrorLogs = (logContent) =>
     .replace(/\n(?=\[\d{4}-\d{2}-\d{2}T)/g, "\n\n");
 
 const LogsPage = () => {
+  const logsContentRef = useRef(null);
   const [type, setType] = useState("errors");
   const [content, setContent] = useState("");
   const [maxBytes, setMaxBytes] = useState(INITIAL_LOG_BYTES);
@@ -41,6 +42,12 @@ const LogsPage = () => {
 
     loadLogs();
   }, [type, maxBytes]);
+
+  useEffect(() => {
+    if (!loading && !error && logsContentRef.current) {
+      logsContentRef.current.scrollTop = logsContentRef.current.scrollHeight;
+    }
+  }, [content, loading, error]);
 
   const handleTypeChange = (nextType) => {
     setType(nextType);
@@ -70,7 +77,7 @@ const LogsPage = () => {
       {loading && <p>Загрузка...</p>}
       {error && <p className="ap-logs-error">{error}</p>}
       {!loading && !error && (
-        <pre className="ap-logs-content">
+        <pre className="ap-logs-content" ref={logsContentRef}>
           {content || "Лог пока пуст"}
         </pre>
       )}
