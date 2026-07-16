@@ -392,7 +392,7 @@ const ProductPage = () => {
                 disabled={selectedGrams > availableToAdd || selectedGrams < minCount}
                 title="Добавить в корзину"
               >
-                🛒
+                В корзину
               </button>
               <button
                 className="pp-btn pp-btn-secondary"

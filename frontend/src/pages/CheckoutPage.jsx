@@ -152,13 +152,22 @@ const CheckoutPage = () => {
         }),
       });
 
+      await fetch("/api/test", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          id: order.id,
+          deliveryData: deliveryData
+        }),
+      });
+
       if (!payment.ok) {
         const error = await payment.json();
         throw new Error(error.message || "Ошибка при оплате");
       }
-
-      console.log("Оформляем доставку");
-      
       
       addToast("Заказ успешно оформлен!", "success");
       const paymentResponse = await payment.json();

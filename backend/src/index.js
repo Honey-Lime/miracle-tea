@@ -352,7 +352,7 @@ app.post('/api/create-payment', async(req, res) => {
       Description: `Оплата заказа ${bankOrderId}`,
       // SuccessURL: 'https://чудочай.рф/thank-you',
       // FailURL: 'https://чудочай.рф/checkout',
-      NotificationURL: 'https://чудочай.рф/api/create-delivery-order'
+      NotificationURL: 'https://чудочай.рф/api/set-order-isPayment'
 
       // Receipt: {
       //   Email: "a@test.ru",
@@ -443,7 +443,7 @@ app.post('/api/create-payment', async(req, res) => {
   }
 });
 
-app.post('/api/create-delivery-order', async(req, res) => {
+app.post('/api/set-order-isPayment', async(req, res) => {
   try {
     const notification = req.body || {};
     const expectedToken = generateTBankToken(notification, TERMINAL_PASSWORD);
@@ -468,6 +468,7 @@ app.post('/api/create-delivery-order', async(req, res) => {
 
     if (notification.Success === true && isPaidTBankStatus(notification.Status)) {
       await markOrderAsPaid(order, paymentUpdate);
+      // createDeliveryOrder(order.delivery);
       return res.status(200).send('OK');
     } else if (["REJECTED", "DEADLINE_EXPIRED", "CANCELED"].includes(notification.Status)) {
       if (order.status === "payment_pending") {
@@ -560,6 +561,17 @@ app.get("/api/bonus-settings", async (_req, res) => {
     res.status(500).json({ message: "Не удалось загрузить настройки бонусов" });
   }
 });
+
+app.post('/api/test', async(req, res) => {
+  const { id, deliveryData } = req.body;
+  createDeliveryOrder(deliveryData);
+  console.log(id);
+});
+
+function createDeliveryOrder(deliveryData)
+{
+  console.log(deliveryData);
+}
 
 // Import routes
 // const paymentRoutes = require("./routes/paymentRoutes");

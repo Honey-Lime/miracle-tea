@@ -306,7 +306,7 @@
   border: 1px solid var(--border-color);
   border-radius: 8px;
   background: var(--color-white);
-  color: var(--color-text-primary);
+  color: #070707;
 }
 
 .pp-product-page .pp-reviews-list {
@@ -326,6 +326,7 @@
   border-left: 3px solid var(--color-brand);
   border-radius: 8px;
   background: var(--color-secondary-light);
+  color: #070707;
 }
 
 .pp-product-page .pp-review-admin-comment strong {
