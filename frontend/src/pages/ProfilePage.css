@@ -99,6 +99,7 @@
   padding: 1rem;
   border-radius: 8px;
   background: var(--color-gray-100);
+  color: #070707;
 }
 
 .prfp-profile-page .prfp-review-product {
@@ -257,6 +258,10 @@
 .prfp-profile-page .prfp-orders-table {
   width: 100%;
   border-collapse: collapse;
+}
+
+.prfp-orders-table thead {
+  color: #070707;
 }
 
 .prfp-profile-page .prfp-orders-table th,
