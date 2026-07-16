@@ -465,8 +465,9 @@ const LoginModal = () => {
 
         <p className="toggle-mode">
           {isRegister ? "Уже есть аккаунт?" : "Нет аккаунта?"}
+          <br/>
           <button
-            className="link-btn"
+            className="link-btn register-btn"
             onClick={() => {
               setIsRegister(!isRegister);
               setEmailVerified(false);
