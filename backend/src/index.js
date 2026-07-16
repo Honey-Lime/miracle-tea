@@ -568,6 +568,8 @@ app.post('/api/test', async(req, res) => {
   const { id, deliveryData } = req.body;
   createDeliveryOrder(deliveryData);
   console.log(id);
+
+  res.status(200).send('OK');
 });
 
 function createDeliveryOrder(deliveryData)
