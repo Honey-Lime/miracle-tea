@@ -565,6 +565,10 @@ app.get("/api/bonus-settings", async (_req, res) => {
 });
 
 app.post('/api/test', async(req, res) => {
+
+
+
+
   const { id, deliveryData } = req.body;
   console.log(id);
 
@@ -578,10 +582,18 @@ app.post('/api/test', async(req, res) => {
   console.log(order);
 
   let orderData = {
-    id: id, // string 	Идентификатор заказа на сайте.
+    id: id,   // string 	Идентификатор заказа на сайте.
     places: [],
+    type: 1,   // integer 	Тип заказа. Доступно 2 варианта: «1» - Интернет-магазин, «2» - Доставка.
+    combine_places_apply: true, // boolean 	
+                                // Объединить все грузовые места в одно.
+                                // При этом внутри грузового места формируется список позиций для страховки.
+                                // По умолчанию = false.
+    total_weight: 0,
+    dimensions: "10*15*"
   };
 
+  let real_orders = 0;
   for (let i = 0; i < order.list.length; i++) {
     orderData.places.push(
       {
@@ -595,8 +607,14 @@ app.post('/api/test', async(req, res) => {
                                                 // Возможные варианты: 0, 5, 7, 10, 20, -1 (без НДС)
       }
     );
-    
+    if (order.list[i].isSampler == false)
+    {
+      real_orders++;
+    }
+    orderData.total_weight += order.list[i].count / 1000;
   }
+
+  orderData.dimensions = `${orderData.dimensions}${real_orders * 6}`
 
   let otherData = {
     sender: {
@@ -666,15 +684,32 @@ function createDeliveryOrder(deliveryData, orderData, otherData)
     }
   };
 
+  let order = {
+    id: orderData.id,
+    comment: deliveryData.comment // string 	Комментарий
+  }
+  switch (deliveryData.service) {
+    case "sdek":
+      order.type = orderData.type;
+      if (orderData.combine_places_apply == true)
+      {
+        order.combine_places = {};
+        order.combine_places.apply = true;
+        order.combine_places.weight = orderData.total_weight;
+        order.combine_places.dimensions = orderData.dimensions;
+      }
+      break;
+  
+    default:
+      break;
+  }
+
   let data = { 
     key: ESHOPLOGISTIC_TOKEN, 
     action: "create",
     cms: "custom",
     service: deliveryData.service,
-    order: {
-      id: orderData.id,
-      comment: deliveryData.comment // string 	Комментарий
-    },
+    order: order,
     sender: otherData.sender,
     receiver: {
       name: deliveryData.name,
@@ -688,7 +723,8 @@ function createDeliveryOrder(deliveryData, orderData, otherData)
 
       },
       location_to: location_to,
-
+      payment: otherData.delivery.payment,
+      cost: otherData.delivery.cost
     }
   };
   
