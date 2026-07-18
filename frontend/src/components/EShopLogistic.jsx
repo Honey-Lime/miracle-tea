@@ -287,7 +287,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
           suggestion?.value ||
           address,
         country: 
-          suggestion.data.country,
+          suggestion.data.country_iso_code,
         city:
           suggestion.data.city,
         region:

@@ -568,22 +568,35 @@ app.post('/api/test', async(req, res) => {
   const { id, deliveryData } = req.body;
   console.log(id);
 
-  let order = await Order.findById(id);
-  console.log(order);
+  let order = await Order.findById(id).populate("list.pid", "sku name");
 
+  order.list = order.list.map((item) => ({
+    ...item.toObject(),
+    article: item.pid?.sku || "",
+    name: item.pid?.name || "",
+  }));
+  console.log(order);
+  
   let orderData = {
     id: id, // string 	Идентификатор заказа на сайте.
-    places: [{
-      article: "",    // string 	Идентификатор товара / груза.
-      name: "",       // string 	Название
-      count: 1,       // integer 	Количество
-      price: "",      // double 	Цена, включая НДС
-      weight: "",     // double 	Вес, в кг.
-      dimensions: "", // string 	Габариты. Формат: строка вида «Д*Ш*В», в сантиметрах. Например: 15*25*10 .
-      vat_rate: "",   // integer 	Значение ставки НДС 
-                      // Возможные варианты: 0, 5, 7, 10, 20, -1 (без НДС)
-    }],
+    places: [],
   };
+
+  for (let i = 0; i < order.list.length; i++) {
+    orderData.places.push(
+      {
+        article: order.list[i].article,         // string 	Идентификатор товара / груза.
+        name: order.list[i].name,               // string 	Название
+        count: 1,                               // integer 	Количество
+        price: order.list[i].priceAtOrder,      // double 	Цена, включая НДС
+        weight: order.list[i].count / 1000,     // double 	Вес, в кг.
+        dimensions: "10*15*6",                  // string 	Габариты. Формат: строка вида «Д*Ш*В», в сантиметрах. Например: 15*25*10 .
+        vat_rate: -1,                           // integer 	Значение ставки НДС 
+                                                // Возможные варианты: 0, 5, 7, 10, 20, -1 (без НДС)
+      }
+    );
+    
+  }
 
   let otherData = {
     sender: {
@@ -642,14 +655,14 @@ function createDeliveryOrder(deliveryData, orderData, otherData)
   }
   : {
     address: {
-      country: "",  // string 	Код страны.
-                    // Варианты: RU, UZ, AZ, KZ, AB, TM, BY, UA, TJ, KG, AM, MD 
-      region: "",   // string 	Регион. Например: Московская область
-      city: "",     // string 	Населённый пункт
-      district: "", // string 	Район
-      street: "",   // string 	Улица
-      house: "",    // string 	Номер строения
-      room: "",     // string 	Квартира / офис / помещение
+      country: deliveryData.address.country,    // string 	Код страны.
+                                                // Варианты: RU, UZ, AZ, KZ, AB, TM, BY, UA, TJ, KG, AM, MD 
+      region: deliveryData.address.region,      // string 	Регион. Например: Московская область
+      city: deliveryData.address.city,          // string 	Населённый пункт
+      district: deliveryData.address.district,  // string 	Район
+      street: deliveryData.address.street,      // string 	Улица
+      house: deliveryData.address.house,        // string 	Номер строения
+      room: deliveryData.room,                  // string 	Квартира / офис / помещение
     }
   };
 
@@ -657,7 +670,7 @@ function createDeliveryOrder(deliveryData, orderData, otherData)
       key: ESHOPLOGISTIC_TOKEN, 
       action: "create",
       cms: "custom",
-      service: deliveryData.delivery.details.service,
+      service: deliveryData.service,
       order: {
         id: orderData.id,
         comment: deliveryData.comment // string 	Комментарий
