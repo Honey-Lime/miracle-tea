@@ -289,13 +289,13 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
         country: 
           suggestion.data.country_iso_code,
         city:
-          suggestion.data.city,
+          suggestion.data.city_with_type,
         region:
-          suggestion.data.region,
+          suggestion.data.region_with_type,
         district:
           suggestion.data.city_district,
         street:
-          suggestion.data.street,
+          suggestion.data.street_with_type,
         house:
           suggestion.data.house,
       };
