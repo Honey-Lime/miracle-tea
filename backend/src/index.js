@@ -688,6 +688,7 @@ async function createDeliveryOrder(deliveryData, orderData, otherData)
     id: orderData.id,
     comment: deliveryData.comment // string 	Комментарий
   }
+  let tariff;
   switch (deliveryData.service) {
     case "sdek":
       order.type = orderData.type;
@@ -697,6 +698,14 @@ async function createDeliveryOrder(deliveryData, orderData, otherData)
         order.combine_places.apply = true;
         order.combine_places.weight = orderData.total_weight;
         order.combine_places.dimensions = orderData.dimensions;
+      }
+
+      if(deliveryData.type == "terminal")
+      {
+        tariff = 136;
+      } else if(deliveryData.type == "door")
+      {
+        tariff = 137;
       }
       break;
   
@@ -718,9 +727,9 @@ async function createDeliveryOrder(deliveryData, orderData, otherData)
     places: orderData.places,
     delivery: {
       type: deliveryData.type,
+      tariff: tariff,
       location_from: {
-        pick_up: otherData.delivery.location_from.pick_up,
-
+        pick_up: otherData.delivery.location_from.pick_up
       },
       location_to: location_to,
       payment: otherData.delivery.payment,
