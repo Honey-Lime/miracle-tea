@@ -566,15 +566,30 @@ app.get("/api/bonus-settings", async (_req, res) => {
 
 app.post('/api/test', async(req, res) => {
   const { id, deliveryData } = req.body;
-  createDeliveryOrder(deliveryData);
   console.log(id);
+  createDeliveryOrder(deliveryData);
 
   res.status(200).send('OK');
 });
 
 function createDeliveryOrder(deliveryData)
 {
+  console.log("deliveryData");
   console.log(deliveryData);
+  const ESHOPLOGISTIC_TOKEN = "df616893f983b20fed6ac71e5f6cb9f2";
+  // await fetch("https://api.esplc.ru/delivery/order", {
+  //   method: "POST",
+  //   headers: { "Content-Type": "application/json" },
+  //   body: JSON.stringify({ 
+  //     key: ESHOPLOGISTIC_TOKEN, 
+  //     action: "create",
+  //     cms: "custom",
+  //     service: deliveryData,
+  //     order: {
+  //       id: deliveryData
+  //     }
+  //   }),
+  // });
 }
 
 // Import routes
