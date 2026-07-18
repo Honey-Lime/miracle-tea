@@ -729,11 +729,11 @@ function createDeliveryOrder(deliveryData, orderData, otherData)
   };
   
   console.log(data);
-  // await fetch("https://api.esplc.ru/delivery/order", {
-  //   method: "POST",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify(data),
-  // });
+  await fetch("https://api.esplc.ru/delivery/order", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
 }
 
 // Import routes
