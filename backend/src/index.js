@@ -576,7 +576,7 @@ app.post('/api/test', async(req, res) => {
     name: item.pid?.name || "",
   }));
   console.log(order);
-  
+
   let orderData = {
     id: id, // string 	Идентификатор заказа на сайте.
     places: [],
@@ -667,29 +667,31 @@ function createDeliveryOrder(deliveryData, orderData, otherData)
   };
 
   let data = { 
-      key: ESHOPLOGISTIC_TOKEN, 
-      action: "create",
-      cms: "custom",
-      service: deliveryData.service,
-      order: {
-        id: orderData.id,
-        comment: deliveryData.comment // string 	Комментарий
-      },
-      sender: otherData.sender,
-      receiver: {
-        name: deliveryData.name,
-        phone: deliveryData.phone
-      },
-      delivery: {
-        type: deliveryData.type,
-        location_from: {
-          pick_up: otherData.delivery.location_from.pick_up,
+    key: ESHOPLOGISTIC_TOKEN, 
+    action: "create",
+    cms: "custom",
+    service: deliveryData.service,
+    order: {
+      id: orderData.id,
+      comment: deliveryData.comment // string 	Комментарий
+    },
+    sender: otherData.sender,
+    receiver: {
+      name: deliveryData.name,
+      phone: deliveryData.phone
+    },
+    delivery: {
+      type: deliveryData.type,
+      location_from: {
+        pick_up: otherData.delivery.location_from.pick_up,
 
-        },
-        location_to: location_to,
+      },
+      location_to: location_to,
 
-      }
-    };
+    }
+  };
+  
+  console.log(data);
   // await fetch("https://api.esplc.ru/delivery/order", {
   //   method: "POST",
   //   headers: { "Content-Type": "application/json" },
