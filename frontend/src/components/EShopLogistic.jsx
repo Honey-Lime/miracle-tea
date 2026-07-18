@@ -709,8 +709,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
           }
         }
 
-        out.address = await getDataByAddress(deliveryAddress);
-        
+        out.address = deliveryAddress;
         if (recalculation) {
           out.price = recalculation.data.door.price.value;
           out.unitPrice = recalculation.data.door.price.unit;
