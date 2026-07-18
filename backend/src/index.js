@@ -729,11 +729,13 @@ async function createDeliveryOrder(deliveryData, orderData, otherData)
   };
   
   console.log(data);
-  await fetch("https://api.esplc.ru/delivery/order", {
+  let result = await fetch("https://api.esplc.ru/delivery/order", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
+  console.log(result);
+  
 }
 
 // Import routes
