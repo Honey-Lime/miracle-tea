@@ -529,7 +529,7 @@ exports.adjustCustomerBonuses = async (req, res) => {
 // Add new product
 exports.addProduct = async (req, res) => {
   try {
-    const { name, description, price, unit, cost, remains, tags, images } =
+    const { name, sku, description, price, unit, cost, remains, tags, images } =
       req.body;
 
     // Преобразуем images в правильный формат если это массив строк
@@ -548,6 +548,7 @@ exports.addProduct = async (req, res) => {
 
     const product = new Product({
       name,
+      sku,
       description,
       price,
       unit: unit || "grams",
@@ -711,7 +712,7 @@ exports.deleteTag = async (req, res) => {
 // Update product
 exports.updateProduct = async (req, res) => {
   try {
-    const { name, description, price, unit, cost, remains, tags, images } =
+    const { name, sku, description, price, unit, cost, remains, tags, images } =
       req.body;
     const product = await Product.findById(req.params.id);
     if (!product) {
@@ -719,6 +720,7 @@ exports.updateProduct = async (req, res) => {
     }
 
     product.name = name || product.name;
+    product.sku = sku !== undefined ? sku : product.sku;
     product.description = description || product.description;
     product.price = price !== undefined ? price : product.price;
     product.unit = unit || product.unit;

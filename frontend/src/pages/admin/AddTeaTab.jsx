@@ -8,6 +8,7 @@ const AddTeaTab = () => {
   const { addToast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
+    sku: "",
     description: "",
     price: "",
     unit: "grams",
@@ -140,6 +141,7 @@ const AddTeaTab = () => {
       addToast("Чай успешно добавлен", "success");
       setFormData({
         name: "",
+        sku: "",
         description: "",
         price: "",
         unit: "grams",
@@ -168,6 +170,18 @@ const AddTeaTab = () => {
           onChange={handleChange}
           required
           placeholder="Например: Да Хун Пао"
+        />
+      </div>
+
+      <div className="att-form-group">
+        <label htmlFor="sku">Артикул</label>
+        <input
+          type="text"
+          id="sku"
+          name="sku"
+          value={formData.sku}
+          onChange={handleChange}
+          placeholder="Например: TEA-001"
         />
       </div>
 

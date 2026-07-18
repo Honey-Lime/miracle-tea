@@ -8,6 +8,7 @@ const EditProductModal = ({ product, onClose, onProductUpdated }) => {
   const { addToast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
+    sku: "",
     description: "",
     price: "",
     unit: "grams",
@@ -26,6 +27,7 @@ const EditProductModal = ({ product, onClose, onProductUpdated }) => {
     // Инициализация формы данными продукта
     setFormData({
       name: product.name || "",
+      sku: product.sku || "",
       description: product.description || "",
       price: product.price?.toString() || "",
       unit: product.unit || "grams",
@@ -218,6 +220,18 @@ const EditProductModal = ({ product, onClose, onProductUpdated }) => {
                 onChange={handleChange}
                 required
                 placeholder="Например: Да Хун Пао"
+              />
+            </div>
+
+            <div className="epm-form-group">
+              <label htmlFor="sku">Артикул</label>
+              <input
+                type="text"
+                id="sku"
+                name="sku"
+                value={formData.sku}
+                onChange={handleChange}
+                placeholder="Например: TEA-001"
               />
             </div>
 

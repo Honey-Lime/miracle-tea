@@ -567,23 +567,114 @@ app.get("/api/bonus-settings", async (_req, res) => {
 app.post('/api/test', async(req, res) => {
   const { id, deliveryData } = req.body;
   console.log(id);
-  createDeliveryOrder(deliveryData);
+
+  let order = await Order.findById(id);
+  console.log(order);
+
+  let orderData = {
+    id: id, // string 	Идентификатор заказа на сайте.
+    places: [{
+      article: "",    // string 	Идентификатор товара / груза.
+      name: "",       // string 	Название
+      count: 1,       // integer 	Количество
+      price: "",      // double 	Цена, включая НДС
+      weight: "",     // double 	Вес, в кг.
+      dimensions: "", // string 	Габариты. Формат: строка вида «Д*Ш*В», в сантиметрах. Например: 15*25*10 .
+      vat_rate: "",   // integer 	Значение ставки НДС 
+                      // Возможные варианты: 0, 5, 7, 10, 20, -1 (без НДС)
+    }],
+  };
+
+  let otherData = {
+    sender: {
+      name: "Александр",    // string 	Имя
+      phone: "79202115108", // string 	Телефон
+      company: "Чудочай"    // string 	Название компании
+    },
+    delivery: {
+      location_from: {
+        pick_up: false, // boolean 	Забор груза от отправителя
+                        // true = отправляете не с пункта, а со своего адреса, 
+                        // и тогда нужно заполнить address(ниже)
+        address: {
+          region: "", // string 	Регион. Например: Московская область
+          city: "",   // string 	Населённый пункт
+          street: "", // string 	Улица
+          house: "",  // string 	Номер строения
+          room: ""    // string 	Квартира / офис / помещение
+        }
+      },
+      payment: "already_paid",  // string 	Способ оплаты
+                                // Возможные варианты:
+                                // already_paid - заказ уже оплачен,
+                                // cash_on_receipt - наличными при получении,
+                                // card_on_receipt - картой при получении,
+                                // cashless - безналичный расчет
+      cost: deliveryData.price, // double 	Стоимость доставки, рубли.
+    }
+
+  };
+  createDeliveryOrder(deliveryData, orderData, otherData);
 
   res.status(200).send('OK');
 });
 
-function createDeliveryOrder(deliveryData)
+function createDeliveryOrder(deliveryData, orderData, otherData)
 {
   console.log("deliveryData");
   console.log(deliveryData);
   const ESHOPLOGISTIC_TOKEN = "df616893f983b20fed6ac71e5f6cb9f2";
+
+  let location_from = 
+  otherData.delivery.location_from.pick_up == true 
+  ? { 
+    pick_up: otherData.delivery.location_from.pick_up,
+    address: otherData.delivery.location_from.address
+  }
+  : {
+    pick_up: otherData.delivery.location_from.pick_up
+  };
+
+  let location_to = 
+  deliveryData.type == "terminal" 
+  ? {
+    terminal: deliveryData.code
+  }
+  : {
+    address: {
+      country: "",  // string 	Код страны.
+                    // Варианты: RU, UZ, AZ, KZ, AB, TM, BY, UA, TJ, KG, AM, MD 
+      region: "",   // string 	Регион. Например: Московская область
+      city: "",     // string 	Населённый пункт
+      district: "", // string 	Район
+      street: "",   // string 	Улица
+      house: "",    // string 	Номер строения
+      room: "",     // string 	Квартира / офис / помещение
+    }
+  };
+
   let data = { 
       key: ESHOPLOGISTIC_TOKEN, 
       action: "create",
       cms: "custom",
-      service: deliveryData,
+      service: deliveryData.delivery.details.service,
       order: {
-        id: deliveryData
+        id: orderData.id,
+        comment: deliveryData.comment // string 	Комментарий
+      },
+      sender: otherData.sender,
+      receiver: {
+        name: deliveryData.name,
+        phone: deliveryData.phone
+      },
+      delivery: {
+        type: deliveryData.type,
+        location_from: {
+          pick_up: otherData.delivery.location_from.pick_up,
+
+        },
+        location_to: location_to,
+
       }
     };
   // await fetch("https://api.esplc.ru/delivery/order", {

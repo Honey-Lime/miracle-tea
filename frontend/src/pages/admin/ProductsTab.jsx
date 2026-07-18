@@ -24,7 +24,9 @@ const ProductsTab = () => {
       return;
     }
     const filtered = products.filter((product) =>
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      [product.name, product.sku].some((value) =>
+        value?.toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
     );
     setFilteredProducts(filtered);
   }, [searchQuery, products]);
@@ -98,6 +100,7 @@ const ProductsTab = () => {
       <div className="pt-products-list">
         <div className="pt-products-header">
           <span className="pt-col-name">Название</span>
+          <span className="pt-col-sku">Артикул</span>
           <span className="pt-col-price">Цена</span>
           <span className="pt-col-remains">Остаток</span>
           <span className="pt-col-tags">Теги</span>
@@ -122,6 +125,7 @@ const ProductsTab = () => {
                   </span>
                 )}
               </span>
+              <span className="pt-col-sku">{product.sku || "-"}</span>
               <span className="pt-col-price">
                 {product.price} ₽/{isGrams ? "100 г" : "шт"}
               </span>

@@ -3,7 +3,7 @@ const Product = require("../models/Product");
 // Get all products
 exports.getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find();
+    const products = await Product.find().select("-sku");
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -13,7 +13,7 @@ exports.getAllProducts = async (req, res) => {
 // Get single product by ID
 exports.getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id).select("-sku");
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -25,7 +25,7 @@ exports.getProductById = async (req, res) => {
 
 // Create a new product (admin only)
 exports.createProduct = async (req, res) => {
-  const { name, description, price, unit, cost, remains, tags, images } =
+  const { name, sku, description, price, unit, cost, remains, tags, images } =
     req.body;
   try {
     // Преобразуем images в правильный формат если это массив строк
@@ -44,6 +44,7 @@ exports.createProduct = async (req, res) => {
 
     const product = new Product({
       name,
+      sku,
       description,
       price,
       unit: unit || "grams",

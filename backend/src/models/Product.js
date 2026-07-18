@@ -6,6 +6,11 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    sku: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     content: [
       {
         type: String,
