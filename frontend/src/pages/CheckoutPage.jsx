@@ -133,14 +133,7 @@ const CheckoutPage = () => {
         });
       }
 
-      if (user?.isAdmin && testOrder) {
-        await clearCart();
-        addToast("Тестовый заказ оформлен и отмечен оплаченным", "success");
-        navigate("/thank-you", { state: { testOrder: true, orderId: order.id } });
-        return;
-      }
-
-      const payment = await fetch("/api/create-payment", {
+      await fetch("/api/test", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -152,7 +145,14 @@ const CheckoutPage = () => {
         }),
       });
 
-      await fetch("/api/test", {
+      if (user?.isAdmin && testOrder) {
+        await clearCart();
+        addToast("Тестовый заказ оформлен и отмечен оплаченным", "success");
+        navigate("/thank-you", { state: { testOrder: true, orderId: order.id } });
+        return;
+      }
+
+      const payment = await fetch("/api/create-payment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
