@@ -1208,7 +1208,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
     }
 
     submitDelivery();
-  }, [output, deliveryRoom, deliveryName, deliveryPhone]);
+  }, [output, deliveryRoom, deliveryName, deliveryPhone, deliveryComment]);
 
 
   useEffect(() => {

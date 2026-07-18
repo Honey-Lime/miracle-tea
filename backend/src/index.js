@@ -574,12 +574,12 @@ app.post('/api/test', async(req, res) => {
 
   let order = await Order.findById(id).populate("list.pid", "sku name");
 
-  order.list = order.list.map((item) => ({
+  const orderList = order.list.map((item) => ({
     ...item.toObject(),
     article: item.pid?.sku || "",
     name: item.pid?.name || "",
   }));
-  console.log(order);
+  console.log(orderList);
 
   let orderData = {
     id: id,   // string 	Идентификатор заказа на сайте.
@@ -594,24 +594,24 @@ app.post('/api/test', async(req, res) => {
   };
 
   let real_orders = 0;
-  for (let i = 0; i < order.list.length; i++) {
+  for (let i = 0; i < orderList.length; i++) {
     orderData.places.push(
       {
-        article: order.list[i].article,         // string 	Идентификатор товара / груза.
-        name: order.list[i].name,               // string 	Название
+        article: orderList[i].article,          // string 	Идентификатор товара / груза.
+        name: orderList[i].name,                // string 	Название
         count: 1,                               // integer 	Количество
-        price: order.list[i].priceAtOrder,      // double 	Цена, включая НДС
-        weight: order.list[i].count / 1000,     // double 	Вес, в кг.
+        price: orderList[i].priceAtOrder,       // double 	Цена, включая НДС
+        weight: orderList[i].count / 1000,      // double 	Вес, в кг.
         dimensions: "10*15*6",                  // string 	Габариты. Формат: строка вида «Д*Ш*В», в сантиметрах. Например: 15*25*10 .
         vat_rate: -1,                           // integer 	Значение ставки НДС 
                                                 // Возможные варианты: 0, 5, 7, 10, 20, -1 (без НДС)
       }
     );
-    if (order.list[i].isSampler == false)
+    if (orderList[i].isSampler == false)
     {
       real_orders++;
     }
-    orderData.total_weight += order.list[i].count / 1000;
+    orderData.total_weight += orderList[i].count / 1000;
   }
 
   orderData.dimensions = `${orderData.dimensions}${real_orders * 6}`
