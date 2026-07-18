@@ -650,7 +650,7 @@ app.post('/api/test', async(req, res) => {
   res.status(200).send('OK');
 });
 
-function createDeliveryOrder(deliveryData, orderData, otherData)
+async function createDeliveryOrder(deliveryData, orderData, otherData)
 {
   console.log("deliveryData");
   console.log(deliveryData);
