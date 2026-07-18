@@ -16,7 +16,7 @@ const INITIAL_STATUS = {
 
 const DELIVERY_CONTACT_STORAGE_KEY = "EShopLogisticDeliveryData";
 
-const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, needCreateOrder, onDeliveryConfirm }) => {
+const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, needCreateOrder, orderWeight, onDeliveryConfirm }) => {
   // Этап 1. Загружаем справочники и базовые данные для расчёта доставки.
   // Основные данные API и справочники служб доставки.
   function getSavedDeliveryContact() {
@@ -709,12 +709,15 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
             "/delivery/calculation",
             {
               to: selectedCity.fias,
-              weight: 1,
+              weight: orderWeight,
               service: selectedMethod.name,
               address: deliveryAddress.address,
             },
             selectedMethod.name
           );
+
+          console.log(recalculation);
+          
 
           if (!recalculation) {
             return;
@@ -864,7 +867,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
       Object.keys(services).forEach((service) => {
         customFetch(
           "/delivery/calculation",
-          { to: selectedCity.fias, weight: 1, service, address: selectedCity.value },
+          { to: selectedCity.fias, weight: orderWeight, service, address: selectedCity.value },
           service
         );
       });

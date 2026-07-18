@@ -228,6 +228,7 @@ const CheckoutPage = () => {
           ESHOPLOGISTIC_TOKEN={ESHOPLOGISTIC_TOKEN}
           YANDEX_API_KEY={YANDEX_API_KEY}
           needCreateOrder={true}
+          orderWeight={totalWeight / 1000}
 
           // получаем выходные данные в state deliveryData
           // data.checked true если есть все данные для создания заказа
