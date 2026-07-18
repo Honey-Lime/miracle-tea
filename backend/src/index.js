@@ -680,6 +680,7 @@ function createDeliveryOrder(deliveryData, orderData, otherData)
       name: deliveryData.name,
       phone: deliveryData.phone
     },
+    places: orderData.places,
     delivery: {
       type: deliveryData.type,
       location_from: {

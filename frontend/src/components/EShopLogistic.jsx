@@ -268,7 +268,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
 
       const result = await response.json();
       const suggestion = result.suggestions?.[0];
-      console.log(suggestion.data);
+      // console.log(suggestion.data);
       // console.log(suggestion.data.region);
       // console.log(suggestion.data.street);
       // console.log(suggestion.data.house);
