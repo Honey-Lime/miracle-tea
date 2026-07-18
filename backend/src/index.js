@@ -577,18 +577,19 @@ function createDeliveryOrder(deliveryData)
   console.log("deliveryData");
   console.log(deliveryData);
   const ESHOPLOGISTIC_TOKEN = "df616893f983b20fed6ac71e5f6cb9f2";
+  let data = { 
+      key: ESHOPLOGISTIC_TOKEN, 
+      action: "create",
+      cms: "custom",
+      service: deliveryData,
+      order: {
+        id: deliveryData
+      }
+    };
   // await fetch("https://api.esplc.ru/delivery/order", {
   //   method: "POST",
   //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify({ 
-  //     key: ESHOPLOGISTIC_TOKEN, 
-  //     action: "create",
-  //     cms: "custom",
-  //     service: deliveryData,
-  //     order: {
-  //       id: deliveryData
-  //     }
-  //   }),
+  //   body: JSON.stringify(data),
   // });
 }
 
