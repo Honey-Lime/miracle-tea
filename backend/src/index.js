@@ -738,11 +738,12 @@ async function createDeliveryOrder(deliveryData, orderData, otherData)
   };
   
   console.log(data);
-  let result = await fetch("https://api.esplc.ru/delivery/order", {
+  let response = await fetch("https://api.esplc.ru/delivery/order", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
+  let result = await response.json();
   console.log("eshopResult", result);
   
 }
