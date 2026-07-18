@@ -268,7 +268,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
 
       const result = await response.json();
       const suggestion = result.suggestions?.[0];
-      // console.log(suggestion.data);
+      console.log(suggestion.data);
       // console.log(suggestion.data.region);
       // console.log(suggestion.data.street);
       // console.log(suggestion.data.house);
@@ -286,8 +286,14 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
           suggestion?.data?.region_with_type ||
           suggestion?.value ||
           address,
+        country: 
+          suggestion.data.country,
+        city:
+          suggestion.data.city,
         region:
           suggestion.data.region,
+        district:
+          suggestion.data.city_district,
         street:
           suggestion.data.street,
         house:
@@ -363,8 +369,14 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
         address,
         lon,
         lat,
+        country: 
+          locationData.country,
+        city:
+          locationData.city,
         region:
           locationData.region,
+        district:
+          locationData.district,
         street:
           locationData.street,
         house:
