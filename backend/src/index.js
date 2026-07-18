@@ -734,7 +734,7 @@ async function createDeliveryOrder(deliveryData, orderData, otherData)
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-  console.log(result);
+  console.log("eshopResult", result);
   
 }
 
