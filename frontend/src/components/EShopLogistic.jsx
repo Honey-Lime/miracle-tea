@@ -671,7 +671,9 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
         }
         
         out.isPostamat = selectedTerminal.is_postamat;
-        out.address = selectedTerminal.address;
+        out.address = {
+          address: selectedTerminal.address
+        };
         out.code = selectedTerminal.code;
         out.price = selectedTerminal.price.value;
         out.unitPrice = selectedTerminal.price.unit;
@@ -707,7 +709,8 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
           }
         }
 
-        out.address = deliveryAddress;
+        out.address = await getDataByAddress(deliveryAddress);
+        
         if (recalculation) {
           out.price = recalculation.data.door.price.value;
           out.unitPrice = recalculation.data.door.price.unit;
