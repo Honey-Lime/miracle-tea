@@ -590,7 +590,14 @@ app.post('/api/test', async(req, res) => {
                                 // При этом внутри грузового места формируется список позиций для страховки.
                                 // По умолчанию = false.
     total_weight: 0,
-    dimensions: "10*15*"
+    dimensions: "10*15*",
+    payment: "already_paid",  // string 	Способ оплаты
+                                // Возможные варианты:
+                                // already_paid - заказ уже оплачен,
+                                // cash_on_receipt - наличными при получении,
+                                // card_on_receipt - картой при получении,
+                                // cashless - безналичный расчет
+      cost: deliveryData.price, // double 	Стоимость доставки, рубли.
   };
 
   let real_orders = 0;
@@ -614,17 +621,7 @@ app.post('/api/test', async(req, res) => {
     orderData.total_weight += orderList[i].count / 1000;
   }
 
-  orderData.dimensions = `${orderData.dimensions}${real_orders * 6}`
-
-
-  createDeliveryOrder(deliveryData, orderData);
-
-  res.status(200).send('OK');
-});
-
-async function createDeliveryOrder(deliveryData, orderData)
-{
-  const ESHOPLOGISTIC_TOKEN = "df616893f983b20fed6ac71e5f6cb9f2";
+  orderData.dimensions = `${orderData.dimensions}${real_orders * 6}`;
 
   let otherData = {
     sender: {
@@ -644,17 +641,19 @@ async function createDeliveryOrder(deliveryData, orderData)
           house: "",  // string 	Номер строения
           room: ""    // string 	Квартира / офис / помещение
         }
-      },
-      payment: "already_paid",  // string 	Способ оплаты
-                                // Возможные варианты:
-                                // already_paid - заказ уже оплачен,
-                                // cash_on_receipt - наличными при получении,
-                                // card_on_receipt - картой при получении,
-                                // cashless - безналичный расчет
-      cost: deliveryData.price, // double 	Стоимость доставки, рубли.
+      }
     }
-
   };
+
+
+  createDeliveryOrder(deliveryData, orderData, otherData);
+
+  res.status(200).send('OK');
+});
+
+async function createDeliveryOrder(deliveryData, orderData, otherData)
+{
+  const ESHOPLOGISTIC_TOKEN = "df616893f983b20fed6ac71e5f6cb9f2";
 
   let location_from = 
   otherData.delivery.location_from.pick_up == true 
@@ -732,8 +731,8 @@ async function createDeliveryOrder(deliveryData, orderData)
         pick_up: otherData.delivery.location_from.pick_up
       },
       location_to: location_to,
-      payment: otherData.delivery.payment,
-      cost: otherData.delivery.cost
+      payment: orderData.payment,
+      cost: deliveryData.price
     }
   };
   
