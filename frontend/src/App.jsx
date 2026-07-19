@@ -21,6 +21,7 @@ import ChatWidget from "./components/ChatWidget";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
+import { SamplerSettingsProvider } from "./context/SamplerSettingsContext";
 
 function AppContent() {
   const location = useLocation();
@@ -62,11 +63,13 @@ function App() {
     <Router>
       <AuthProvider>
         <ToastProvider>
-          <CartProvider>
-            <div className="app">
-              <AppContent />
-            </div>
-          </CartProvider>
+          <SamplerSettingsProvider>
+            <CartProvider>
+              <div className="app">
+                <AppContent />
+              </div>
+            </CartProvider>
+          </SamplerSettingsProvider>
         </ToastProvider>
       </AuthProvider>
     </Router>

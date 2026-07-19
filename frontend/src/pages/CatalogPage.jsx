@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { getProducts } from "../services/productService";
 import { useCart } from "../context/CartContext";
+import { useSamplerSettings } from "../context/SamplerSettingsContext";
 
 const CatalogPage = () => {
   const [products, setProducts] = useState([]);
@@ -10,6 +11,7 @@ const CatalogPage = () => {
   const [selectedTag, setSelectedTag] = useState(null);
   const navigate = useNavigate();
   const { addToCart, cartItems } = useCart();
+  const { samplerSizeGrams } = useSamplerSettings();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -75,7 +77,7 @@ const CatalogPage = () => {
   };
 
   const handleAddSamplerToCart = (product) => {
-    addToCart(product, 10, true);
+    addToCart(product, samplerSizeGrams, true);
   };
 
   const handleCardClick = (e, productId) => {
@@ -151,7 +153,7 @@ const CatalogPage = () => {
             const availableToAdd = Math.max(product.remains - alreadyInCart, 0);
             const currentCount = gramCounts[product._id] || minCount;
             const canAddCurrentCount = currentCount >= minCount && currentCount <= availableToAdd;
-            const isSamplerAvailable = isGrams && availableToAdd >= 10;
+            const isSamplerAvailable = isGrams && availableToAdd >= samplerSizeGrams;
             const hasSamplerInCart = cartItems.some(
               (item) => item.pid === product._id && item.isSampler === true,
             );

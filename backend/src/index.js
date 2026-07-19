@@ -582,9 +582,9 @@ app.post('/api/test', async(req, res) => {
   console.log(orderList);
 
   let orderData = {
-    id: id,   // string 	Идентификатор заказа на сайте.
-    places: [],
-    type: 1,   // integer 	Тип заказа. Доступно 2 варианта: «1» - Интернет-магазин, «2» - Доставка.
+    id: id,       // string 	Идентификатор заказа на сайте.
+    places: [],   // array Нужно заполнить информацией о заказах 
+    type: 1,      // integer 	Тип заказа. Доступно 2 варианта: «1» - Интернет-магазин, «2» - Доставка.
     combine_places_apply: true, // boolean 	
                                 // Объединить все грузовые места в одно.
                                 // При этом внутри грузового места формируется список позиций для страховки.
@@ -616,6 +616,16 @@ app.post('/api/test', async(req, res) => {
 
   orderData.dimensions = `${orderData.dimensions}${real_orders * 6}`
 
+
+  createDeliveryOrder(deliveryData, orderData);
+
+  res.status(200).send('OK');
+});
+
+async function createDeliveryOrder(deliveryData, orderData)
+{
+  const ESHOPLOGISTIC_TOKEN = "df616893f983b20fed6ac71e5f6cb9f2";
+
   let otherData = {
     sender: {
       name: "Александр",    // string 	Имя
@@ -645,16 +655,6 @@ app.post('/api/test', async(req, res) => {
     }
 
   };
-  createDeliveryOrder(deliveryData, orderData, otherData);
-
-  res.status(200).send('OK');
-});
-
-async function createDeliveryOrder(deliveryData, orderData, otherData)
-{
-  console.log("deliveryData");
-  console.log(deliveryData);
-  const ESHOPLOGISTIC_TOKEN = "df616893f983b20fed6ac71e5f6cb9f2";
 
   let location_from = 
   otherData.delivery.location_from.pick_up == true 
@@ -745,7 +745,6 @@ async function createDeliveryOrder(deliveryData, orderData, otherData)
   });
   let result = await response.json();
   console.log("eshopResult", result);
-  
 }
 
 // Import routes

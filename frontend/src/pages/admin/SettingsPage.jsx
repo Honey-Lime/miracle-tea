@@ -4,6 +4,7 @@ import api from "../../services/api";
 const SettingsPage = () => {
   const [bonusPercent, setBonusPercent] = useState("0");
   const [reviewBonusAmount, setReviewBonusAmount] = useState("0");
+  const [samplerSizeGrams, setSamplerSizeGrams] = useState("20");
   const [notificationEmail, setNotificationEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -18,6 +19,7 @@ const SettingsPage = () => {
         const response = await api.get("/admin/settings/bonuses");
         setBonusPercent(String(response.data.bonusPercent ?? 0));
         setReviewBonusAmount(String(response.data.reviewBonusAmount ?? 0));
+        setSamplerSizeGrams(String(response.data.samplerSizeGrams ?? 20));
         setNotificationEmail(response.data.notificationEmail || "");
       } catch (requestError) {
         setError(requestError.response?.data?.message || "Не удалось загрузить настройки");
@@ -36,6 +38,7 @@ const SettingsPage = () => {
 
     const normalizedPercent = Number(bonusPercent);
     const normalizedReviewBonus = Math.floor(Number(reviewBonusAmount));
+    const normalizedSamplerSize = Math.floor(Number(samplerSizeGrams));
 
     if (!Number.isFinite(normalizedPercent) || normalizedPercent < 0) {
       setError("Введите процент не меньше 0");
@@ -47,17 +50,24 @@ const SettingsPage = () => {
       return;
     }
 
+    if (!Number.isFinite(normalizedSamplerSize) || normalizedSamplerSize <= 0) {
+      setError("Введите размер пробника больше 0 грамм");
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await api.put("/admin/settings/bonuses", {
         bonusPercent: normalizedPercent,
         reviewBonusAmount: normalizedReviewBonus,
+        samplerSizeGrams: normalizedSamplerSize,
         notificationEmail,
       });
       setBonusPercent(String(response.data.bonusPercent ?? 0));
       setReviewBonusAmount(String(response.data.reviewBonusAmount ?? 0));
+      setSamplerSizeGrams(String(response.data.samplerSizeGrams ?? 20));
       setNotificationEmail(response.data.notificationEmail || "");
-      setMessage("Настройки бонусов сохранены");
+      setMessage("Настройки сохранены");
     } catch (requestError) {
       setError(requestError.response?.data?.message || "Не удалось сохранить настройки");
     } finally {
@@ -101,6 +111,18 @@ const SettingsPage = () => {
         />
         <small className="hint">
           На этот адрес приходят уведомления о новых сообщениях, заказах, отменах и отзывах на модерации.
+        </small>
+        <label>Размер пробника, г</label>
+        <input
+          type="number"
+          min="1"
+          step="1"
+          value={samplerSizeGrams}
+          onChange={(event) => setSamplerSizeGrams(event.target.value)}
+          disabled={loading}
+        />
+        <small className="hint">
+          Этот размер используется на сайте, в корзине и при проверке заказа.
         </small>
         {error && <p className="error">{error}</p>}
         {message && <p className="success-message">{message}</p>}

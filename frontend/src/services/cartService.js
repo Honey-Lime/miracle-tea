@@ -2,7 +2,15 @@ import axios from "axios";
 
 const API_URL = "/api/orders";
 
+const DEFAULT_SAMPLER_SIZE_GRAMS = 20;
+
+const getStoredSamplerSizeGrams = () => {
+  const size = Math.floor(Number(localStorage.getItem("samplerSizeGrams")));
+  return Number.isFinite(size) && size > 0 ? size : DEFAULT_SAMPLER_SIZE_GRAMS;
+};
+
 const normalizeLocalCartItems = (items = []) => {
+  const samplerSizeGrams = getStoredSamplerSizeGrams();
   const itemsByKey = new Map();
 
   items.forEach((item) => {
@@ -13,7 +21,7 @@ const normalizeLocalCartItems = (items = []) => {
     const minCount = unit === "grams" ? 50 : 1;
 
     if (!pid) return;
-    if (isSampler && count !== 10) return;
+    if (isSampler && count !== samplerSizeGrams) return;
     if (!isSampler && count < minCount) return;
 
     const key = `${pid}:${isSampler ? "sampler" : "regular"}`;
@@ -21,7 +29,7 @@ const normalizeLocalCartItems = (items = []) => {
     itemsByKey.set(key, {
       pid,
       isSampler,
-      count: isSampler ? 10 : (existing?.count || 0) + count,
+      count: isSampler ? samplerSizeGrams : (existing?.count || 0) + count,
     });
   });
 

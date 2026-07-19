@@ -10,7 +10,7 @@ const EditPage = () => {
 
   return (
     <div className="ep-edit-page">
-      <h1>Редактирование</h1>
+      <h1>Товары</h1>
       <div className="ep-tabs">
         <button
           className={`ep-tab ${activeTab === "add" ? "active" : ""}`}

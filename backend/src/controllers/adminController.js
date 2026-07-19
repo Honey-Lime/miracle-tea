@@ -16,6 +16,10 @@ const {
   notifyAdmin,
   setNotificationEmail,
 } = require("../services/adminNotificationService");
+const {
+  getSamplerSizeGrams,
+  setSamplerSizeGrams,
+} = require("../services/samplerService");
 const { getLogFilePath, logError } = require("../utils/logger");
 const path = require("path");
 const fs = require("fs");
@@ -198,12 +202,13 @@ exports.updateOrderStatus = async (req, res) => {
 
 exports.getBonusSettings = async (_req, res) => {
   try {
-    const [bonusPercent, reviewBonusAmount, notificationEmail] = await Promise.all([
+    const [bonusPercent, reviewBonusAmount, notificationEmail, samplerSizeGrams] = await Promise.all([
       getBonusPercent(),
       getReviewBonusAmount(),
       getNotificationEmail(),
+      getSamplerSizeGrams(),
     ]);
-    res.json({ bonusPercent, reviewBonusAmount, notificationEmail });
+    res.json({ bonusPercent, reviewBonusAmount, notificationEmail, samplerSizeGrams });
   } catch (error) {
     logError(error, "getBonusSettings");
     res.status(500).json({ message: error.message });
@@ -212,12 +217,13 @@ exports.getBonusSettings = async (_req, res) => {
 
 exports.updateBonusSettings = async (req, res) => {
   try {
-    const [bonusPercent, reviewBonusAmount, notificationEmail] = await Promise.all([
+    const [bonusPercent, reviewBonusAmount, notificationEmail, samplerSizeGrams] = await Promise.all([
       setBonusPercent(req.body.bonusPercent),
       setReviewBonusAmount(req.body.reviewBonusAmount),
       setNotificationEmail(req.body.notificationEmail),
+      setSamplerSizeGrams(req.body.samplerSizeGrams),
     ]);
-    res.json({ bonusPercent, reviewBonusAmount, notificationEmail });
+    res.json({ bonusPercent, reviewBonusAmount, notificationEmail, samplerSizeGrams });
   } catch (error) {
     logError(error, "updateBonusSettings");
     res.status(500).json({ message: error.message });
@@ -857,6 +863,7 @@ exports.getStatistics = async (req, res) => {
             orders: new Set(),
             totalGramsExclSamplers: 0,
             samplerGrams: 0,
+            samplerItems: 0,
           };
         }
 
@@ -865,6 +872,7 @@ exports.getStatistics = async (req, res) => {
 
         if (item.isSampler) {
           productStats[productId].samplerGrams += count;
+          productStats[productId].samplerItems += 1;
         } else {
           productStats[productId].orders.add(String(order._id));
           productStats[productId].totalGramsExclSamplers += count;
@@ -880,6 +888,7 @@ exports.getStatistics = async (req, res) => {
       orderCount: stat.orders.size,
       totalGramsExclSamplers: stat.totalGramsExclSamplers,
       samplerCount: stat.samplerGrams,
+      samplerItems: stat.samplerItems,
       avgOrderSize:
         stat.orders.size > 0
           ? stat.totalGramsExclSamplers / stat.orders.size

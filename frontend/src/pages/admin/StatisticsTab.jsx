@@ -111,7 +111,7 @@ const StatisticsTab = () => {
                   {product.avgOrderSize.toFixed(1)} г
                 </span>
                 <span className="st-col-samplers">
-                  {product.samplerCount / 10} шт
+                  {product.samplerItems ?? 0} шт
                 </span>
               </div>
             ))

@@ -3,6 +3,7 @@ const Product = require("../models/Product");
 const User = require("../models/User");
 const Counter = require("../models/Counter");
 const { logError } = require("../utils/logger");
+const { getSamplerSizeGrams } = require("../services/samplerService");
 
 const ID_COUNTER = "orderSequence";
 const LETTERS_COUNT = 26;
@@ -204,9 +205,10 @@ exports.addToCart = async (req, res) => {
       }
       // Ensure not exceeding stock (optional)
     } else {
-      // Для пробника проверяем, что количество равно 10 г
-      if (isSampler && count !== 10) {
-        return res.status(400).json({ message: "Пробник должен быть 10 г" });
+      const samplerSizeGrams = await getSamplerSizeGrams();
+      // Для пробника проверяем, что количество равно настройке размера пробника
+      if (isSampler && count !== samplerSizeGrams) {
+        return res.status(400).json({ message: `Пробник должен быть ${samplerSizeGrams} г` });
       }
       // Add new item
       cart.list.push({
@@ -279,14 +281,15 @@ exports.updateCartItem = async (req, res) => {
       return res.status(404).json({ message: "Item not found in cart" });
     }
 
-    // Для пробника запрещаем изменение количества (оно всегда должно быть 10 г)
+    // Для пробника запрещаем изменение количества (оно всегда должно соответствовать настройке)
     if (isSampler) {
-      if (count !== 10) {
+      const samplerSizeGrams = await getSamplerSizeGrams();
+      if (count !== samplerSizeGrams) {
         return res
           .status(400)
           .json({ message: "Количество пробника нельзя изменить" });
       }
-      // Если count == 10, просто оставляем как есть (можно пропустить обновление)
+      // Если count соответствует настройке, просто оставляем как есть (можно пропустить обновление)
       // Но если count <= 0, удаляем (пользователь может удалить пробник)
       if (count <= 0) {
         cart.list = cart.list.filter(

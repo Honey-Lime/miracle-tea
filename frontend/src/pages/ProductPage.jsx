@@ -7,10 +7,12 @@ import api from "../services/api";
 import AdminUserMenu from "../components/AdminUserMenu";
 import PhotoUploadField from "../components/PhotoUploadField";
 import { compressImageFiles } from "../utils/imageCompression";
+import { useSamplerSettings } from "../context/SamplerSettingsContext";
 
 const ProductPage = () => {
   const { id } = useParams();
   const { addToCart, cartItems } = useCart();
+  const { samplerSizeGrams } = useSamplerSettings();
   const { user, token, isAdmin } = useAuth();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -95,7 +97,7 @@ const ProductPage = () => {
 
   const handleAddToCart = (isSampler = false) => {
     if (!product) return;
-    let grams = isSampler ? 10 : selectedGrams;
+    let grams = isSampler ? samplerSizeGrams : selectedGrams;
     // Проверка на пробник: ограничение 1 пробник каждого вида чая
     addToCart(product, grams, isSampler);
     if (!isSampler) {
@@ -242,7 +244,7 @@ const ProductPage = () => {
     .filter((item) => item.pid === product._id)
     .reduce((sum, item) => sum + item.count, 0);
   const availableToAdd = Math.max(product.remains - productCountInCart, 0);
-  const isSamplerAvailable = availableToAdd >= 10;
+  const isSamplerAvailable = availableToAdd >= samplerSizeGrams;
   const hasSamplerInCart = cartItems.some(
     (item) => item.pid === product._id && item.isSampler === true,
   );
@@ -401,10 +403,10 @@ const ProductPage = () => {
                 title={
                   hasSamplerInCart
                     ? "Пробник уже добавлен"
-                    : "Пробник 10 г (можно добавить только один)"
+                    : `Пробник ${samplerSizeGrams} г (можно добавить только один)`
                 }
               >
-                Хочу пробник (10 г)
+                Хочу пробник ({samplerSizeGrams} г)
               </button>
             </div>
             <p className="pp-sampler-note">

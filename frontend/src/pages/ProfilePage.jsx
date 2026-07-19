@@ -2,6 +2,7 @@ import { useContext, useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import { useSamplerSettings } from "../context/SamplerSettingsContext";
 import { useToast } from "../context/ToastContext";
 import { cancelOrder, getMyOrders } from "../services/orderService";
 import { changePassword, getProfile, updateName } from "../services/authService";
@@ -50,6 +51,7 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const { user, logout, updateUser, openForgotPasswordModal } = useContext(AuthContext);
   const { addToCart } = useCart();
+  const { samplerSizeGrams } = useSamplerSettings();
   const { addToast } = useToast();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -236,7 +238,7 @@ const ProfilePage = () => {
     }
 
     if (item.isSampler) {
-      return remains >= 10 ? 10 : 0;
+      return remains >= samplerSizeGrams ? samplerSizeGrams : 0;
     }
 
     const unit = product.unit || "grams";

@@ -6,7 +6,11 @@ import leaf2 from "/leaf2.png";
 import leaf3 from "/leaf3.png";
 import leaf4 from "/leaf4.png";
 import firstscreen from "/firstscreen.png";
+import { useSamplerSettings } from "../context/SamplerSettingsContext";
+
 const HomePage = () => {
+  const { samplerSizeGrams } = useSamplerSettings();
+
   return (
     <div className="hp-home-page">
       <section className="hp-hero">
@@ -64,7 +68,7 @@ const HomePage = () => {
             <h2>Снимите пробу</h2>
             <p>
               Не уверены в своём вкусе? Хотите сравнить несколько позиций без
-              лишних трат? Можно заказать пробники по 10 г — это 2-3
+              лишних трат? Можно заказать пробники по {samplerSizeGrams} г — это 2-3
               полноценные чайные церемонии. Удобный формат, чтобы найти «тот
               самый» чай.
             </p>

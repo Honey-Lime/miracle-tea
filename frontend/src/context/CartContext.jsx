@@ -7,6 +7,7 @@ import {
 } from "react";
 import { useAuth } from "./AuthContext";
 import { useToast } from "./ToastContext";
+import { useSamplerSettings } from "./SamplerSettingsContext";
 import * as cartService from "../services/cartService";
 
 const CartContext = createContext();
@@ -17,6 +18,7 @@ export const useCart = () => useContext(CartContext);
 export const CartProvider = ({ children }) => {
   const { user, token } = useAuth();
   const { addToast } = useToast();
+  const { samplerSizeGrams } = useSamplerSettings();
   const [cartItems, setCartItems] = useState(() => {
     const saved = localStorage.getItem("cart");
     return saved ? JSON.parse(saved) : [];
@@ -73,8 +75,8 @@ export const CartProvider = ({ children }) => {
   const addToCart = async (product, count, isSampler = false) => {
     const unit = product.unit || "grams";
     const pricePerUnit = unit === "grams" ? product.price / 100 : product.price;
-    // Для пробника фиксируем количество 10 г
-    const finalCount = isSampler ? 10 : count;
+    // Для пробника фиксируем количество из настроек
+    const finalCount = isSampler ? samplerSizeGrams : count;
     const sameProductCount = cartItems
       .filter((item) => item.pid === product._id)
       .reduce((sum, item) => sum + item.count, 0);
@@ -163,11 +165,10 @@ export const CartProvider = ({ children }) => {
       removeFromCart(pid, isSampler);
       return;
     }
-    // Для пробника фиксированное количество 10 г, запрещаем изменение
+    // Для пробника фиксированное количество из настроек, запрещаем изменение
     if (isSampler) {
-      // Если пытаются изменить количество пробника, игнорируем (оставляем 10)
-      // Но если newCount != 10, показываем предупреждение и не изменяем
-      if (newCount !== 10) {
+      // Если пытаются изменить количество пробника, игнорируем
+      if (newCount !== samplerSizeGrams) {
         addToast("Количество пробника нельзя изменить", "warning");
         return;
       }
@@ -244,6 +245,7 @@ export const CartProvider = ({ children }) => {
     totalUniqueItems, // количество пунктов
     totalPrice,
     isSyncing,
+    samplerSizeGrams,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

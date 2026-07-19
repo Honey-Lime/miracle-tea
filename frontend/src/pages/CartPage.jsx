@@ -50,7 +50,7 @@ const CartPage = () => {
       const step = unit === "grams" ? 50 : 1;
       const minCount = unit === "grams" ? 50 : 1;
       let allowedCount = item.isSampler
-        ? availableForItem >= 10 ? 10 : 0
+        ? availableForItem >= item.count ? item.count : 0
         : Math.floor(availableForItem / step) * step;
 
       if (!item.isSampler && allowedCount < minCount) {
@@ -137,7 +137,7 @@ const CartPage = () => {
           >
             <div className="crt-item-info">
               <h3>
-                {item.name} {item.isSampler && "(Пробник 10г)"}
+                {item.name} {item.isSampler && `(Пробник ${item.count}г)`}
               </h3>
               <p>
                 Цена: {isGrams ? `${(item.price * 10).toFixed(2)} ₽/10г` : `${item.price.toFixed(2)} ₽/шт`}

@@ -716,7 +716,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
             selectedMethod.name
           );
 
-          console.log(recalculation);
+          // console.log(recalculation);
           
 
           if (!recalculation) {
