@@ -19,6 +19,8 @@ const Order = require("./models/Order");
 const Product = require("./models/Product");
 const User = require("./models/User");
 const { getBonusPercent } = require("./services/bonusService");
+const { createOrder } = require("./utils/CreateOrder");
+// const { createOrder } = require("eshoplogistic-react/server");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -565,12 +567,23 @@ app.get("/api/bonus-settings", async (_req, res) => {
 });
 
 app.post('/api/test', async(req, res) => {
-
-
-
-
   const { id, deliveryData } = req.body;
-  console.log(id);
+
+  const ESHOPLOGISTIC_TOKEN = "df616893f983b20fed6ac71e5f6cb9f2";
+  let companyData = {
+    senderName: "Александр",                       // string 	Имя
+    senderPhone: "79202115108",                   // string 	Телефон
+    senderCompany: "Чудочай",      // string 	Название компании
+    
+    pick_up: false,                               // boolean 	Забор груза от отправителя
+    address: {      // заполняем если pick_up = true
+      region: "",   // string 	Регион. Например: Московская область
+      city: "",     // string 	Населённый пункт
+      street: "",   // string 	Улица
+      house: "",    // string 	Номер строения
+      room: ""      // string 	Квартира / офис / помещение
+    }
+  };
 
   let order = await Order.findById(id).populate("list.pid", "sku name");
 
@@ -597,7 +610,6 @@ app.post('/api/test', async(req, res) => {
                                 // cash_on_receipt - наличными при получении,
                                 // card_on_receipt - картой при получении,
                                 // cashless - безналичный расчет
-      cost: deliveryData.price, // double 	Стоимость доставки, рубли.
   };
 
   let real_orders = 0;
@@ -623,128 +635,105 @@ app.post('/api/test', async(req, res) => {
 
   orderData.dimensions = `${orderData.dimensions}${real_orders * 6}`;
 
-  let otherData = {
-    sender: {
-      name: "Александр",    // string 	Имя
-      phone: "79202115108", // string 	Телефон
-      company: "Чудочай"    // string 	Название компании
-    },
-    delivery: {
-      location_from: {
-        pick_up: false, // boolean 	Забор груза от отправителя
-                        // true = отправляете не с пункта, а со своего адреса, 
-                        // и тогда нужно заполнить address(ниже)
-        address: {
-          region: "", // string 	Регион. Например: Московская область
-          city: "",   // string 	Населённый пункт
-          street: "", // string 	Улица
-          house: "",  // string 	Номер строения
-          room: ""    // string 	Квартира / офис / помещение
-        }
-      }
-    }
-  };
-
-
-  createDeliveryOrder(deliveryData, orderData, otherData);
+  createOrder(ESHOPLOGISTIC_TOKEN, deliveryData, orderData, companyData);
 
   res.status(200).send('OK');
 });
 
-async function createDeliveryOrder(deliveryData, orderData, otherData)
-{
-  const ESHOPLOGISTIC_TOKEN = "df616893f983b20fed6ac71e5f6cb9f2";
+// async function createDeliveryOrder(deliveryData, orderData, otherData)
+// {
+//   const ESHOPLOGISTIC_TOKEN = "df616893f983b20fed6ac71e5f6cb9f2";
 
-  let location_from = 
-  otherData.delivery.location_from.pick_up == true 
-  ? { 
-    pick_up: otherData.delivery.location_from.pick_up,
-    address: otherData.delivery.location_from.address
-  }
-  : {
-    pick_up: otherData.delivery.location_from.pick_up
-  };
+//   let location_from = 
+//   otherData.delivery.location_from.pick_up == true 
+//   ? { 
+//     pick_up: otherData.delivery.location_from.pick_up,
+//     address: otherData.delivery.location_from.address
+//   }
+//   : {
+//     pick_up: otherData.delivery.location_from.pick_up
+//   };
 
-  let location_to = 
-  deliveryData.type == "terminal" 
-  ? {
-    terminal: deliveryData.code
-  }
-  : {
-    address: {
-      country: deliveryData.address.country,    // string 	Код страны.
-                                                // Варианты: RU, UZ, AZ, KZ, AB, TM, BY, UA, TJ, KG, AM, MD 
-      region: deliveryData.address.region,      // string 	Регион. Например: Московская область
-      city: deliveryData.address.city,          // string 	Населённый пункт
-      district: deliveryData.address.district,  // string 	Район
-      street: deliveryData.address.street,      // string 	Улица
-      house: deliveryData.address.house,        // string 	Номер строения
-      room: deliveryData.room,                  // string 	Квартира / офис / помещение
-    }
-  };
+//   let location_to = 
+//   deliveryData.type == "terminal" 
+//   ? {
+//     terminal: deliveryData.code
+//   }
+//   : {
+//     address: {
+//       country: deliveryData.address.country,    // string 	Код страны.
+//                                                 // Варианты: RU, UZ, AZ, KZ, AB, TM, BY, UA, TJ, KG, AM, MD 
+//       region: deliveryData.address.region,      // string 	Регион. Например: Московская область
+//       city: deliveryData.address.city,          // string 	Населённый пункт
+//       district: deliveryData.address.district,  // string 	Район
+//       street: deliveryData.address.street,      // string 	Улица
+//       house: deliveryData.address.house,        // string 	Номер строения
+//       room: deliveryData.room,                  // string 	Квартира / офис / помещение
+//     }
+//   };
 
-  let order = {
-    id: orderData.id,
-    comment: deliveryData.comment // string 	Комментарий
-  }
-  let tariff;
-  switch (deliveryData.service) {
-    case "sdek":
-      order.type = orderData.type;
-      if (orderData.combine_places_apply == true)
-      {
-        order.combine_places = {};
-        order.combine_places.apply = true;
-        order.combine_places.weight = orderData.total_weight;
-        order.combine_places.dimensions = orderData.dimensions;
-      }
+//   let order = {
+//     id: orderData.id,
+//     comment: deliveryData.comment // string 	Комментарий
+//   }
+//   let tariff;
+//   switch (deliveryData.service) {
+//     case "sdek":
+//       order.type = orderData.type;
+//       if (orderData.combine_places_apply == true)
+//       {
+//         order.combine_places = {};
+//         order.combine_places.apply = true;
+//         order.combine_places.weight = orderData.total_weight;
+//         order.combine_places.dimensions = orderData.dimensions;
+//       }
 
-      if(deliveryData.type == "terminal")
-      {
-        tariff = 136;
-      } else if(deliveryData.type == "door")
-      {
-        tariff = 137;
-      }
-      break;
+//       if(deliveryData.type == "terminal")
+//       {
+//         tariff = 136;
+//       } else if(deliveryData.type == "door")
+//       {
+//         tariff = 137;
+//       }
+//       break;
   
-    default:
-      break;
-  }
+//     default:
+//       break;
+//   }
 
-  let data = { 
-    key: ESHOPLOGISTIC_TOKEN, 
-    action: "create",
-    cms: "custom",
-    service: deliveryData.service,
-    order: order,
-    sender: otherData.sender,
-    receiver: {
-      name: deliveryData.name,
-      phone: deliveryData.phone
-    },
-    places: orderData.places,
-    delivery: {
-      type: deliveryData.type,
-      tariff: tariff,
-      location_from: {
-        pick_up: otherData.delivery.location_from.pick_up
-      },
-      location_to: location_to,
-      payment: orderData.payment,
-      cost: deliveryData.price
-    }
-  };
+//   let data = { 
+//     key: ESHOPLOGISTIC_TOKEN, 
+//     action: "create",
+//     cms: "custom",
+//     service: deliveryData.service,
+//     order: order,
+//     sender: otherData.sender,
+//     receiver: {
+//       name: deliveryData.name,
+//       phone: deliveryData.phone
+//     },
+//     places: orderData.places,
+//     delivery: {
+//       type: deliveryData.type,
+//       tariff: tariff,
+//       location_from: {
+//         pick_up: otherData.delivery.location_from.pick_up
+//       },
+//       location_to: location_to,
+//       payment: orderData.payment,
+//       cost: deliveryData.price
+//     }
+//   };
   
-  console.log(data);
-  let response = await fetch("https://api.esplc.ru/delivery/order", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-  let result = await response.json();
-  console.log("eshopResult", result);
-}
+//   console.log(data);
+//   let response = await fetch("https://api.esplc.ru/delivery/order", {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify(data),
+//   });
+//   let result = await response.json();
+//   console.log("eshopResult", result);
+// }
 
 // Import routes
 // const paymentRoutes = require("./routes/paymentRoutes");

@@ -3,7 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
-import EShopLogistic from "../components/EShopLogistic";
+import { EShopLogistic } from "../components/EShopLogistic";
+// import { EShopLogistic } from "eshoplogistic-react/client";
+// import "eshoplogistic-react/styles.css";
 
 
 const DADATA_TOKEN = "eb5a9b17d07d3320d19d665bc0ade765f3f016d3";
@@ -227,7 +229,6 @@ const CheckoutPage = () => {
           DADATA_TOKEN={DADATA_TOKEN}
           ESHOPLOGISTIC_TOKEN={ESHOPLOGISTIC_TOKEN}
           YANDEX_API_KEY={YANDEX_API_KEY}
-          needCreateOrder={true}
           orderWeight={totalWeight / 1000}
 
           // получаем выходные данные в state deliveryData

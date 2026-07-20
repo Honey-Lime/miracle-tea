@@ -1,5 +1,6 @@
 import { useState, useEffect, Fragment, useRef } from "react";
-import ReactDadataBox from "react-dadata-box";
+import { AddressSuggestions } from 'react-dadata';
+import 'react-dadata/dist/react-dadata.css';
 import "./EShopLogistic.css";
 
 const DEFAULT_MAP_LOCATION = {
@@ -16,7 +17,7 @@ const INITIAL_STATUS = {
 
 const DELIVERY_CONTACT_STORAGE_KEY = "EShopLogisticDeliveryData";
 
-const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, needCreateOrder, orderWeight, onDeliveryConfirm }) => {
+const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, orderWeight, onDeliveryConfirm }) => {
   // Этап 1. Загружаем справочники и базовые данные для расчёта доставки.
   // Основные данные API и справочники служб доставки.
   function getSavedDeliveryContact() {
@@ -220,7 +221,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
 
     if (addressPickMode) {
       const nextAddress = {
-        address: suggestion.value,
+        value: suggestion.value,
         lon: cityData.lon,
         lat: cityData.lat,
       };
@@ -268,11 +269,6 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
 
       const result = await response.json();
       const suggestion = result.suggestions?.[0];
-      // console.log(suggestion.data);
-      // console.log(suggestion.data.region);
-      // console.log(suggestion.data.street);
-      // console.log(suggestion.data.house);
-      
 
       return {
         fias:
@@ -366,7 +362,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
       const nextLocationValue = locationData?.value;
 
       const nextAddress = {
-        address,
+        value: address,
         lon,
         lat,
         country: 
@@ -538,7 +534,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
 
     markerElement.onclick = (event) => {
       const terminalAddress = {
-        address: terminal.address,
+        value: terminal.address,
         lon: Number(terminal.lon),
         lat: Number(terminal.lat),
       };
@@ -630,7 +626,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
     if (isMethodChanged) {
       setDeliveryAddress(null);
       setOutput(null);
-      onDeliveryConfirm(null);
+      onDeliveryConfirm?.(null);
     }
 
     switch (type) {
@@ -711,13 +707,10 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
               to: selectedCity.fias,
               weight: orderWeight,
               service: selectedMethod.name,
-              address: deliveryAddress.address,
+              address: deliveryAddress.value,
             },
             selectedMethod.name
           );
-
-          // console.log(recalculation);
-          
 
           if (!recalculation) {
             return;
@@ -731,7 +724,6 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
           out.time = recalculation.data.door.time.value;
           out.unitTime = recalculation.data.door.time.unit;
         } else {
-          // console.log(data.calculation[selectedMethod.name].data);
           out.price = data.calculation[selectedMethod.name].data.door.price.value;
           out.unitPrice = data.calculation[selectedMethod.name].data.door.price.unit;
           out.time = data.calculation[selectedMethod.name].data.door.time.value;
@@ -789,7 +781,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
       });
     }
 
-    renderDeliveryAddressMarker(deliveryAddress.address);
+    renderDeliveryAddressMarker(deliveryAddress);
   }, [deliveryAddress, mapReady, addressPickMode]);
 
   // Этап 4.3. При открытии виджета загружаем базовые данные и пробуем определить город.
@@ -1163,7 +1155,6 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
   // Этап 5. Финально проверяем контакты и передаём подтверждённую доставку в checkout.
   async function submitDelivery() {
     if (!output) {
-      // console.log("NO OUTPUT");
       return;
     }
 
@@ -1187,7 +1178,6 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
 
     if (Object.keys(nextErrors).length > 0) {
       showError("delivery-required-fields", "Заполните обязательные поля доставки.");
-      // console.log("NEXT_ERRORS", nextErrors);
       return;
     }
 
@@ -1202,7 +1192,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
       checked: true,
     };
 
-    onDeliveryConfirm(finalOutput);
+    onDeliveryConfirm?.(finalOutput);
   }
 
   useEffect(() => {
@@ -1260,12 +1250,12 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
 
       {!loading && (
         <>
-          <ReactDadataBox
+          <AddressSuggestions
             token={DADATA_TOKEN}
-            type="address"
             onChange={handleCitySelect}
-            placeholder="Введите город / Адрес доставки..."
-            query={deliveryAddress?.address || selectedCity?.value || ""}
+            inputProps={{ placeholder: "Выберите адрес доставки" }}
+            value={deliveryAddress || selectedCity || ""}
+            delay={500}
           />
 
           {data.calculation && (
@@ -1347,7 +1337,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
                     <img src={services[selectedMethod.name].logo} alt={selectedMethod.name} />
                   </li>
                   <li>{services[selectedMethod.name].name}</li>
-                  <li>{deliveryAddress.address}</li>
+                  <li>{deliveryAddress.value}</li>
                 </>
               )}
             </ul>
@@ -1430,5 +1420,4 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, need
     </div>
   );
 };
-
-export default EShopLogistic;
+export { EShopLogistic };
