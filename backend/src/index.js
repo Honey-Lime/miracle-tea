@@ -356,7 +356,8 @@ app.post('/api/create-payment', async(req, res) => {
       Description: `Оплата заказа ${bankOrderId}`,
       // SuccessURL: 'https://чудочай.рф/thank-you',
       // FailURL: 'https://чудочай.рф/checkout',
-      // NotificationURL: 'https://чудочай.рф/api/set-order-isPayment'
+      // NotificationURL: 'https://чудочай.рф/api/set-order-isPayment'\
+      NotificationURL: 'https://%D1%87%D1%83%D0%B4%D0%BE%D1%87%D0%B0%D0%B9.%D1%80%D1%84/api/set-order-isPayment'
 
       // Receipt: {
       //   Email: "a@test.ru",
