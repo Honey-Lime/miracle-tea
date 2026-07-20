@@ -10,8 +10,8 @@ const Footer = () => {
           <div className="ftr-section">
             <h4>Контакты</h4>
             <p>Email: vikdub01@mail.ru</p>
-            <p>Примем звонков с 12:00 до 21:00 <br/>
-            Телефон: +7 (920) 211-51-08</p>
+            {/* <p>Примем звонков с 12:00 до 21:00 <br/>
+            Телефон: +7 (920) 211-51-08</p> */}
           </div>
           <div className="ftr-section">
             <h4>Быстрые ссылки</h4>

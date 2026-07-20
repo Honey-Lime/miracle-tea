@@ -448,6 +448,8 @@ app.post('/api/create-payment', async(req, res) => {
 });
 
 app.post('/api/set-order-isPayment', async(req, res) => {
+  console.log(req.body);
+  
   try {
     const notification = req.body || {};
     const expectedToken = generateTBankToken(notification, TERMINAL_PASSWORD);
