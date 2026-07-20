@@ -356,7 +356,7 @@ app.post('/api/create-payment', async(req, res) => {
       Description: `Оплата заказа ${bankOrderId}`,
       // SuccessURL: 'https://чудочай.рф/thank-you',
       // FailURL: 'https://чудочай.рф/checkout',
-      NotificationURL: 'https://чудочай.рф/api/set-order-isPayment'
+      // NotificationURL: 'https://чудочай.рф/api/set-order-isPayment'
 
       // Receipt: {
       //   Email: "a@test.ru",
@@ -448,9 +448,9 @@ app.post('/api/create-payment', async(req, res) => {
 });
 
 app.post('/api/set-order-isPayment', async(req, res) => {
-  console.log(req.body);
   
   try {
+    console.log("ответ банка", req.body);
     const notification = req.body || {};
     const expectedToken = generateTBankToken(notification, TERMINAL_PASSWORD);
 
