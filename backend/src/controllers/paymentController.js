@@ -41,7 +41,7 @@ const generateId = async () => {
   const counter = await Counter.findOneAndUpdate(
     { _id: ID_COUNTER },
     { $inc: { seq: 1 } },
-    { new: true, upsert: true },
+    { returnDocument: 'after', upsert: true },
   );
 
   return formatId(counter.seq - 1);
