@@ -96,8 +96,8 @@ async function createOrder(ESHOPLOGISTIC_TOKEN, deliveryData, orderData, company
   let result = await response.json();
   
   if (!response.ok) {
-    throw new Error(`EShopLogistic order creation failed with status ${response.status}`);
     console.log(result);
+    throw new Error(`EShopLogistic order creation failed with status ${response.status}`);
   }
 
   return result;
