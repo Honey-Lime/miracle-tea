@@ -93,13 +93,14 @@ async function createOrder(ESHOPLOGISTIC_TOKEN, deliveryData, orderData, company
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-
+  let result = await response.json();
+  
   if (!response.ok) {
-    throw new Error(`EShopLogistic order creation failed with status ${response.status}`);
+    throw new Error(`EShopLogistic order creation failed with status ${response.status}`, result);
   }
 
-  let result = await response.json();
   return result;
+
 }
 
 module.exports = {

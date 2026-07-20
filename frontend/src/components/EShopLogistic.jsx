@@ -1255,7 +1255,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, orde
             onChange={handleCitySelect}
             inputProps={{ placeholder: "Выберите адрес доставки" }}
             value={deliveryAddress || selectedCity || ""}
-            delay={500}
+            delay={300}
           />
 
           {data.calculation && (
