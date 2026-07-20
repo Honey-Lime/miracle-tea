@@ -381,8 +381,8 @@ app.post('/api/create-payment', async(req, res) => {
         Amount: paymentData.Amount,
         OrderId: paymentData.OrderId,
         Description: paymentData.Description,
-        SuccessURL: paymentData.SuccessURL,
-        FailURL: paymentData.FailURL,
+        // SuccessURL: paymentData.SuccessURL,
+        // FailURL: paymentData.FailURL,
         NotificationURL: paymentData.NotificationURL
       }, 
       TERMINAL_PASSWORD
@@ -501,64 +501,64 @@ app.post('/api/set-order-isPayment', async(req, res) => {
   }
 });
 
-app.post('/api/check-payment', async(req, res) => {
-  try {
-    const { id, paymentId } = req.body;
+// app.post('/api/check-payment', async(req, res) => {
+//   try {
+//     const { id, paymentId } = req.body;
 
-    if (!id || !paymentId) {
-      return res.status(400).json({ error: "id и paymentId обязательны" });
-    }
+//     if (!id || !paymentId) {
+//       return res.status(400).json({ error: "id и paymentId обязательны" });
+//     }
 
-    const order = await Order.findById(id);
+//     const order = await Order.findById(id);
 
-    if (!order) {
-      return res.status(404).json({ error: "Заказ не найден" });
-    }
+//     if (!order) {
+//       return res.status(404).json({ error: "Заказ не найден" });
+//     }
 
-    const stateRequest = {
-      TerminalKey: TERMINAL_KEY,
-      PaymentId: String(paymentId),
-    };
+//     const stateRequest = {
+//       TerminalKey: TERMINAL_KEY,
+//       PaymentId: String(paymentId),
+//     };
 
-    stateRequest.Token = generateTBankToken(stateRequest, TERMINAL_PASSWORD);
+//     stateRequest.Token = generateTBankToken(stateRequest, TERMINAL_PASSWORD);
 
-    const response = await fetch("https://securepay.tinkoff.ru/v2/GetState", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-      },
-      body: JSON.stringify(stateRequest),
-    });
+//     const response = await fetch("https://securepay.tinkoff.ru/v2/GetState", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//         "Accept": "application/json",
+//       },
+//       body: JSON.stringify(stateRequest),
+//     });
 
-    const result = await response.json();
+//     const result = await response.json();
 
-    if (!response.ok || result.Success === false) {
-      return res.status(400).json({
-        error: "Не удалось проверить статус оплаты",
-        details: result,
-      });
-    }
+//     if (!response.ok || result.Success === false) {
+//       return res.status(400).json({
+//         error: "Не удалось проверить статус оплаты",
+//         details: result,
+//       });
+//     }
 
-    if (isPaidTBankStatus(result.Status)) {
-      await markOrderAsPaid(order, {
-        paymentId: String(result.PaymentId || paymentId),
-        status: result.Status,
-        raw: result,
-      });
-    }
+//     if (isPaidTBankStatus(result.Status)) {
+//       await markOrderAsPaid(order, {
+//         paymentId: String(result.PaymentId || paymentId),
+//         status: result.Status,
+//         raw: result,
+//       });
+//     }
 
-    res.json({
-      paid: isPaidTBankStatus(result.Status),
-      status: result.Status,
-      orderStatus: order.status,
-      raw: result,
-    });
-  } catch (error) {
-    console.error('Ошибка проверки платежа:', error.message);
-    res.status(500).json({ error: 'Не удалось проверить платеж' });
-  }
-});
+//     res.json({
+//       paid: isPaidTBankStatus(result.Status),
+//       status: result.Status,
+//       orderStatus: order.status,
+//       raw: result,
+//     });
+//   } catch (error) {
+//     console.error('Ошибка проверки платежа:', error.message);
+//     res.status(500).json({ error: 'Не удалось проверить платеж' });
+//   }
+// });
 
 app.get("/api/bonus-settings", async (_req, res) => {
   try {
