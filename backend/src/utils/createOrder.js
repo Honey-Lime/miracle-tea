@@ -1,4 +1,4 @@
-async function createOrder(ESHOPLOGISTIC_TOKEN, deliveryData, orderData, otherData, options = {})
+async function createOrder(ESHOPLOGISTIC_TOKEN, deliveryData, orderData, companyData, options = {})
 {
 
   if (!ESHOPLOGISTIC_TOKEN) {
@@ -6,13 +6,13 @@ async function createOrder(ESHOPLOGISTIC_TOKEN, deliveryData, orderData, otherDa
   }
 
   let location_from = 
-  otherData.pick_up == true 
+  companyData.pick_up == true 
   ? { 
-    pick_up: otherData.pick_up,
-    address: otherData.address
+    pick_up: companyData.pick_up,
+    address: companyData.address
   }
   : {
-    pick_up: otherData.pick_up
+    pick_up: companyData.pick_up
   };
 
   let location_to = 
@@ -69,9 +69,9 @@ async function createOrder(ESHOPLOGISTIC_TOKEN, deliveryData, orderData, otherDa
     service: deliveryData.service,
     order: order,
     sender: {
-      name: otherData.senderName,
-      phone: otherData.senderPhone,
-      company: otherData.senderCompany,
+      name: companyData.senderName,
+      phone: companyData.senderPhone,
+      company: companyData.senderCompany,
     },
     receiver: {
       name: deliveryData.name,
