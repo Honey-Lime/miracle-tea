@@ -690,7 +690,6 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, orde
         out.payment = selectedTerminal.payment.methods;
 
         console.log("selectedTerminal", selectedTerminal);
-        
 
         break;
 
@@ -704,6 +703,8 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, orde
 
         if (manualAddressChangeRef.current) {
           console.error('recalculation');
+          
+          console.log("Адрес доставки", deliveryAddress.value);
           
           recalculation = await customFetch(
             "/delivery/calculation",
