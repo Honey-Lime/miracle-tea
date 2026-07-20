@@ -702,7 +702,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, orde
         let recalculation = null;
 
         if (manualAddressChangeRef.current) {
-          console.error('recalculation');
+          console.log('recalculation');
           
           console.log("Адрес доставки", deliveryAddress.value);
           
@@ -1357,7 +1357,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, orde
             <div className="prooveDelivery">
               <img src={services[output.service].logo} alt={output.service} />
               <div className="heading">{output.type == 'terminal' ? (output.isPostamat == true ? 'Постамат' : 'Пункт выдачи') : 'Курьер' } {services[output.service].name}</div>
-              <div className="address">{output.address.address}</div>
+              <div className="address">{deliveryAddress.value}</div>
               {selectedMethod.type == 'door' && (
                 <div>
                   <span className="red">*</span>Квартира: {" "}
