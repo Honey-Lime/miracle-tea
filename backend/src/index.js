@@ -100,18 +100,18 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 // HTTP request logging with morgan
 app.use(morgan("dev"));
 
-// Custom HTTP logging middleware
-app.use((req, res, next) => {
-  const start = Date.now();
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    logHTTPRequest(req.method, req.originalUrl, res.statusCode, duration, {
-      user: req.userId || "guest",
-      ip: req.ip || req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
-    });
-  });
-  next();
-});
+// // Custom HTTP logging middleware
+// app.use((req, res, next) => {
+//   const start = Date.now();
+//   res.on("finish", () => {
+//     const duration = Date.now() - start;
+//     logHTTPRequest(req.method, req.originalUrl, res.statusCode, duration, {
+//       user: req.userId || "guest",
+//       ip: req.ip || req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
+//     });
+//   });
+//   next();
+// });
 
 // MongoDB connection
 const mongoURI = process.env.MONGODB_URI;
@@ -156,9 +156,9 @@ mongoose.connection.on("error", (err) => {
 });
 
 // MongoDB operation logging
-mongoose.set("debug", (collectionName, method, query, doc) => {
-  logDBOperation(method, collectionName, query, doc);
-});
+// mongoose.set("debug", (collectionName, method, query, doc) => {
+//   logDBOperation(method, collectionName, query, doc);
+// });
 
 // Basic route
 app.get("/", (req, res) => {
@@ -357,7 +357,7 @@ app.post('/api/create-payment', async(req, res) => {
       // SuccessURL: 'https://чудочай.рф/thank-you',
       // FailURL: 'https://чудочай.рф/checkout',
       // NotificationURL: 'https://чудочай.рф/api/set-order-isPayment'\
-      NotificationURL: 'https://%D1%87%D1%83%D0%B4%D0%BE%D1%87%D0%B0%D0%B9.%D1%80%D1%84/api/set-order-isPayment'
+      NotificationURL: 'https://xn--80ahqsxxd.xn--p1ai/api/set-order-isPayment'
 
       // Receipt: {
       //   Email: "a@test.ru",
