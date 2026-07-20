@@ -19,7 +19,7 @@ const Order = require("./models/Order");
 const Product = require("./models/Product");
 const User = require("./models/User");
 const { getBonusPercent } = require("./services/bonusService");
-const { createOrder } = require("./utils/CreateOrder");
+const { createOrder } = require("./utils/createOrder");
 // const { createOrder } = require("eshoplogistic-react/server");
 
 const app = express();
