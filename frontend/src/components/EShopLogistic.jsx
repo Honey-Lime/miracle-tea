@@ -712,7 +712,10 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, orde
             selectedMethod.name
           );
 
+          console.log('📦 Результат пересчёта:', recalculation);
+
           if (!recalculation) {
+            console.error('❌ Пересчёт не удался');
             return;
           }
         }

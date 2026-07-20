@@ -58,8 +58,8 @@ async function createOrder(ESHOPLOGISTIC_TOKEN, deliveryData, orderData, company
       }
       break;
       
-    case "yandex":
-      location_from.platform_id = false;
+    // case "yandex":
+    //   location_from.platform_id = false;
   
     default:
       break;
