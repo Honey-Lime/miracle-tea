@@ -135,17 +135,17 @@ const CheckoutPage = () => {
         });
       }
 
-      await fetch("/api/test", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          id: order.id,
-          deliveryData: deliveryData
-        }),
-      });
+      // await fetch("/api/test", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //     ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      //   },
+      //   body: JSON.stringify({
+      //     id: order.id,
+      //     deliveryData: deliveryData
+      //   }),
+      // });
 
       if (user?.isAdmin && testOrder) {
         await clearCart();
