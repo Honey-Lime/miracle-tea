@@ -689,10 +689,14 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, orde
         out.unitTime = selectedTerminal.time.unit;
         out.payment = selectedTerminal.payment.methods;
 
+        console.log("selectedTerminal", selectedTerminal);
+        
+
         break;
 
       case "door": {
         if (!deliveryAddress) {
+          // console.error('❌ Не указан адрес');
           return;
         }
 
