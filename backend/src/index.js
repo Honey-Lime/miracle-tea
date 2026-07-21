@@ -359,7 +359,7 @@ app.post('/api/create-payment', async(req, res) => {
       // SuccessURL: 'https://чудочай.рф/thank-you',
       // FailURL: 'https://чудочай.рф/checkout',
       // NotificationURL: 'https://чудочай.рф/api/set-order-isPayment'
-      NotificationURL: 'https://xn--80ahqsxxd.xn--p1ai/api/set-order-isPayment'
+      // NotificationURL: 'https://xn--80ahqsxxd.xn--p1ai/api/set-order-isPayment'
 
       // Receipt: {
       //   Email: "a@test.ru",
@@ -386,7 +386,7 @@ app.post('/api/create-payment', async(req, res) => {
         Description: paymentData.Description,
         // SuccessURL: paymentData.SuccessURL,
         // FailURL: paymentData.FailURL,
-        NotificationURL: paymentData.NotificationURL
+        // NotificationURL: paymentData.NotificationURL
       }, 
       TERMINAL_PASSWORD
     );
