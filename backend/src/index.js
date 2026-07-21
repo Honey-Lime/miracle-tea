@@ -22,6 +22,9 @@ const { getBonusPercent } = require("./services/bonusService");
 const { createOrder } = require("./utils/createOrder");
 // const { createOrder } = require("eshoplogistic-react/server");
 
+const TERMINAL_KEY = "1778276759503";
+const TERMINAL_PASSWORD = "TVEj0Hk0YYkzhQrr";
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 const PAID_TOTAL_STATUSES = ["paid", "assembled", "shipped", "completed"];
@@ -31,6 +34,7 @@ const PAID_TOTAL_STATUSES = ["paid", "assembled", "shipped", "completed"];
 const ENABLE_HTTPS = ["1", "true", "yes"].includes(
   String(process.env.ENABLE_HTTPS || "").toLowerCase(),
 );
+
 
 // Чтение SSL-сертификатов
 let sslOptions = null;
@@ -183,8 +187,7 @@ app.post("/api/client-errors", (req, res) => {
 
 
 
-const TERMINAL_KEY = "1778276759438DEMO";
-const TERMINAL_PASSWORD = "m#G#C$En4dhul5!!";
+
 
 function generateTBankToken(params, password) {
   const tokenParams = { Password: password };
@@ -356,8 +359,8 @@ app.post('/api/create-payment', async(req, res) => {
       Description: `Оплата заказа ${bankOrderId}`,
       // SuccessURL: 'https://чудочай.рф/thank-you',
       // FailURL: 'https://чудочай.рф/checkout',
-      // NotificationURL: 'https://чудочай.рф/api/set-order-isPayment'\
-      NotificationURL: 'https://xn--80ahqsxxd.xn--p1ai/api/set-order-isPayment'
+      NotificationURL: 'https://чудочай.рф/api/set-order-isPayment'
+      // NotificationURL: 'https://xn--80ahqsxxd.xn--p1ai/api/set-order-isPayment'
 
       // Receipt: {
       //   Email: "a@test.ru",
