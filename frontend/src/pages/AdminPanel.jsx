@@ -51,7 +51,7 @@ const AdminPanel = () => {
             Чаты {counts.unreadChats > 0 && <span className="ap-nav-badge">{counts.unreadChats}</span>}
           </NavLink>
           <NavLink to="/admin/edit" className="ap-sidebar-link">
-            Редактирование
+            Товары
           </NavLink>
           <NavLink to="/admin/statistics" className="ap-sidebar-link">
             Статистика

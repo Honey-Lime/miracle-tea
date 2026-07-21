@@ -19,8 +19,7 @@ const Order = require("./models/Order");
 const Product = require("./models/Product");
 const User = require("./models/User");
 const { getBonusPercent } = require("./services/bonusService");
-const { createOrder } = require("./utils/createOrder");
-// const { createOrder } = require("eshoplogistic-react/server");
+const { createEShopDeliveryOrder } = require("./utils/createEShopDeliveryOrder");
 
 const TERMINAL_KEY = "1778276759503";
 const TERMINAL_PASSWORD = "TVEj0Hk0YYkzhQrr";
@@ -641,7 +640,7 @@ app.post('/api/test', async(req, res) => {
 
   orderData.dimensions = `${orderData.dimensions}${real_orders * 6}`;
 
-  createOrder(ESHOPLOGISTIC_TOKEN, deliveryData, orderData, companyData);
+  createEShopDeliveryOrder(ESHOPLOGISTIC_TOKEN, deliveryData, orderData, companyData);
 
   res.status(200).send('OK');
 });

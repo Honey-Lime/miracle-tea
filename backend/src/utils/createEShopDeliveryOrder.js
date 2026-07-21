@@ -1,4 +1,4 @@
-async function createOrder(ESHOPLOGISTIC_TOKEN, deliveryData, orderData, companyData, options = {})
+async function createEShopDeliveryOrder(ESHOPLOGISTIC_TOKEN, deliveryData, orderData, companyData, options = {})
 {
 
   if (!ESHOPLOGISTIC_TOKEN) {
@@ -108,5 +108,5 @@ async function createOrder(ESHOPLOGISTIC_TOKEN, deliveryData, orderData, company
 }
 
 module.exports = {
-  createOrder
+  createEShopDeliveryOrder
 };
