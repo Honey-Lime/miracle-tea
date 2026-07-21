@@ -9,68 +9,68 @@ const ThankYouPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // useEffect(() => {
-  //   if (clearStartedRef.current) {
-  //     return;
-  //   }
+  useEffect(() => {
+    if (clearStartedRef.current) {
+      return;
+    }
 
-  //   clearStartedRef.current = true;
+    clearStartedRef.current = true;
 
-  //   if (location.state?.withoutPayment) {
-  //     setLoading(false);
-  //     return;
-  //   }
-  // 
-  //   const handleSuccessfulPaymentReturn = async () => {
-  //     try {
-  //       const lastPayment = JSON.parse(sessionStorage.getItem("lastPayment") || "null");
+    if (location.state?.withoutPayment) {
+      setLoading(false);
+      return;
+    }
+  
+    const handleSuccessfulPaymentReturn = async () => {
+      try {
+        const lastPayment = JSON.parse(sessionStorage.getItem("lastPayment") || "null");
 
-  //       if (!lastPayment?.id || !lastPayment?.paymentId) {
-  //         setError("Не удалось найти данные платежа. Если оплата прошла, заказ обновится после уведомления банка.");
-  //         return;
-  //       }
+        if (!lastPayment?.id || !lastPayment?.paymentId) {
+          setError("Не удалось найти данные платежа. Если оплата прошла, заказ обновится после уведомления банка.");
+          return;
+        }
 
-  //       const response = await fetch("/api/check-payment", {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify(lastPayment),
-  //       });
+        const response = await fetch("/api/check-payment", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(lastPayment),
+        });
 
-  //       const result = await response.json();
+        const result = await response.json();
 
-  //       if (!response.ok) {
-  //         throw new Error(result.error || "Не удалось проверить статус оплаты");
-  //       }
+        if (!response.ok) {
+          throw new Error(result.error || "Не удалось проверить статус оплаты");
+        }
 
-  //       if (!result.paid) {
-  //         setError("Оплата ещё не подтверждена банком. Корзина пока не очищена.");
-  //         return;
-  //       }
+        if (!result.paid) {
+          setError("Оплата ещё не подтверждена банком. Корзина пока не очищена.");
+          return;
+        }
 
-  //       await clearCart();
-  //       sessionStorage.removeItem("lastPayment");
-  //     } catch (err) {
-  //       console.error("Ошибка обработки оплаты:", err);
-  //       setError(err.message || "Не удалось обработать оплату.");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
+        await clearCart();
+        sessionStorage.removeItem("lastPayment");
+      } catch (err) {
+        console.error("Ошибка обработки оплаты:", err);
+        setError(err.message || "Не удалось обработать оплату.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  //   handleSuccessfulPaymentReturn();
-  // }, [clearCart, location.state]);
+    handleSuccessfulPaymentReturn();
+  }, [clearCart, location.state]);
 
-  // if (loading) {
-  //   return (
-  //     <div className="typ-thank-you-page container">
-  //       <div className="typ-thank-you-content">
-  //         <p>Обработка заказа...</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  if (loading) {
+    return (
+      <div className="typ-thank-you-page container">
+        <div className="typ-thank-you-content">
+          <p>Обработка заказа...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="typ-thank-you-page container">
