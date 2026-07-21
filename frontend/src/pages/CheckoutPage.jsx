@@ -27,7 +27,8 @@ const CheckoutPage = () => {
   const [refundPolicyAccepted, setRefundPolicyAccepted] = useState(false);
   const [bonusPercent, setBonusPercent] = useState(0);
   const [bonusSpent, setBonusSpent] = useState(0);
-  const [testOrder, setTestOrder] = useState(false);
+  const [withoutPayment, setWithoutPayment] = useState(false);
+  const [withoutDeliveryPaymentPayment, setwithoutDeliveryPaymentPayment] = useState(false);
   const canPay = Boolean(
     deliveryData?.checked && personalDataAccepted && refundPolicyAccepted,
   );
@@ -109,7 +110,8 @@ const CheckoutPage = () => {
         bonuses: {
           spent: normalizedBonusSpent,
         },
-        testOrder: Boolean(user?.isAdmin && testOrder),
+        withoutPayment: Boolean(user?.isAdmin && withoutPayment),
+        withoutDeliveryPaymentPayment: Boolean(user?.isAdmin && withoutDeliveryPaymentPayment),
       };
 
       const response = await fetch("/api/orders", {
@@ -147,10 +149,10 @@ const CheckoutPage = () => {
       //   }),
       // });
 
-      if (user?.isAdmin && testOrder) {
+      if (user?.isAdmin && withoutPayment) {
         await clearCart();
         addToast("Тестовый заказ оформлен и отмечен оплаченным", "success");
-        navigate("/thank-you", { state: { testOrder: true, orderId: order.id } });
+        navigate("/thank-you", { state: { withoutPayment: true, orderId: order.id } });
         return;
       }
 
@@ -285,7 +287,7 @@ const CheckoutPage = () => {
               <div>
                 <span>Оплата:</span>
                 <span>
-                  {user?.isAdmin && testOrder ? "Тестовый заказ" : "Картой"}
+                  {user?.isAdmin && withoutPayment ? "Тестовый заказ" : "Картой"}
                   {/* {PAYMENT_OPTIONS.find(
                     (option) => option.value === paymentMethod,
                   )?.label || "Не выбрано"} */}
@@ -330,10 +332,21 @@ const CheckoutPage = () => {
               <label className="chp-policy-consent">
                 <input
                   type="checkbox"
-                  checked={testOrder}
-                  onChange={(event) => setTestOrder(event.target.checked)}
+                  checked={withoutPayment}
+                  onChange={(event) => setWithoutPayment(event.target.checked)}
                 />
-                <span>Тестовый заказ</span>
+                <span>Без оплаты</span>
+              </label>
+            )}
+
+            {user?.isAdmin && (
+              <label className="chp-policy-consent">
+                <input
+                  type="checkbox"
+                  checked={withoutPayment}
+                  onChange={(event) => setwithoutDeliveryPaymentPayment(event.target.checked)}
+                />
+                <span>Без оплаты доставки</span>
               </label>
             )}
 

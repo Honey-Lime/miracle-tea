@@ -159,7 +159,7 @@ const reserveOrderRemains = async (order) => {
 
 // Create a new order
 exports.createOrder = async (req, res) => {
-  const { list, delivery, consents, bonuses, testOrder } = req.body;
+  const { list, delivery, consents, bonuses, withoutPayment, withoutDeliveryPayment } = req.body;
   const customerType = req.userId ? "user" : "guest";
 
   try {
@@ -172,9 +172,9 @@ exports.createOrder = async (req, res) => {
     const user = req.userId
       ? await User.findById(req.userId).select("bonusBalance isAdmin delivery total")
       : null;
-    const isTestOrder = Boolean(testOrder && user?.isAdmin);
+    const isWithoutPayment = Boolean(withoutPayment && user?.isAdmin);
 
-    if (testOrder && !isTestOrder) {
+    if (withoutPayment && !isWithoutPayment) {
       return res.status(403).json({ message: "Тестовый заказ доступен только администратору" });
     }
 
@@ -233,7 +233,8 @@ exports.createOrder = async (req, res) => {
 
     const bonusPercent = await getBonusPercent();
     const bonusEarned = req.userId ? calculateBonusEarned(itemsTotal, bonusPercent) : 0;
-    if(isTestOrder)
+    const iswithoutDeliveryPayment = Boolean(withoutDeliveryPayment && user?.isAdmin);
+    if(iswithoutDeliveryPayment)
     {
       const totalPrice = Math.max(0, itemsTotal - bonusSpent);
     } else 
@@ -273,19 +274,19 @@ exports.createOrder = async (req, res) => {
         acceptedAt: consents.acceptedAt || new Date(),
       },
       totalPrice,
-      status: isTestOrder ? "paid" : "payment_pending",
-      payment: isTestOrder
+      status: isWithoutPayment ? "paid" : "payment_pending",
+      payment: isWithoutPayment
         ? {
             paymentId: `test-${Date.now()}`,
             status: "test_paid",
-            raw: { testOrder: true },
+            raw: { withoutPayment: true },
           }
         : undefined,
     });
 
     const savedOrder = await order.save();
 
-    if (isTestOrder) {
+    if (isWithoutPayment) {
       await reserveOrderRemains(order);
       user.delivery.last = order.delivery?.address || null;
       user.delivery.history.push({

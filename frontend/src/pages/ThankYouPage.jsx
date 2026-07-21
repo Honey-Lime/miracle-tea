@@ -16,7 +16,7 @@ const ThankYouPage = () => {
 
   //   clearStartedRef.current = true;
 
-  //   if (location.state?.testOrder) {
+  //   if (location.state?.withoutPayment) {
   //     setLoading(false);
   //     return;
   //   }
