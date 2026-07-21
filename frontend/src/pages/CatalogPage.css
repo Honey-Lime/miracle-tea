@@ -45,7 +45,7 @@
   background: rgba(209, 217, 189, 0.34);
   overflow: hidden;
   cursor: pointer;
-  border: 18px solid rgba(192, 204, 164, 0.3);
+  border: 18px solid rgba(192, 204, 164, 0.8);
   border-radius: 42px;
   box-shadow: 0 15px 28px rgba(0, 0, 0, 0.18);
   transition: 0.3s ease-in-out;

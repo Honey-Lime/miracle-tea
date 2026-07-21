@@ -20,11 +20,15 @@
 }
 
 .prfp-profile-page .prfp-profile-info h2 {
+  font-family: "Jost";
+  font-weight: 500;
   margin-bottom: 1rem;
   color: var(--color-brand);
 }
 
 .prfp-profile-page .prfp-profile-info p {
+  font-family: "Jost";
+  font-weight: 300;
   margin-bottom: 0.5rem;
   font-size: 1.1rem;
 }
@@ -70,6 +74,8 @@
 
 .prfp-profile-page .prfp-reviews-summary h2,
 .prfp-profile-page .prfp-reviews-summary h3 {
+  font-family: "Jost";
+  font-weight: 300;
   color: var(--color-brand);
 }
 
@@ -104,7 +110,7 @@
 
 .prfp-profile-page .prfp-review-product {
   color: var(--color-brand);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .prfp-profile-page .prfp-reviews-modal {
@@ -251,6 +257,8 @@
 }
 
 .prfp-profile-page .prfp-orders h2 {
+  font-family: "Jost";
+  font-weight: 500;
   margin-bottom: 1.5rem;
   color: var(--color-brand);
 }
@@ -266,6 +274,8 @@
 
 .prfp-profile-page .prfp-orders-table th,
 .prfp-profile-page .prfp-orders-table td {
+  font-family: "Jost";
+  font-weight: 500;
   padding: 1rem;
   text-align: left;
   border-bottom: 1px solid var(--color-gray-200);
