@@ -234,12 +234,13 @@ exports.createOrder = async (req, res) => {
     const bonusPercent = await getBonusPercent();
     const bonusEarned = req.userId ? calculateBonusEarned(itemsTotal, bonusPercent) : 0;
     const iswithoutDeliveryPayment = Boolean(withoutDeliveryPayment && user?.isAdmin);
+    let totalPrice;
     if(iswithoutDeliveryPayment)
     {
-      const totalPrice = Math.max(0, itemsTotal - bonusSpent);
+      totalPrice = Math.max(0, itemsTotal - bonusSpent);
     } else 
     {
-      const totalPrice = Math.max(0, itemsTotal - bonusSpent) + (delivery.price || 0);
+      totalPrice = Math.max(0, itemsTotal - bonusSpent) + (delivery.price || 0);
     }
 
     // Build list with priceAtOrder (price per gram)
