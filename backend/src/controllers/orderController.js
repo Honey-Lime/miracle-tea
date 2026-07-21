@@ -233,13 +233,12 @@ exports.createOrder = async (req, res) => {
 
     const bonusPercent = await getBonusPercent();
     const bonusEarned = req.userId ? calculateBonusEarned(itemsTotal, bonusPercent) : 0;
-    const totalPrice;
     if(isTestOrder)
     {
-      totalPrice = Math.max(0, itemsTotal - bonusSpent);
+      const totalPrice = Math.max(0, itemsTotal - bonusSpent);
     } else 
     {
-      totalPrice = Math.max(0, itemsTotal - bonusSpent) + (delivery.price || 0);
+      const totalPrice = Math.max(0, itemsTotal - bonusSpent) + (delivery.price || 0);
     }
 
     // Build list with priceAtOrder (price per gram)
