@@ -28,7 +28,7 @@ const CheckoutPage = () => {
   const [bonusPercent, setBonusPercent] = useState(0);
   const [bonusSpent, setBonusSpent] = useState(0);
   const [withoutPayment, setWithoutPayment] = useState(false);
-  const [withoutDeliveryPaymentPayment, setwithoutDeliveryPaymentPayment] = useState(false);
+  const [withoutDeliveryPayment, setWithoutDeliveryPayment] = useState(false);
   const canPay = Boolean(
     deliveryData?.checked && personalDataAccepted && refundPolicyAccepted,
   );
@@ -111,7 +111,7 @@ const CheckoutPage = () => {
           spent: normalizedBonusSpent,
         },
         withoutPayment: Boolean(user?.isAdmin && withoutPayment),
-        withoutDeliveryPaymentPayment: Boolean(user?.isAdmin && withoutDeliveryPaymentPayment),
+        withoutDeliveryPayment: Boolean(user?.isAdmin && withoutDeliveryPayment),
       };
 
       const response = await fetch("/api/orders", {
@@ -343,8 +343,8 @@ const CheckoutPage = () => {
               <label className="chp-policy-consent">
                 <input
                   type="checkbox"
-                  checked={withoutPayment}
-                  onChange={(event) => setwithoutDeliveryPaymentPayment(event.target.checked)}
+                  checked={withoutDeliveryPayment}
+                  onChange={(event) => setWithoutDeliveryPayment(event.target.checked)}
                 />
                 <span>Без оплаты доставки</span>
               </label>
