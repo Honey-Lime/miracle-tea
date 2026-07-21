@@ -11,6 +11,8 @@
 }
 
 .cp-catalog-page h1 {
+  font-family: "Jost";
+  font-weight: 500;
   text-align: center;
   margin-bottom: 0.5rem;
   color: var(--color-cta);
@@ -21,6 +23,8 @@
 }
 
 .cp-catalog-page .cp-price-note {
+  font-family: "Jost";
+  font-weight: 500;
   text-align: center;
   color: rgba(242, 240, 232, 0.78);
   font-size: 1rem;
@@ -94,14 +98,14 @@
 }
 
 .cp-catalog-page .cp-product-info h2 {
+  font-family: "Jost";
+  font-weight: 500;
   height: 2.6em;
   margin-bottom: 0;
   color: var(--color-cta);
   align-self: center;
   text-align: center;
   font-size: 2rem;
-  font-family: "Inter", sans-serif;
-  font-weight: 800;
   text-shadow: 0 3px 5px rgba(0, 0, 0, 0.4);
 }
 
@@ -133,11 +137,12 @@
 }
 
 .cp-catalog-page .cp-price {
+  font-family: "Jost";
+  font-weight: 500;
   display: inline-flex;
   text-align: center;
   color: var(--color-cta);
   font-size: 3.2rem;
-  font-weight: 800;
   line-height: 1;
   text-shadow: 0 4px 6px rgba(0, 0, 0, 0.45);
   margin: unset;
@@ -174,12 +179,13 @@
 }
 
 .cp-catalog-page .gram-btn {
+  font-family: "Jost";
+  font-weight: 500;
   background: #aeba78;
   color: rgba(242, 240, 232, 0.92);
   border: none;
   padding: 0.85rem 1.1rem;
   font-size: 1.35rem;
-  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -195,12 +201,13 @@
 }
 
 .cp-catalog-page .gram-count {
+  font-family: "Jost";
+  font-weight: 500;
   display: flex;
   flex-direction: column;
   background: #dfd5ca;
   color: var(--color-cta);
   font-size: 1.25rem;
-  font-weight: 800;
   min-width: 6.5rem;
   text-align: center;
   transition: background 0.2s ease;
@@ -268,13 +275,14 @@
 
 /* Add to cart button */
 .cp-catalog-page .cp-add-to-cart-btn {
+  font-family: "Jost";
+  font-weight: 500;
   display: flex;
   justify-content: center;
   width: 100%;
   padding: 4.5rem 0.9rem 0.4rem;
   margin-top: -4.5rem;
   font-size: 1.2rem;
-  font-weight: 800;
   border-radius: 30px;
   background: #708834;
   color: var(--color-cta);
@@ -309,6 +317,8 @@
 }
 
 .cp-catalog-page .cp-tag-filter-btn {
+  font-family: "Jost";
+  font-weight: 500;
   padding: 0.65rem 1.2rem;
   border: 1px solid rgba(242, 240, 232, 0.22);
   background: rgba(184, 196, 134, 0.42);

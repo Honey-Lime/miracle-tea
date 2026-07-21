@@ -1,5 +1,6 @@
 @import url("./colors.css");
 @import url("./components.css");
+@import url("./fonts.css");
 
 /* Reset and base styles */
 * {
@@ -40,6 +41,8 @@ button {
 }
 
 .container {
+  font-family: "Jost";
+  font-weight: 300;
   width: 100%;
   max-width: 1224px;
   margin: 0 auto;

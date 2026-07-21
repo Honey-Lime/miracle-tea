@@ -16,15 +16,21 @@
 
 .ftr-footer .ftr-section h3,
 .ftr-footer .ftr-section h4 {
+  font-family: "Jost";
+  font-weight: 500;
   margin-bottom: 1rem;
 }
 
 .ftr-footer .ftr-section p {
+  font-family: "Jost";
+  font-weight: 300;
   margin-bottom: 0.5rem;
   opacity: 0.9;
 }
 
 .ftr-footer .ftr-section a {
+  font-family: "Jost";
+  font-weight: 300;
   display: block;
   color: white;
   margin-bottom: 0.5rem;
@@ -36,6 +42,8 @@
 }
 
 .ftr-footer .ftr-bottom {
+  font-family: "Jost";
+  font-weight: 500;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 1rem;
   text-align: center;

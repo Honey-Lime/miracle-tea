@@ -88,6 +88,8 @@
 }
 
 .pp-product-page .pp-product-title {
+  font-family: "Jost";
+  font-weight: 500;
   font-size: 2.5rem;
   margin-bottom: 0.5rem;
   color: var(--btn-secondary-bg);
@@ -102,18 +104,24 @@
 }
 
 .pp-product-page .pp-price-value {
+  font-family: "Jost";
+  font-weight: 500;
   font-weight: bold;
   color: var(--color-cta);
   font-size: 1.8rem;
 }
 
 .pp-product-page .pp-product-description {
+  font-family: "Jost";
+  font-weight: 300;
   margin-bottom: 2.5rem;
   line-height: 1.6;
   color: var(--btn-secondary-bg);
 }
 
 .pp-product-page .pp-product-description h3 {
+  font-family: "Jost";
+  font-weight: 500;
   margin-bottom: 0.8rem;
   font-size: 1.5rem;
 }
@@ -126,6 +134,8 @@
 }
 
 .pp-product-page .pp-gram-selection h3 {
+  font-family: "Jost";
+  font-weight: 500;
   margin-top: 0;
   margin-bottom: 1rem;
 }
@@ -138,6 +148,8 @@
 }
 
 .pp-product-page .pp-gram-btn {
+  font-family: "Jost";
+  font-weight: 500;
   padding: 0.7rem;
   background: var(--color-secondary-light);
   color: var(--color-secondary-dark);
@@ -175,6 +187,8 @@
 }
 
 .pp-product-page .pp-gram-display input {
+  font-family: "Jost";
+  font-weight: 500;
   width: 3rem;
   border: none;
   font-size: 1.2rem;
@@ -191,6 +205,8 @@
 }
 
 .pp-product-page .pp-gram-hint {
+  font-family: "Jost";
+  font-weight: 300;
   font-size: 0.9rem;
   color: var(--color-gray-500);
 }
@@ -202,6 +218,8 @@
 }
 
 .pp-product-page .pp-total-price {
+  font-family: "Jost";
+  font-weight: 500;
   display: flex;
   align-items: baseline;
   gap: 1rem;
@@ -215,7 +233,7 @@
 }
 
 .pp-product-page .pp-total-grams {
-  color: var(--color-gray-500);
+  color: var(--color-white-500);
   font-size: 1rem;
 }
 
@@ -239,6 +257,8 @@
 }
 
 .pp-product-page .pp-btn-primary {
+  font-family: "Jost";
+  font-weight: 500;
   background: var(--color-brand);
   color: var(--color-white);
 }
@@ -249,6 +269,8 @@
 }
 
 .pp-product-page .pp-btn-secondary {
+  font-family: "Jost";
+  font-weight: 500;
   background: var(--btn-secondary-bg);
   color: var(--color-white);
 }
@@ -258,8 +280,10 @@
 }
 
 .pp-product-page .pp-sampler-note {
+  font-family: "Jost";
+  font-weight: 300;
   font-size: 0.9rem;
-  color: var(--color-gray-500);
+  color: var(--color-white-500);
   margin-top: 0.5rem;
 }
 
@@ -275,6 +299,8 @@
 }
 
 .pp-product-page .pp-reviews-section {
+  font-family: "Jost";
+  font-weight: 500;
   margin-top: 2rem;
   padding: 1.5rem;
   border: 1px solid var(--border-color);
@@ -282,6 +308,10 @@
   background: var(--color-primary);
 }
 
+.pp-product-page .pp-reviews-section p {
+  font-family: "Jost";
+  font-weight: 300;
+}
 .pp-product-page .pp-reviews-header {
   display: flex;
   align-items: center;

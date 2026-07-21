@@ -9,6 +9,8 @@
 }
 
 .breadcrumbs a {
+  font-family: "Jost";
+  font-weight: 500;
   color: var(--breadcrumb-default);
   text-decoration: none;
 }
@@ -32,6 +34,8 @@
 }
 
 .product-tags .tag {
+  font-family: "Jost";
+  font-weight: 300;
   background: var(--product-tag-bg);
   color: var(--product-tag-text);
   padding: 0.4rem 0.6rem;
@@ -122,6 +126,8 @@
 }
 
 .btn-primary {
+  font-family: "Jost";
+  font-weight: 500;
   background-color: var(--btn-primary-bg);
   color: var(--btn-primary-text);
 }
