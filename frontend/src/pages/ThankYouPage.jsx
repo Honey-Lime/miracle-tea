@@ -60,7 +60,7 @@ const ThankYouPage = () => {
     //   }
     // };
 
-    handleSuccessfulPaymentReturn();
+    // handleSuccessfulPaymentReturn();
   }, [clearCart, location.state]);
 
   if (loading) {
@@ -77,10 +77,9 @@ const ThankYouPage = () => {
     <div className="typ-thank-you-page container">
       <div className="typ-thank-you-content">
         <h1>Спасибо за заказ!</h1>
-        {/* <p>
-          Ваш заказ успешно оформлен и оплачен. Мы свяжемся с вами в ближайшее
-          время.
-        </p> */}
+        <p>
+          Ваш заказ успешно оформлен и оплачен. ID заказа в системе доставки отправлен Вам по почте.
+        </p>
         {error && <p className="typ-error">{error}</p>}
         <Link to="/" className="typ-btn btn btn-primary">
           Вернуться на главную

@@ -492,12 +492,13 @@ async function saveDeliveryIdToOrder(orderId, deliveryId) {
 
 
 app.post('/api/create-payment', async(req, res) => {
+  let order = null;
+
   try {
     const {
       id,
       deliveryData
     } = req.body;
-    let order = null;
 
     if (!id || !deliveryData) {
       return res.status(400).json({
