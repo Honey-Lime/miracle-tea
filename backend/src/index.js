@@ -416,7 +416,7 @@ async function arrangeDeliveryOrder(orderId, deliveryData)
     article: item.pid?.sku || "",
     name: item.pid?.name || "",
   }));
-  console.log(orderList);
+  // console.log(orderList);
 
   let orderData = {
     id: orderId,       // string 	Идентификатор заказа на сайте.
@@ -459,8 +459,8 @@ async function arrangeDeliveryOrder(orderId, deliveryData)
 
   orderData.dimensions = `${orderData.dimensions}${real_orders * 6}`;
 
-  await createEShopDeliveryOrder(ESHOPLOGISTIC_TOKEN, deliveryData, orderData, companyData);
-
+  const deliveryId = await createEShopDeliveryOrder(ESHOPLOGISTIC_TOKEN, deliveryData, orderData, companyData);
+  return deliveryId;
 }
 
 async function saveDeliveryIdToOrder(orderId, deliveryId) {
@@ -591,7 +591,7 @@ app.post('/api/create-payment', async(req, res) => {
       address: deliveryData.address || order.delivery?.address || null,
       price: Number(deliveryData.price || order.delivery?.price || 0),
       provider: deliveryData.service || order.delivery?.provider || "eshop",
-      terminalCode: deliveryData.code || order.delivery?.did || "",
+      terminalCode: deliveryData.code || order.delivery?.terminalCode || "",
       details: deliveryData,
     };
     
@@ -618,16 +618,16 @@ app.post('/api/create-payment', async(req, res) => {
       let deliveryId = await arrangeDeliveryOrder(order.id, deliveryData);
       await saveDeliveryIdToOrder(order.id, deliveryId);
       const user = await User.findById(order.userId);
-      const result = await sendEmail({
+      const emailResult = await sendEmail({
         to: user.email,
         subject: `Заказ ${order.id} оплачен`,
         text: `Здравствуйте, ${user.name}.\nВаш заказ ${order.id} оформлен и оплачен.\nID заказа в кабинете доставки(${order.delivery.provider}): ${deliveryId}.`
       });
 
-      if (result.success) {
+      if (emailResult.success) {
         console.log('Письмо отправлено');
       } else {
-        console.error('Ошибка:', result.error);
+        console.error('Ошибка:', emailResult.error);
       }
       console.log("ID заказа в ЛК перевозчика: ", deliveryId);}
 
@@ -653,18 +653,18 @@ app.post('/api/create-payment', async(req, res) => {
   }
 });
 
-app.post('/api/test', async(req, res) => {
-  try {
-    const {id, deliveryData} = req.body;
-    let deliveryId = await arrangeDeliveryOrder(id, deliveryData);
-    await saveDeliveryIdToOrder(order.id, deliveryId);
-    console.log("ID заказа в ЛК перевозчика: ", deliveryId);
-    res.status(200).send('OK');
-  } catch (error) {
-    console.error('Ошибка проверки платежа:', error.message);
-    res.status(500).json({ error: 'Не удалось проверить платеж' });
-  }
-});
+// app.post('/api/test', async(req, res) => {
+//   try {
+//     const {id, deliveryData} = req.body;
+//     let deliveryId = await arrangeDeliveryOrder(id, deliveryData);
+//     await saveDeliveryIdToOrder(order.id, deliveryId);
+//     console.log("ID заказа в ЛК перевозчика: ", deliveryId);
+//     res.status(200).send('OK');
+//   } catch (error) {
+//     console.error('Ошибка проверки платежа:', error.message);
+//     res.status(500).json({ error: 'Не удалось проверить платеж' });
+//   }
+// });
 
 app.post('/api/set-order-isPayment', async(req, res) => {
   try {
