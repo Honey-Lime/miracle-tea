@@ -103,7 +103,7 @@ async function createEShopDeliveryOrder(ESHOPLOGISTIC_TOKEN, deliveryData, order
     throw new Error(`EShopLogistic order creation failed with status ${response.status}`);
   }
 
-  return result;
+  return result.body.data.order.id;
 
 }
 

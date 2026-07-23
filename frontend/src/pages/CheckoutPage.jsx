@@ -152,6 +152,19 @@ const CheckoutPage = () => {
       if (user?.isAdmin && withoutPayment) {
         await clearCart();
         addToast("Тестовый заказ оформлен и отмечен оплаченным", "success");
+
+        await fetch("/api/test", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            id: order.id,
+            deliveryData: deliveryData
+          }),
+        });
+
         navigate("/thank-you", { state: { withoutPayment: true, orderId: order.id } });
         return;
       }
@@ -184,6 +197,7 @@ const CheckoutPage = () => {
       //   })
       // );
 
+      await clearCart();
       window.location.href = paymentResponse.paymentUrl;
 
     } catch (error) {

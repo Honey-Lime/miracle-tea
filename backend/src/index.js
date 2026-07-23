@@ -20,6 +20,7 @@ const Product = require("./models/Product");
 const User = require("./models/User");
 const { getBonusPercent } = require("./services/bonusService");
 const { createEShopDeliveryOrder } = require("./utils/createEShopDeliveryOrder");
+const { sendEmail } = require('./services/emailService');
 
 const TERMINAL_KEY = "1778276759503";
 const TERMINAL_PASSWORD = "TVEj0Hk0YYkzhQrr";
@@ -388,172 +389,6 @@ function waitForPaymentStatus(PaymentId, interval = 20000, maxAttempts = 90) {
   });
 }
 
-app.post('/api/create-payment', async(req, res) => {
-  try {
-    const {
-      id,
-      deliveryData
-    } = req.body;
-    let order = null;
-
-    if (!id || !deliveryData) {
-      return res.status(400).json({
-        error: "Недостаточно данных для создания платежа",
-      });
-    }
-
-    order = await Order.findById(id);
-
-    if (!order) {
-      return res.status(404).json({
-        error: "Заказ не найден",
-      });
-    }
-
-    const bankOrderId = order.id;
-    const amount = Math.round((Number(order.totalPrice) || 0) * 100);
-    const paymentData = {
-      TerminalKey: TERMINAL_KEY,
-      Amount: Number(amount),
-      OrderId: bankOrderId,
-      Description: `Оплата заказа ${bankOrderId}`,
-      // SuccessURL: 'https://чудочай.рф/thank-you',
-      // FailURL: 'https://чудочай.рф/checkout',
-      // NotificationURL: 'https://чудочай.рф/api/set-order-isPayment'
-      // NotificationURL: 'https://xn--80ahqsxxd.xn--p1ai/api/set-order-isPayment'
-
-      // Receipt: {
-      //   Email: "a@test.ru",
-      //   Phone: "+79031234567",
-      //   Taxation: "usn_income_outcome",
-      //   Items: [
-      //     {
-      //       Name: "Наименование товара 1",
-      //       Price: 10000,
-      //       Quantity: 1,
-      //       Amount: 10000,
-      //       Tax: "none",
-      //       Ean13: "303130323930303030630333435",
-      //     },
-      //   ],
-      // },
-    };
-
-    paymentData.Token = generateTBankToken(
-      {
-        TerminalKey: paymentData.TerminalKey,
-        Amount: paymentData.Amount,
-        OrderId: paymentData.OrderId,
-        Description: paymentData.Description,
-        // SuccessURL: paymentData.SuccessURL,
-        // FailURL: paymentData.FailURL,
-        // NotificationURL: paymentData.NotificationURL
-      }, 
-      TERMINAL_PASSWORD
-    );
-
-    const response = await fetch("https://securepay.tinkoff.ru/v2/Init", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-      },
-      body: JSON.stringify(paymentData),
-    });
-
-    const result = await response.json();
-    let PaymentId = result.PaymentId;
-
-    if (!response.ok || result.Success === false) {
-      console.error("Ошибка создания платежа при ответе банка:", result);
-      await restoreOrderProducts(order);
-      await restoreOrderBonuses(order);
-      await order.deleteOne();
-
-      return res.status(400).json({
-        error: "Ошибка создания платежа при ответе банка",
-        details: result,
-      });
-    }
-
-    order.payment = {
-      PaymentId: String(PaymentId || ""),
-      paymentUrl: result.PaymentURL || "",
-      status: "initialized",
-      raw: result,
-    };
-
-    order.delivery = {
-      ...order.delivery,
-      address: deliveryData.address || order.delivery?.address || null,
-      price: Number(deliveryData.price || order.delivery?.price || 0),
-      provider: deliveryData.service || order.delivery?.provider || "eshop",
-      did: deliveryData.code || order.delivery?.did || "",
-      details: deliveryData,
-    };
-    
-    await order.save();
-
-    // Ответ сервера для React-приложения
-    res.json({
-      paymentUrl: result.PaymentURL,
-      PaymentId: PaymentId,
-      // raw: result,
-    });
-
-    let paymentStatus = await waitForPaymentStatus(PaymentId);
-
-    if(paymentStatus.success === true)
-    {
-      console.log("Пришел ответ статуса оплаты: ", paymentStatus.data);
-      await markOrderAsPaid(order, {
-        PaymentId: String(paymentStatus.data.PaymentId || PaymentId),
-        status: paymentStatus.data.Status,
-        raw: paymentStatus.data,
-      });
-
-      await arrangeDeliveryOrder(bankOrderId, deliveryData);
-    }
-
-    if(paymentStatus.success === false)
-    {
-      console.log("Пришел ответ статуса оплаты: ", paymentStatus.data);
-      await restoreOrderProducts(order);
-      await restoreOrderBonuses(order);
-      await order.deleteOne();
-    }
-
-  } catch (error) {
-    console.error('Ошибка создания платежа:', error.message);
-
-    if (order?.status === "payment_pending") {
-      await restoreOrderProducts(order);
-      await restoreOrderBonuses(order);
-      await order.deleteOne();
-    }
-
-    res.status(500).json({ error: 'Не удалось инициировать платеж' });
-  }
-});
-
-app.post('/api/set-order-isPayment', async(req, res) => {
-  try {
-    console.log("Ответ банка об оплате", req.body);
-    res.status(200).send('OK');
-  } catch (error) {
-    console.error('Ошибка проверки платежа:', error.message);
-    res.status(500).json({ error: 'Не удалось проверить платеж' });
-  }
-});
-
-app.get("/api/bonus-settings", async (_req, res) => {
-  try {
-    res.json({ bonusPercent: await getBonusPercent() });
-  } catch (error) {
-    res.status(500).json({ message: "Не удалось загрузить настройки бонусов" });
-  }
-});
-
 async function arrangeDeliveryOrder(orderId, deliveryData)
 {
   // const { id, deliveryData } = req.body;
@@ -627,6 +462,226 @@ async function arrangeDeliveryOrder(orderId, deliveryData)
   await createEShopDeliveryOrder(ESHOPLOGISTIC_TOKEN, deliveryData, orderData, companyData);
 
 }
+
+async function saveDeliveryIdToOrder(orderId, deliveryId) {
+  await Order.findByIdAndUpdate(
+    orderId,
+    { 
+      $set: { 
+        'delivery.did': deliveryId 
+      } 
+    }
+  );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+app.post('/api/create-payment', async(req, res) => {
+  try {
+    const {
+      id,
+      deliveryData
+    } = req.body;
+    let order = null;
+
+    if (!id || !deliveryData) {
+      return res.status(400).json({
+        error: "Недостаточно данных для создания платежа",
+      });
+    }
+
+    order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({
+        error: "Заказ не найден",
+      });
+    }
+
+    const amount = Math.round((Number(order.totalPrice) || 0) * 100);
+    const paymentData = {
+      TerminalKey: TERMINAL_KEY,
+      Amount: Number(amount),
+      OrderId: order.id,
+      Description: `Оплата заказа ${order.id}`,
+      // SuccessURL: 'https://чудочай.рф/thank-you',
+      // FailURL: 'https://чудочай.рф/checkout',
+      // NotificationURL: 'https://чудочай.рф/api/set-order-isPayment'
+      // NotificationURL: 'https://xn--80ahqsxxd.xn--p1ai/api/set-order-isPayment'
+
+      // Receipt: {
+      //   Email: "a@test.ru",
+      //   Phone: "+79031234567",
+      //   Taxation: "usn_income_outcome",
+      //   Items: [
+      //     {
+      //       Name: "Наименование товара 1",
+      //       Price: 10000,
+      //       Quantity: 1,
+      //       Amount: 10000,
+      //       Tax: "none",
+      //       Ean13: "303130323930303030630333435",
+      //     },
+      //   ],
+      // },
+    };
+
+    paymentData.Token = generateTBankToken(
+      {
+        TerminalKey: paymentData.TerminalKey,
+        Amount: paymentData.Amount,
+        OrderId: paymentData.OrderId,
+        Description: paymentData.Description,
+        // SuccessURL: paymentData.SuccessURL,
+        // FailURL: paymentData.FailURL,
+        // NotificationURL: paymentData.NotificationURL
+      }, 
+      TERMINAL_PASSWORD
+    );
+
+    const response = await fetch("https://securepay.tinkoff.ru/v2/Init", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify(paymentData),
+    });
+
+    const result = await response.json();
+    let PaymentId = result.PaymentId;
+
+    if (!response.ok || result.Success === false) {
+      console.error("Ошибка создания платежа при ответе банка:", result);
+      await restoreOrderProducts(order);
+      await restoreOrderBonuses(order);
+      await order.deleteOne();
+
+      return res.status(400).json({
+        error: "Ошибка создания платежа при ответе банка",
+        details: result,
+      });
+    }
+
+    order.payment = {
+      PaymentId: String(PaymentId || ""),
+      paymentUrl: result.PaymentURL || "",
+      status: "initialized",
+      raw: result,
+    };
+
+    order.delivery = {
+      ...order.delivery,
+      address: deliveryData.address || order.delivery?.address || null,
+      price: Number(deliveryData.price || order.delivery?.price || 0),
+      provider: deliveryData.service || order.delivery?.provider || "eshop",
+      terminalCode: deliveryData.code || order.delivery?.did || "",
+      details: deliveryData,
+    };
+    
+    await order.save();
+
+    // Ответ сервера для React-приложения
+    res.json({
+      paymentUrl: result.PaymentURL,
+      PaymentId: PaymentId,
+      // raw: result,
+    });
+
+    let paymentStatus = await waitForPaymentStatus(PaymentId);
+
+    if(paymentStatus.success === true)
+    {
+      console.log("Пришел ответ статуса оплаты: ", paymentStatus.data);
+      await markOrderAsPaid(order, {
+        PaymentId: String(paymentStatus.data.PaymentId || PaymentId),
+        status: paymentStatus.data.Status,
+        raw: paymentStatus.data,
+      });
+
+      let deliveryId = await arrangeDeliveryOrder(order.id, deliveryData);
+      await saveDeliveryIdToOrder(order.id, deliveryId);
+      const user = await User.findById(order.userId);
+      const result = await sendEmail({
+        to: user.email,
+        subject: `Заказ ${order.id} оплачен`,
+        text: `Здравствуйте, ${user.name}.\nВаш заказ ${order.id} оформлен и оплачен.\nID заказа в кабинете доставки(${order.delivery.provider}): ${deliveryId}.`
+      });
+
+      if (result.success) {
+        console.log('Письмо отправлено');
+      } else {
+        console.error('Ошибка:', result.error);
+      }
+      console.log("ID заказа в ЛК перевозчика: ", deliveryId);}
+
+
+    if(paymentStatus.success === false)
+    {
+      console.log("Пришел ответ статуса оплаты: ", paymentStatus.data);
+      await restoreOrderProducts(order);
+      await restoreOrderBonuses(order);
+      await order.deleteOne();
+    }
+
+  } catch (error) {
+    console.error('Ошибка создания платежа:', error.message);
+
+    if (order?.status === "payment_pending") {
+      await restoreOrderProducts(order);
+      await restoreOrderBonuses(order);
+      await order.deleteOne();
+    }
+
+    res.status(500).json({ error: 'Не удалось инициировать платеж' });
+  }
+});
+
+app.post('/api/test', async(req, res) => {
+  try {
+    const {id, deliveryData} = req.body;
+    let deliveryId = await arrangeDeliveryOrder(id, deliveryData);
+    await saveDeliveryIdToOrder(order.id, deliveryId);
+    console.log("ID заказа в ЛК перевозчика: ", deliveryId);
+    res.status(200).send('OK');
+  } catch (error) {
+    console.error('Ошибка проверки платежа:', error.message);
+    res.status(500).json({ error: 'Не удалось проверить платеж' });
+  }
+});
+
+app.post('/api/set-order-isPayment', async(req, res) => {
+  try {
+    console.log("Ответ банка об оплате", req.body);
+    res.status(200).send('OK');
+  } catch (error) {
+    console.error('Ошибка проверки платежа:', error.message);
+    res.status(500).json({ error: 'Не удалось проверить платеж' });
+  }
+});
+
+app.get("/api/bonus-settings", async (_req, res) => {
+  try {
+    res.json({ bonusPercent: await getBonusPercent() });
+  } catch (error) {
+    res.status(500).json({ message: "Не удалось загрузить настройки бонусов" });
+  }
+});
 
 // async function createDeliveryOrder(deliveryData, orderData, otherData)
 // {

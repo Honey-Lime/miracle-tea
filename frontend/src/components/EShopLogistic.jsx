@@ -689,7 +689,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, orde
         out.unitTime = selectedTerminal.time.unit;
         out.payment = selectedTerminal.payment.methods;
 
-        console.log("selectedTerminal", selectedTerminal);
+        // console.log("selectedTerminal", selectedTerminal);
 
         break;
 
@@ -702,9 +702,9 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, orde
         let recalculation = null;
 
         if (manualAddressChangeRef.current) {
-          console.log('recalculation');
+          // console.log('recalculation');
           
-          console.log("Адрес доставки", deliveryAddress.value);
+          // console.log("Адрес доставки", deliveryAddress.value);
           
           recalculation = await customFetch(
             "/delivery/calculation",
@@ -717,7 +717,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, orde
             selectedMethod.name
           );
 
-          console.log('📦 Результат пересчёта:', recalculation);
+          // console.log('📦 Результат пересчёта:', recalculation);
 
           if (!recalculation) {
             console.error('❌ Пересчёт не удался');
