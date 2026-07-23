@@ -369,12 +369,12 @@ function waitForPaymentStatus(PaymentId, interval = 20000, maxAttempts = 90) {
         }
 
         if (isCancelTBankStatus(result.Status)) {
-          resolve({ success: false, error: 'Payment cancelled' });
+          resolve({ success: false, data: result, error: 'Payment cancelled' });
           return;
         }
 
         if (attempts >= maxAttempts) {
-          resolve({ success: null, error: 'Max attempts exceeded' });
+          resolve({ success: null, data: result, error: 'Max attempts exceeded' });
           return;
         }
 
@@ -604,7 +604,7 @@ app.post('/api/create-payment', async(req, res) => {
       // raw: result,
     });
 
-    let paymentStatus = await waitForPaymentStatus(PaymentId);
+    var paymentStatus = await waitForPaymentStatus(PaymentId);
 
     if(paymentStatus.success === true)
     {
