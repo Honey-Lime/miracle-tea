@@ -22,8 +22,9 @@ const { getBonusPercent } = require("./services/bonusService");
 const { createEShopDeliveryOrder } = require("./utils/createEShopDeliveryOrder");
 const { sendEmail } = require('./services/emailService');
 
-const TERMINAL_KEY = "1778276759503";
-const TERMINAL_PASSWORD = "TVEj0Hk0YYkzhQrr";
+const TERMINAL_KEY = process.env.TERMINAL_KEY;
+const TERMINAL_PASSWORD = process.env.TERMINAL_PASSWORD;
+const ESHOPLOGISTIC_TOKEN = process.env.ESHOPLOGISTIC_TOKEN;
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -393,7 +394,6 @@ async function arrangeDeliveryOrder(orderId, deliveryData)
 {
   // const { id, deliveryData } = req.body;
 
-  const ESHOPLOGISTIC_TOKEN = "df616893f983b20fed6ac71e5f6cb9f2";
   let companyData = {
     senderName: "Александр",                       // string 	Имя
     senderPhone: "79202115108",                   // string 	Телефон

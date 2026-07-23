@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "azure-devops": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@azure-devops/mcp@1.0.0",
+        "--hash",
+        "sha1:742d3aa74ec8a13283a62c77c9fc5c2a0d276624",
+        "HoneyLime"
+      ]
+    }
+  }
+}
