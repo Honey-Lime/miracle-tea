@@ -323,17 +323,78 @@ async function markOrderAsPaid(order, paymentUpdate = {}) {
 }
 
 function isPaidTBankStatus(status) {
-  return ["CONFIRMED", "AUTHORIZED"].includes(status);
+  return ["CONFIRMED"].includes(status);
+}
+
+function isCancelTBankStatus(status) {
+  return ["REVERSED", "REFUNDED", "REJECTED", "DEADLINE_EXPIRED", "PARTIAL_REFUNDED"].includes(status);
+}
+
+// Функция, которая возвращает Promise, разрешающийся при успешном/отменённом статусе
+function waitForPaymentStatus(PaymentId, interval = 20000, maxAttempts = 90) {
+  return new Promise((resolve, reject) => {
+    let attempts = 0;
+
+    const check = async () => {
+      attempts++;
+      try {
+        const checkPaymentData = {
+          TerminalKey: TERMINAL_KEY,
+          PaymentId: PaymentId,
+        };
+
+        checkPaymentData.Token = generateTBankToken(
+          {
+            TerminalKey: TERMINAL_KEY,
+            PaymentId: PaymentId,
+          },
+          TERMINAL_PASSWORD
+        );
+
+        const response = await fetch("https://securepay.tinkoff.ru/v2/GetState", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+          },
+          body: JSON.stringify(checkPaymentData),
+        });
+
+        const result = await response.json();
+
+        if (isPaidTBankStatus(result.Status)) {
+          resolve({ success: true, data: result });
+          return;
+        }
+
+        if (isCancelTBankStatus(result.Status)) {
+          resolve({ success: false, error: 'Payment cancelled' });
+          return;
+        }
+
+        if (attempts >= maxAttempts) {
+          resolve({ success: null, error: 'Max attempts exceeded' });
+          return;
+        }
+
+        // Иначе повторяем через interval
+        setTimeout(check, interval);
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    check(); // запускаем первую проверку
+  });
 }
 
 app.post('/api/create-payment', async(req, res) => {
-  let order = null;
-
   try {
     const {
       id,
       deliveryData
     } = req.body;
+    let order = null;
 
     if (!id || !deliveryData) {
       return res.status(400).json({
@@ -401,6 +462,7 @@ app.post('/api/create-payment', async(req, res) => {
     });
 
     const result = await response.json();
+    let PaymentId = result.PaymentId;
 
     if (!response.ok || result.Success === false) {
       console.error("Ошибка создания платежа при ответе банка:", result);
@@ -415,7 +477,7 @@ app.post('/api/create-payment', async(req, res) => {
     }
 
     order.payment = {
-      paymentId: String(result.PaymentId || ""),
+      PaymentId: String(PaymentId || ""),
       paymentUrl: result.PaymentURL || "",
       status: "initialized",
       raw: result,
@@ -429,14 +491,38 @@ app.post('/api/create-payment', async(req, res) => {
       did: deliveryData.code || order.delivery?.did || "",
       details: deliveryData,
     };
+    
     await order.save();
 
     // Ответ сервера для React-приложения
     res.json({
       paymentUrl: result.PaymentURL,
-      paymentId: result.PaymentId,
-      raw: result,
+      PaymentId: PaymentId,
+      // raw: result,
     });
+
+    let paymentStatus = await waitForPaymentStatus(PaymentId);
+
+    if(paymentStatus.success === true)
+    {
+      console.log("Пришел ответ статуса оплаты: ", paymentStatus.data);
+      await markOrderAsPaid(order, {
+        PaymentId: String(paymentStatus.data.PaymentId || PaymentId),
+        status: paymentStatus.data.Status,
+        raw: paymentStatus.data,
+      });
+
+      await arrangeDeliveryOrder(bankOrderId, deliveryData);
+    }
+
+    if(paymentStatus.success === false)
+    {
+      console.log("Пришел ответ статуса оплаты: ", paymentStatus.data);
+      await restoreOrderProducts(order);
+      await restoreOrderBonuses(order);
+      await order.deleteOne();
+    }
+
   } catch (error) {
     console.error('Ошибка создания платежа:', error.message);
 
@@ -451,112 +537,9 @@ app.post('/api/create-payment', async(req, res) => {
 });
 
 app.post('/api/set-order-isPayment', async(req, res) => {
-  
   try {
-    console.log("ответ банка", req.body);
-    const notification = req.body || {};
-    const expectedToken = generateTBankToken(notification, TERMINAL_PASSWORD);
-
-    if (notification.Token !== expectedToken) {
-      console.error("Некорректный токен уведомления Т-Банка:", notification);
-      return res.status(200).send('OK');
-    }
-
-    const order = await Order.findById(notification.OrderId);
-
-    if (!order) {
-      console.error("Заказ из уведомления Т-Банка не найден:", notification.OrderId);
-      return res.status(200).send('OK');
-    }
-
-    const paymentUpdate = {
-      paymentId: String(notification.PaymentId || order.payment?.paymentId || ""),
-      status: notification.Status || order.payment?.status || "",
-      raw: notification,
-    };
-
-    if (notification.Success === true && isPaidTBankStatus(notification.Status)) {
-      await markOrderAsPaid(order, paymentUpdate);
-      // createDeliveryOrder(order.delivery);
-      return res.status(200).send('OK');
-    } else if (["REJECTED", "DEADLINE_EXPIRED", "CANCELED"].includes(notification.Status)) {
-      if (order.status === "payment_pending") {
-        await restoreOrderProducts(order);
-        await restoreOrderBonuses(order);
-        await order.deleteOne();
-        return res.status(200).send('OK');
-      }
-    }
-
-    order.payment = {
-      ...order.payment,
-      ...paymentUpdate,
-    };
-
-    await order.save();
-
-    // Ответ сервера для банка
+    console.log("Ответ банка об оплате", req.body);
     res.status(200).send('OK');
-
-  } catch (error) {
-    console.error('Ошибка создания заказа доставки:', error.message);
-    res.status(200).send('OK');
-  }
-});
-
-app.post('/api/check-payment', async(req, res) => {
-  try {
-    const { id, paymentId } = req.body;
-
-    if (!id || !paymentId) {
-      return res.status(400).json({ error: "id и paymentId обязательны" });
-    }
-
-    const order = await Order.findById(id);
-
-    if (!order) {
-      return res.status(404).json({ error: "Заказ не найден" });
-    }
-
-    const stateRequest = {
-      TerminalKey: TERMINAL_KEY,
-      PaymentId: String(paymentId),
-    };
-
-    stateRequest.Token = generateTBankToken(stateRequest, TERMINAL_PASSWORD);
-
-    const response = await fetch("https://securepay.tinkoff.ru/v2/GetState", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-      },
-      body: JSON.stringify(stateRequest),
-    });
-
-    const result = await response.json();
-
-    if (!response.ok || result.Success === false) {
-      return res.status(400).json({
-        error: "Не удалось проверить статус оплаты",
-        details: result,
-      });
-    }
-
-    // if (isPaidTBankStatus(result.Status)) {
-    //   await markOrderAsPaid(order, {
-    //     paymentId: String(result.PaymentId || paymentId),
-    //     status: result.Status,
-    //     raw: result,
-    //   });
-    // }
-
-    res.json({
-      paid: isPaidTBankStatus(result.Status),
-      status: result.Status,
-      // orderStatus: order.status,
-      raw: result,
-    });
   } catch (error) {
     console.error('Ошибка проверки платежа:', error.message);
     res.status(500).json({ error: 'Не удалось проверить платеж' });
@@ -571,8 +554,9 @@ app.get("/api/bonus-settings", async (_req, res) => {
   }
 });
 
-app.post('/api/test', async(req, res) => {
-  const { id, deliveryData } = req.body;
+async function arrangeDeliveryOrder(orderId, deliveryData)
+{
+  // const { id, deliveryData } = req.body;
 
   const ESHOPLOGISTIC_TOKEN = "df616893f983b20fed6ac71e5f6cb9f2";
   let companyData = {
@@ -590,7 +574,7 @@ app.post('/api/test', async(req, res) => {
     }
   };
 
-  let order = await Order.findById(id).populate("list.pid", "sku name");
+  let order = await Order.findById(orderId).populate("list.pid", "sku name");
 
   const orderList = order.list.map((item) => ({
     ...item.toObject(),
@@ -600,7 +584,7 @@ app.post('/api/test', async(req, res) => {
   console.log(orderList);
 
   let orderData = {
-    id: id,       // string 	Идентификатор заказа на сайте.
+    id: orderId,       // string 	Идентификатор заказа на сайте.
     places: [],   // array Нужно заполнить информацией о заказах 
     type: 1,      // integer 	Тип заказа. Доступно 2 варианта: «1» - Интернет-магазин, «2» - Доставка.
     combine_places_apply: true, // boolean 	
@@ -640,10 +624,9 @@ app.post('/api/test', async(req, res) => {
 
   orderData.dimensions = `${orderData.dimensions}${real_orders * 6}`;
 
-  createEShopDeliveryOrder(ESHOPLOGISTIC_TOKEN, deliveryData, orderData, companyData);
+  await createEShopDeliveryOrder(ESHOPLOGISTIC_TOKEN, deliveryData, orderData, companyData);
 
-  res.status(200).send('OK');
-});
+}
 
 // async function createDeliveryOrder(deliveryData, orderData, otherData)
 // {

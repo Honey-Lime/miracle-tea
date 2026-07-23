@@ -121,7 +121,7 @@ const orderSchema = new mongoose.Schema(
       },
     },
     payment: {
-      paymentId: {
+      PaymentId: {
         type: String,
         default: "",
       },

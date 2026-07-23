@@ -176,16 +176,15 @@ const CheckoutPage = () => {
       addToast("Заказ успешно оформлен!", "success");
       const paymentResponse = await payment.json();
        
-      sessionStorage.setItem(
-        "lastPayment",
-        JSON.stringify({
-          id: order.id,
-          paymentId: paymentResponse.paymentId,
-        })
-      );
+      // sessionStorage.setItem(
+      //   "lastPayment",
+      //   JSON.stringify({
+      //     id: order.id,
+      //     PaymentId: paymentResponse.PaymentId,
+      //   })
+      // );
+
       window.location.href = paymentResponse.paymentUrl;
-
-
 
     } catch (error) {
       addToast(error.message, "error");

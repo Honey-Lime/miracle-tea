@@ -291,7 +291,7 @@ const OrdersPage = () => {
                     <div className="op-payment-grid">
                       <div>
                         <span>ID платежа:</span>
-                        <strong>{order.payment?.paymentId || "Не указан"}</strong>
+                        <strong>{order.payment?.PaymentId || "Не указан"}</strong>
                       </div>
                     </div>
                   </div>

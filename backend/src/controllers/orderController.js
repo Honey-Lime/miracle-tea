@@ -278,7 +278,7 @@ exports.createOrder = async (req, res) => {
       status: isWithoutPayment ? "paid" : "payment_pending",
       payment: isWithoutPayment
         ? {
-            paymentId: `test-${Date.now()}`,
+            PaymentId: `test-${Date.now()}`,
             status: "test_paid",
             raw: { withoutPayment: true },
           }
