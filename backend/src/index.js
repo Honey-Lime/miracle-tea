@@ -508,6 +508,7 @@ app.post('/api/create-payment', async(req, res) => {
     }
 
     order = await Order.findById(id);
+    const user = await User.findById(order.userId);
 
     if (!order) {
       return res.status(404).json({
@@ -515,9 +516,9 @@ app.post('/api/create-payment', async(req, res) => {
       });
     }
 
+
     const TAXATION = "usn_income_outcome";
     const TAX = "none";
-
     const receiptItems = [];
 
     for (const item of order.list || []) {
@@ -586,6 +587,7 @@ app.post('/api/create-payment', async(req, res) => {
       Receipt: {
         Taxation: TAXATION,
         Items: receiptItems,
+        Email: user.email
       },
 
       // SuccessURL: 'https://чудочай.рф/thank-you',
@@ -685,7 +687,6 @@ app.post('/api/create-payment', async(req, res) => {
 
       let deliveryId = await arrangeDeliveryOrder(order.id, deliveryData);
       await saveDeliveryIdToOrder(order.id, deliveryId);
-      const user = await User.findById(order.userId);
       const emailResult = await sendEmail({
         to: user.email,
         subject: `Заказ ${order.id} оплачен`,
