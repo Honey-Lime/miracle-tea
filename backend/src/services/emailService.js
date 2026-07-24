@@ -31,7 +31,7 @@ const createTransporter = async () => {
   });
 };
 
-const sendEmail = async ({ to, subject, text }) => {
+const sendEmail = async ({ to, subject, text, html }) => {
   const transporter = await createTransporter();
   const appName = process.env.EMAIL_FROM_NAME || "Miracle Tea";
   const fromAddress = process.env.EMAIL_FROM_ADDRESS || process.env.SMTP_USER;
@@ -46,6 +46,7 @@ const sendEmail = async ({ to, subject, text }) => {
       to,
       subject,
       text,
+      html,
     });
     return { success: true };
   } catch (error) {

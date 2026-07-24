@@ -217,6 +217,105 @@ function generateTBankToken(params, password) {
     .digest("hex");
 }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function formatRub(value) {
+  return `${Number(value || 0).toLocaleString("ru-RU", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })} ₽`;
+}
+
+function buildPaidOrderEmail({ user, order, deliveryId, orderItems }) {
+  const customerName = user?.name || "покупатель";
+  const deliveryProvider = order.delivery?.provider || "служба доставки";
+  const deliveryAddress = order.delivery?.address || "адрес доставки не указан";
+  const itemsTotal = Number(order.itemsTotal) || orderItems.reduce((sum, item) => sum + item.total, 0);
+  const bonusSpent = Number(order.bonuses?.spent) || 0;
+  const deliveryPrice = Number(order.delivery?.price) || 0;
+  const totalPrice = Number(order.totalPrice) || Math.max(0, itemsTotal - bonusSpent) + deliveryPrice;
+
+  const rowsHtml = orderItems.map((item) => `
+    <tr>
+      <td style="padding:14px 12px;border-bottom:1px solid #edf1e8;color:#24301f;">
+        <div style="font-weight:600;">${escapeHtml(item.name)}</div>
+        ${item.isSampler ? '<div style="margin-top:4px;color:#6f7b68;font-size:13px;">Пробник</div>' : ""}
+      </td>
+      <td style="padding:14px 12px;border-bottom:1px solid #edf1e8;color:#53604c;text-align:center;white-space:nowrap;">${escapeHtml(item.quantityLabel)}</td>
+      <td style="padding:14px 12px;border-bottom:1px solid #edf1e8;color:#53604c;text-align:right;white-space:nowrap;">${formatRub(item.price)}</td>
+      <td style="padding:14px 12px;border-bottom:1px solid #edf1e8;color:#24301f;text-align:right;font-weight:600;white-space:nowrap;">${formatRub(item.total)}</td>
+    </tr>`).join("");
+
+  const text = [
+    `Здравствуйте, ${customerName}.`,
+    `Ваш заказ ${order.id} оформлен и оплачен.`,
+    `ID заказа в кабинете доставки (${deliveryProvider}): ${deliveryId}.`,
+    `Адрес доставки: ${deliveryAddress}.`,
+    "",
+    "Состав заказа:",
+    ...orderItems.map((item) => `- ${item.name}${item.isSampler ? " (Пробник)" : ""}: ${item.quantityLabel} × ${formatRub(item.price)} = ${formatRub(item.total)}`),
+    "",
+    `Товары: ${formatRub(itemsTotal)}`,
+    bonusSpent > 0 ? `Списано бонусов: −${formatRub(bonusSpent)}` : null,
+    `Доставка: ${formatRub(deliveryPrice)}`,
+    `Итого оплачено: ${formatRub(totalPrice)}`,
+  ].filter(Boolean).join("\n");
+
+  const html = `
+    <div style="margin:0;padding:0;background:#f6f7f2;font-family:Arial,Helvetica,sans-serif;color:#24301f;">
+      <div style="max-width:680px;margin:0 auto;padding:28px 16px;">
+        <div style="background:#ffffff;border-radius:22px;overflow:hidden;box-shadow:0 10px 30px rgba(35,48,31,0.08);">
+          <div style="padding:30px 28px;background:#24301f;color:#ffffff;">
+            <div style="font-size:14px;letter-spacing:0.08em;text-transform:uppercase;color:#cdddc3;">Чудо Чай</div>
+            <h1 style="margin:10px 0 0;font-size:28px;line-height:1.25;font-weight:700;">Заказ оплачен</h1>
+            <p style="margin:12px 0 0;color:#e6f0df;font-size:16px;line-height:1.5;">Здравствуйте, ${escapeHtml(customerName)}! Мы получили оплату и уже готовим ваш заказ.</p>
+          </div>
+
+          <div style="padding:28px;">
+            <div style="padding:18px 20px;background:#f4f8ef;border-radius:16px;margin-bottom:24px;">
+              <div style="margin-bottom:8px;"><strong>Заказ:</strong> №${escapeHtml(order.id)}</div>
+              <div style="margin-bottom:8px;"><strong>Доставка:</strong> ${escapeHtml(deliveryProvider)}</div>
+              <div style="margin-bottom:8px;"><strong>ID в кабинете доставки:</strong> ${escapeHtml(deliveryId)}</div>
+              <div><strong>Адрес:</strong> ${escapeHtml(deliveryAddress)}</div>
+            </div>
+
+            <h2 style="margin:0 0 14px;font-size:20px;color:#24301f;">Состав заказа</h2>
+            <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #edf1e8;border-radius:14px;overflow:hidden;">
+              <thead>
+                <tr style="background:#f8faf5;">
+                  <th align="left" style="padding:12px;color:#6f7b68;font-size:13px;font-weight:600;">Товар</th>
+                  <th align="center" style="padding:12px;color:#6f7b68;font-size:13px;font-weight:600;">Кол-во</th>
+                  <th align="right" style="padding:12px;color:#6f7b68;font-size:13px;font-weight:600;">Цена</th>
+                  <th align="right" style="padding:12px;color:#6f7b68;font-size:13px;font-weight:600;">Сумма</th>
+                </tr>
+              </thead>
+              <tbody>${rowsHtml}</tbody>
+            </table>
+
+            <div style="margin-top:24px;padding:20px;background:#fbfcf8;border-radius:16px;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:10px;"><span>Товары</span><strong>${formatRub(itemsTotal)}</strong></div>
+              ${bonusSpent > 0 ? `<div style="display:flex;justify-content:space-between;margin-bottom:10px;color:#5d7f36;"><span>Списано бонусов</span><strong>−${formatRub(bonusSpent)}</strong></div>` : ""}
+              <div style="display:flex;justify-content:space-between;margin-bottom:14px;"><span>Доставка</span><strong>${formatRub(deliveryPrice)}</strong></div>
+              <div style="height:1px;background:#e6ebdf;margin:14px 0;"></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:20px;"><span>Итого оплачено</span><strong>${formatRub(totalPrice)}</strong></div>
+            </div>
+
+            <p style="margin:24px 0 0;color:#6f7b68;line-height:1.5;">Спасибо, что выбрали Чудо Чай. Если появятся вопросы по заказу, просто ответьте на это письмо.</p>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  return { text, html };
+}
+
 async function restoreOrderProducts(order) {
   if (!order?.stockReserved || !order?.list?.length) {
     return;
@@ -508,7 +607,6 @@ app.post('/api/create-payment', async(req, res) => {
     }
 
     order = await Order.findById(id);
-    const user = await User.findById(order.userId);
 
     if (!order) {
       return res.status(404).json({
@@ -516,10 +614,13 @@ app.post('/api/create-payment', async(req, res) => {
       });
     }
 
+    const user = order.userId ? await User.findById(order.userId) : null;
+
 
     const TAXATION = "usn_income_outcome";
     const TAX = "none";
     const receiptItems = [];
+    const orderEmailItems = [];
 
     for (const item of order.list || []) {
       const product = await Product.findById(item.pid);
@@ -547,6 +648,16 @@ app.post('/api/create-payment', async(req, res) => {
         Quantity: quantity,
         Amount: amountKopecks,
         Tax: TAX,
+      });
+
+      const unit = product.unit || "grams";
+      orderEmailItems.push({
+        name: product.name || "Товар",
+        quantity,
+        quantityLabel: `${quantity} ${unit === "grams" ? "г" : "шт"}`,
+        price: priceRub,
+        total: amountKopecks / 100,
+        isSampler: Boolean(item.isSampler),
       });
     }
 
@@ -690,16 +801,28 @@ app.post('/api/create-payment', async(req, res) => {
 
       let deliveryId = await arrangeDeliveryOrder(order.id, deliveryData);
       await saveDeliveryIdToOrder(order.id, deliveryId);
-      const emailResult = await sendEmail({
-        to: user.email,
-        subject: `Заказ ${order.id} оплачен`,
-        text: `Здравствуйте, ${user.name}.\nВаш заказ ${order.id} оформлен и оплачен.\nID заказа в кабинете доставки(${order.delivery.provider}): ${deliveryId}.`
+      const orderEmail = buildPaidOrderEmail({
+        user,
+        order,
+        deliveryId,
+        orderItems: orderEmailItems,
       });
 
-      if (emailResult.success) {
-        console.log('Письмо отправлено');
+      if (user?.email) {
+        const emailResult = await sendEmail({
+          to: user.email,
+          subject: `Заказ ${order.id} оформлен и оплачен`,
+          text: orderEmail.text,
+          html: orderEmail.html,
+        });
+
+        if (emailResult.success) {
+          console.log('Письмо отправлено');
+        } else {
+          console.error('Ошибка:', emailResult.error);
+        }
       } else {
-        console.error('Ошибка:', emailResult.error);
+        console.warn(`Email для заказа ${order.id} не отправлен: у пользователя не указан email`);
       }
       console.log("ID заказа в ЛК перевозчика: ", deliveryId);}
 
