@@ -19,8 +19,9 @@ const Order = require("./models/Order");
 const Product = require("./models/Product");
 const User = require("./models/User");
 const { getBonusPercent } = require("./services/bonusService");
-const { createEShopDeliveryOrder } = require("./utils/createEShopDeliveryOrder");
 const { sendEmail } = require('./services/emailService');
+
+const { createEShopDeliveryOrder } = require("./utils/createEShopDeliveryOrder");
 
 const TERMINAL_KEY = process.env.TERMINAL_KEY;
 const TERMINAL_PASSWORD = process.env.TERMINAL_PASSWORD;
