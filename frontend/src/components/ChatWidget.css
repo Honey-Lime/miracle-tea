@@ -82,6 +82,7 @@
   border: 2px solid transparent;
   border-radius: 12px;
   background: var(--color-gray-100);
+  color: black;
 }
 
 .cw-message.cw-message-unread {
@@ -103,7 +104,6 @@
 .cw-message.user {
   align-self: flex-end;
   background: var(--color-secondary-light);
-  color: black;
 }
 
 .cw-message small {
