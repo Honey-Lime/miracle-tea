@@ -578,6 +578,9 @@ app.post('/api/create-payment', async(req, res) => {
 
     const receiptAmount = receiptItems.reduce((sum, item) => sum + item.Amount, 0);
 
+    console.log("TERMINAL_KEY", TERMINAL_KEY);
+    console.log("TERMINAL_PASSWORD", TERMINAL_PASSWORD);
+    
     // const amount = Math.round((Number(order.totalPrice) || 0) * 100);
     const paymentData = {
       TerminalKey: TERMINAL_KEY,
@@ -857,6 +860,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const emailRoutes = require("./routes/emailRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
 const chatRoutes = require("./routes/chatRoutes");
+const { log } = require("console");
 
 console.log("Routes imported");
 
