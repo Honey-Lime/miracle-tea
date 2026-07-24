@@ -77,7 +77,8 @@
 .prfp-profile-page .prfp-reviews-summary h3 {
   font-family: "Jost";
   font-weight: 300;
-  color: var(--color-brand);
+  /* color: var(--color-brand); */
+  color: white;
 }
 
 .prfp-profile-page .prfp-reviews-all-btn {
