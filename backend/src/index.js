@@ -236,7 +236,7 @@ function formatRub(value) {
 function buildPaidOrderEmail({ user, order, deliveryId, orderItems }) {
   const customerName = user?.name || "покупатель";
   const deliveryProvider = order.delivery?.provider || "служба доставки";
-  const deliveryAddress = order.delivery?.address?.address || "адрес доставки не указан";
+  const deliveryAddress = order.delivery?.address?.value || "адрес доставки не указан";
   const itemsTotal = Number(order.itemsTotal) || orderItems.reduce((sum, item) => sum + item.total, 0);
   const bonusSpent = Number(order.bonuses?.spent) || 0;
   const deliveryPrice = Number(order.delivery?.price) || 0;
