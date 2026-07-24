@@ -167,6 +167,12 @@
   color: var(--color-text-primary);
 }
 
+.registration-policy-consent span,
+.lgn-registration-policy-consent span
+{
+  color: black;
+}
+
 .registration-policy-consent input,
 .lgn-registration-policy-consent input {
   flex: 0 0 auto;

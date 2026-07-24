@@ -27,9 +27,12 @@
   z-index: 7;
   /* top: 10%; */
   /* bottom: 50%; */
-  left: 30%;
-  max-height: 100%;
-  max-width: 70%;
+  left: 25%;
+  top: 0;
+  /* max-height: 100%; */
+  height: 120%;
+  max-width: 80%;
+  object-fit: contain;
 }
 
 .leaf1 {
@@ -43,7 +46,7 @@
   position: absolute;
   max-width: 10%;
   right: 5%;
-  bottom: 10%;
+  bottom: 7%;
 }
 
 .leaf3 {
@@ -57,7 +60,7 @@
   position: absolute;
   max-width: 20%;
   right: 5%;
-  bottom: 0;
+  bottom: -5%;
 }
 
 .hp-hero-copy {
@@ -80,7 +83,7 @@
 .hp-hero .hp-subtitle {
   font-family: "Jost";
   font-weight: 300;
-  margin-left: 11.5rem;
+  margin-left: 15.5rem;
   color: rgba(241, 238, 229, 0.82);
   font-size: 1.35rem;
   line-height: 1.2;
@@ -98,12 +101,12 @@
 .hp-hero-actions a {
   font-family: "Jost";
   font-weight: 300;
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   position: relative;
   display: flex;
   align-items: center;
   min-height: 42px;
-  padding: 0.45rem 1rem 0.45rem 2.5rem;
+  padding: 0.65rem 1.4rem 0.65rem 3.2rem;
   border-radius: 999px;
   background: rgba(184, 196, 134, 0.2);
   backdrop-filter: blur(4px);
@@ -130,8 +133,8 @@
   content: "";
   position: absolute;
   left: 0.35rem;
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: #e9e4dc;
 }
@@ -242,7 +245,6 @@
 }
 
 .hp-feature-row .hp-feature-text {
-  padding-bottom: 20%;
   margin: auto;
 }
 
