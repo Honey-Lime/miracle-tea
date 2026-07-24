@@ -680,7 +680,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, orde
         
         out.isPostamat = selectedTerminal.is_postamat;
         out.address = {
-          address: selectedTerminal.address
+          value: selectedTerminal.address
         };
         out.code = selectedTerminal.code;
         out.price = selectedTerminal.price.value;
