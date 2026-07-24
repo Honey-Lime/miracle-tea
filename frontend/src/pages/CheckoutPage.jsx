@@ -97,7 +97,7 @@ const CheckoutPage = () => {
         list: cartItemsWithDetails,
         delivery: {
           address: deliveryData?.address || null,
-          price: deliveryData?.price || 0,
+          price: withoutDeliveryPayment ? 0 : deliveryData?.price || 0,
           provider: deliveryData?.service || "eshop",
           did: deliveryData?.code || "",
           details: deliveryData,
