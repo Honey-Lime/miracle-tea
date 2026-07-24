@@ -236,7 +236,7 @@ function formatRub(value) {
 function buildPaidOrderEmail({ user, order, deliveryId, orderItems }) {
   const customerName = user?.name || "покупатель";
   const deliveryProvider = order.delivery?.provider || "служба доставки";
-  const deliveryAddress = order.delivery?.address || "адрес доставки не указан";
+  const deliveryAddress = order.delivery?.address?.address || "адрес доставки не указан";
   const itemsTotal = Number(order.itemsTotal) || orderItems.reduce((sum, item) => sum + item.total, 0);
   const bonusSpent = Number(order.bonuses?.spent) || 0;
   const deliveryPrice = Number(order.delivery?.price) || 0;
@@ -689,8 +689,8 @@ app.post('/api/create-payment', async(req, res) => {
 
     const receiptAmount = receiptItems.reduce((sum, item) => sum + item.Amount, 0);
 
-    console.log("TERMINAL_KEY", TERMINAL_KEY);
-    console.log("TERMINAL_PASSWORD", TERMINAL_PASSWORD);
+    // console.log("TERMINAL_KEY", TERMINAL_KEY);
+    // console.log("TERMINAL_PASSWORD", TERMINAL_PASSWORD);
     
     // const amount = Math.round((Number(order.totalPrice) || 0) * 100);
     const paymentData = {
@@ -792,7 +792,7 @@ app.post('/api/create-payment', async(req, res) => {
 
     if(paymentStatus.success === true)
     {
-      console.log("Пришел ответ статуса оплаты: ", paymentStatus.data);
+      // console.log("Пришел ответ статуса оплаты: ", paymentStatus.data);
       await markOrderAsPaid(order, {
         PaymentId: String(paymentStatus.data.PaymentId || PaymentId),
         status: paymentStatus.data.Status,
@@ -816,20 +816,20 @@ app.post('/api/create-payment', async(req, res) => {
           html: orderEmail.html,
         });
 
-        if (emailResult.success) {
-          console.log('Письмо отправлено');
-        } else {
-          console.error('Ошибка:', emailResult.error);
+        // if (emailResult.success) {
+        //   console.log('Письмо отправлено');
+        // } else {
+        //   console.error('Ошибка:', emailResult.error);
         }
       } else {
         console.warn(`Email для заказа ${order.id} не отправлен: у пользователя не указан email`);
       }
-      console.log("ID заказа в ЛК перевозчика: ", deliveryId);}
+      // console.log("ID заказа в ЛК перевозчика: ", deliveryId);}
 
 
     if(paymentStatus.success === false)
     {
-      console.log("Пришел ответ статуса оплаты: ", paymentStatus.data);
+      console.log("Сбой оплаты, ответ банка: ", paymentStatus.data);
       await restoreOrderProducts(order);
       await restoreOrderBonuses(order);
       await order.deleteOne();
