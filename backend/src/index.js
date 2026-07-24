@@ -515,12 +515,79 @@ app.post('/api/create-payment', async(req, res) => {
       });
     }
 
-    const amount = Math.round((Number(order.totalPrice) || 0) * 100);
+    const TAXATION = "usn_income_outcome";
+    const TAX = "none";
+
+    const receiptItems = [];
+
+    for (const item of order.list || []) {
+      const product = await Product.findById(item.pid);
+
+      if (!product) {
+        return res.status(400).json({
+          error: `Товар ${item.pid} не найден для формирования чека`,
+        });
+      }
+
+      const quantity = Number(item.count);
+      const priceRub = Number(item.priceAtOrder) || 0;
+      const priceKopecks = Math.round(priceRub * 100);
+      const amountKopecks = Math.round(priceKopecks * quantity);
+
+      if (!quantity || quantity <= 0 || !priceKopecks || priceKopecks <= 0) {
+        return res.status(400).json({
+          error: `Некорректная позиция чека: ${product.name}`,
+        });
+      }
+
+      receiptItems.push({
+        Name: String(product.name || "Товар").slice(0, 128),
+        Price: priceKopecks,
+        Quantity: quantity,
+        Amount: amountKopecks,
+        Tax: TAX,
+      });
+    }
+
+    const deliveryPriceRub = Number(order.delivery?.price) || 0;
+
+    if (deliveryPriceRub > 0) {
+      const deliveryAmountKopecks = Math.round(deliveryPriceRub * 100);
+
+      receiptItems.push({
+        Name: "Доставка",
+        Price: deliveryAmountKopecks,
+        Quantity: 1,
+        Amount: deliveryAmountKopecks,
+        Tax: TAX,
+      });
+    }
+
+    if (receiptItems.length === 0) {
+      return res.status(400).json({
+        error: "Нет позиций для формирования чека",
+      });
+    }
+
+    if (receiptItems.length > 100) {
+      return res.status(400).json({
+        error: "В чеке не может быть больше 100 позиций",
+      });
+    }
+
+    const receiptAmount = receiptItems.reduce((sum, item) => sum + item.Amount, 0);
+
+    // const amount = Math.round((Number(order.totalPrice) || 0) * 100);
     const paymentData = {
       TerminalKey: TERMINAL_KEY,
-      Amount: Number(amount),
+      Amount: Number(receiptAmount),
       OrderId: order.id,
       Description: `Оплата заказа ${order.id}`,
+      Receipt: {
+        Taxation: TAXATION,
+        Items: receiptItems,
+      },
+
       // SuccessURL: 'https://чудочай.рф/thank-you',
       // FailURL: 'https://чудочай.рф/checkout',
       // NotificationURL: 'https://чудочай.рф/api/set-order-isPayment'
