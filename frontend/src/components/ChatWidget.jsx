@@ -139,7 +139,7 @@ const ChatWidget = () => {
             })}
           </div>
           <form className="cw-chat-form" onSubmit={sendMessage}>
-            <textarea value={text} onChange={(event) => setText(event.target.value)} onPaste={handleMessagePaste} placeholder="Ваше сообщение" rows={2} />
+            <textarea value={text} onChange={(event) => setText(event.target.value)} onPaste={handleMessagePaste} placeholder="Ваше сообщение" rows={4} />
             <PhotoUploadField
               photos={photos}
               onAddFiles={addSelectedPhotos}

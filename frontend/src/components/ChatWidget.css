@@ -59,6 +59,7 @@
   padding: 0.9rem 1rem;
   background: var(--color-secondary-light);
   font-weight: 700;
+  color: black;
 }
 
 .cw-chat-header button {
@@ -102,6 +103,7 @@
 .cw-message.user {
   align-self: flex-end;
   background: var(--color-secondary-light);
+  color: black;
 }
 
 .cw-message small {

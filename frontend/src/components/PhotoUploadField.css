@@ -24,6 +24,7 @@
   box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.16);
   transform: scale(1.02);
   background: rgba(29, 78, 216, 0.06);
+  color: black;
 }
 
 .puf-dropzone input {
