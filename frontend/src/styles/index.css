@@ -2,6 +2,29 @@
 @import url("./components.css");
 @import url("./fonts.css");
 
+@media (max-width: 420px) {
+  html {
+    font-size: 10px;
+  }
+  .crt-cart-page .crt-item .crt-item-total {
+    min-width: 55px;
+  }
+
+  .crt-cart-page .crt-item .crt-item-controls
+  {
+    flex-direction: column;
+  }
+  .ymap-marker
+  {
+    width: 5rem;
+    height: 5rem;
+  }
+  .container
+  {
+    padding: 5px !important;
+  }
+}
+
 /* Reset and base styles */
 * {
   margin: 0;

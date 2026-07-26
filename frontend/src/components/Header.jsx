@@ -1,5 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { CartContext } from "../context/CartContext";
 import cartSVG from "/cart.svg";
@@ -11,6 +11,9 @@ import logoPNG from "/logo.png";
 const Header = () => {
   const { user, isAdmin, openLoginModal } = useContext(AuthContext);
   const { totalUniqueItems } = useContext(CartContext);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const closeMenu = () => setIsMenuOpen(false);
 
   return (
     <header className="hdr-header">
@@ -24,9 +27,59 @@ const Header = () => {
             </Link>
             <p className="hdr-tagline">Качественный чай по лояльной цене</p>
           </div>
-          <nav className="hdr-nav">
-            <NavLink to="/">Главная</NavLink>
-            <NavLink to="/catalog">Каталог</NavLink>
+          <div className="hdr-actions">
+            <button
+              className="hdr-menu-toggle"
+              type="button"
+              aria-label={isMenuOpen ? "Закрыть меню" : "Открыть меню"}
+              aria-expanded={isMenuOpen}
+              aria-controls="hdr-menu"
+              onClick={() => setIsMenuOpen((isOpen) => !isOpen)}
+            >
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+            <nav
+              id="hdr-menu"
+              className={`hdr-nav${isMenuOpen ? " hdr-nav--open" : ""}`}
+            >
+              <NavLink to="/" onClick={closeMenu}>Главная</NavLink>
+              <NavLink to="/catalog" onClick={closeMenu}>Каталог</NavLink>
+              {user ? (
+                <>
+                <Link
+                  to="/profile"
+                  className="hdr-profile-link"
+                  title="Личный кабинет"
+                  onClick={closeMenu}
+                >
+                  {user.name}
+                </Link>
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="hdr-admin-link"
+                    title="Админка"
+                    onClick={closeMenu}
+                  >
+                    Adm
+                  </Link>
+                )}
+                </>
+              ) : (
+                <button
+                  className="hdr-btn-login"
+                  onClick={() => {
+                    closeMenu();
+                    openLoginModal();
+                  }}
+                  title="Вход"
+                >
+                  <img className="hdr-cart-icon" src={userSVG} alt="" />
+                </button>
+              )}
+            </nav>
             <Link to="/cart" className="hdr-cart-link" title="Корзина">
               <img className="hdr-cart-icon" src={cartSVG} alt="" />
               {/* <span className="hdr-cart-icon">🛒</span> */}
@@ -34,27 +87,7 @@ const Header = () => {
                 <span className="hdr-cart-count">{totalUniqueItems}</span>
               )}
             </Link>
-            {user ? (
-              <>
-                <Link
-                  to="/profile"
-                  className="hdr-profile-link"
-                  title="Личный кабинет"
-                >
-                  {user.name}
-                </Link>
-                {isAdmin && (
-                  <Link to="/admin" className="hdr-admin-link" title="Админка">
-                    Adm
-                  </Link>
-                )}
-              </>
-            ) : (
-              <button className="hdr-btn-login" onClick={openLoginModal} title="Вход">
-                <img className="hdr-cart-icon" src={userSVG} alt="" />
-              </button>
-            )}
-          </nav>
+          </div>
         </div>
       </div>
     </header>

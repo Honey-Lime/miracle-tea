@@ -185,3 +185,23 @@ textarea.comment {
   background-color: #d64c4c;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
+
+@media (max-width: 420px)
+{
+  #ymap
+  {
+    width: 60%;
+    margin-right: 0;
+  }
+
+  .pointInfo
+  {
+    width: 40%;
+    margin-left: 0;
+  }
+
+  .pointInfo img
+  {
+    width: 100%;
+  }
+}
