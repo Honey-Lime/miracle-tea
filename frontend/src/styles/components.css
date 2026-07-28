@@ -194,7 +194,8 @@
 
 .modal-content h2 {
   margin-bottom: 0;
-  color: var(--color-brand);
+  /* color: var(--color-brand); */
+  color: white;
 }
 
 .modal-close {

@@ -332,6 +332,7 @@ const LoginModal = () => {
 
           {isRegister && registrationStep === 2 && (
             <div className="form-group">
+              <p>Вам на почту был отправлен код.</p>
               <label>Код из письма</label>
               <div className="code-input-wrapper">
                 <input
