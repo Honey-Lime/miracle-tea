@@ -142,17 +142,6 @@ const CatalogPage = () => {
         <p className="cp-price-note">*Цена указана за 100г</p>
 
         <div className="cp-catalog-controls">
-          <label className="cp-sort-filter">
-            <span>Сортировка:</span>
-            <select
-              value={sortOrder}
-              onChange={(event) => setSortOrder(event.target.value)}
-            >
-              <option value="">По умолчанию</option>
-              <option value="price-asc">Цена: по возрастанию</option>
-              <option value="price-desc">Цена: по убыванию</option>
-            </select>
-          </label>
           {allTags.length > 0 && (
             <div className="cp-tags-filter">
               <button
@@ -174,6 +163,17 @@ const CatalogPage = () => {
               ))}
             </div>
           )}
+          <label className="cp-sort-filter">
+            <span>Сортировка:</span>
+            <select
+              value={sortOrder}
+              onChange={(event) => setSortOrder(event.target.value)}
+            >
+              <option value="">По умолчанию</option>
+              <option value="price-asc">Цена: по возрастанию</option>
+              <option value="price-desc">Цена: по убыванию</option>
+            </select>
+          </label>
           </div>
 
         <div className="cp-products-grid">
