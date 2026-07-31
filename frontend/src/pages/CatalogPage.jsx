@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { getProducts } from "../services/productService";
 import { useCart } from "../context/CartContext";
 import { useSamplerSettings } from "../context/SamplerSettingsContext";
@@ -8,10 +8,12 @@ const CatalogPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [gramCounts, setGramCounts] = useState({});
-  const [selectedTag, setSelectedTag] = useState(null);
+  const [sortOrder, setSortOrder] = useState("");
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart, cartItems } = useCart();
   const { samplerSizeGrams } = useSamplerSettings();
+  const selectedTag = searchParams.get("tag") || null;
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -42,6 +44,30 @@ const CatalogPage = () => {
   const filteredProducts = selectedTag
     ? products.filter((product) => product.tags?.includes(selectedTag))
     : products;
+
+  const displayedProducts = [...filteredProducts].sort((firstProduct, secondProduct) => {
+    if (sortOrder === "price-asc") {
+      return firstProduct.price - secondProduct.price;
+    }
+
+    if (sortOrder === "price-desc") {
+      return secondProduct.price - firstProduct.price;
+    }
+
+    return 0;
+  });
+
+  const handleTagChange = (tag) => {
+    const nextSearchParams = new URLSearchParams(searchParams);
+
+    if (tag) {
+      nextSearchParams.set("tag", tag);
+    } else {
+      nextSearchParams.delete("tag");
+    }
+
+    setSearchParams(nextSearchParams);
+  };
 
   const handleGramChange = (product, delta) => {
     setGramCounts((prev) => {
@@ -115,34 +141,46 @@ const CatalogPage = () => {
         <h1>Каталог чая</h1>
         <p className="cp-price-note">*Цена указана за 100г</p>
 
-      {/* Фильтр по тегам */}
-        {allTags.length > 0 && (
-          <div className="cp-tags-filter">
-          <button
-            className={`cp-tag-filter-btn ${!selectedTag ? "active" : ""}`}
-            onClick={() => setSelectedTag(null)}
-          >
-            Все
-          </button>
-          {allTags.map((tag) => (
-            <button
-              key={tag}
-              className={`cp-tag-filter-btn ${
-                selectedTag === tag ? "active" : ""
-              }`}
-              onClick={() => setSelectedTag(tag)}
+        <div className="cp-catalog-controls">
+          <label className="cp-sort-filter">
+            <span>Сортировка:</span>
+            <select
+              value={sortOrder}
+              onChange={(event) => setSortOrder(event.target.value)}
             >
-              {tag}
-            </button>
-          ))}
+              <option value="">По умолчанию</option>
+              <option value="price-asc">Цена: по возрастанию</option>
+              <option value="price-desc">Цена: по убыванию</option>
+            </select>
+          </label>
+          {allTags.length > 0 && (
+            <div className="cp-tags-filter">
+              <button
+                className={`cp-tag-filter-btn ${!selectedTag ? "active" : ""}`}
+                onClick={() => handleTagChange(null)}
+              >
+                Все
+              </button>
+              {allTags.map((tag) => (
+                <button
+                  key={tag}
+                  className={`cp-tag-filter-btn ${
+                    selectedTag === tag ? "active" : ""
+                  }`}
+                  onClick={() => handleTagChange(tag)}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          )}
           </div>
-        )}
 
         <div className="cp-products-grid">
-        {filteredProducts.length === 0 ? (
+        {displayedProducts.length === 0 ? (
           <p className="cp-no-products">Товары с выбранным тегом не найдены</p>
         ) : (
-          filteredProducts.map((product) => {
+          displayedProducts.map((product) => {
             const isGrams = (product.unit || "grams") === "grams";
             const step = isGrams ? 50 : 1;
             const minCount = isGrams ? 50 : 1;

@@ -308,12 +308,20 @@
   flex-direction: row;
 }
 
+.cp-catalog-page .cp-catalog-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+
 .cp-catalog-page .cp-tags-filter {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.75rem;
-  margin-bottom: 3rem;
 }
 
 .cp-catalog-page .cp-tag-filter-btn {
@@ -338,6 +346,35 @@
   color: #6d7c4b;
   border-color: var(--color-cta);
   font-weight: 700;
+}
+
+.cp-catalog-page .cp-sort-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(242, 240, 232, 0.86);
+  font-family: "Jost";
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.cp-catalog-page .cp-sort-filter select {
+  padding: 0.65rem 2.2rem 0.65rem 0.85rem;
+  border: 1px solid rgba(242, 240, 232, 0.22);
+  border-radius: 999px;
+  background: rgba(184, 196, 134, 0.42);
+  color: rgba(242, 240, 232, 0.92);
+  cursor: pointer;
+  font: inherit;
+}
+
+.cp-catalog-page .cp-sort-filter select:focus {
+  outline: 2px solid var(--color-cta);
+  outline-offset: 2px;
+}
+
+.cp-catalog-page .cp-sort-filter option {
+  color: #1b220e;
 }
 
 .cp-catalog-page .cp-no-products {
