@@ -246,12 +246,12 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.625rem;
+    gap: 0.425rem;
     cursor: pointer;
   }
 
   .hdr-menu-toggle span {
-    width: 3.375rem;
+    width: 1.7rem;
     height: 0.125rem;
     border-radius: 62.4375rem;
     background: rgba(242, 240, 232, 0.9);
