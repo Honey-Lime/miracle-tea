@@ -33,7 +33,7 @@
   gap: 2rem;
 }
 
-.hdr-header .hdr-logo h1 {
+.hdr-header .hdr-logo .logo-word {
   font-family: "Princess Diana", cursive;
   font-size: calc(var(--header-height) * 0.45);
   font-weight: 400;
@@ -223,7 +223,7 @@
     flex: 0 0 auto;
   }
 
-  .hdr-header .hdr-logo h1 {
+  .hdr-header .hdr-logo .logo-word {
     font-size: calc(var(--header-height) * 0.36);
   }
 

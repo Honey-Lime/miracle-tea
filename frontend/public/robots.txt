@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /cart
+Disallow: /checkout
+Disallow: /profile
+Disallow: /thank-you
+
+Sitemap: https://www.xn--80ahqsxxd.xn--p1ai/api/sitemap.xml

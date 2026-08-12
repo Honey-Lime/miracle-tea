@@ -1,0 +1,165 @@
+.abp-about-page {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: 9rem 0 6rem;
+  color: rgba(242, 240, 232, 0.9);
+}
+
+.abp-hero {
+  max-width: 48rem;
+  margin-bottom: 3.5rem;
+}
+
+.abp-eyebrow {
+  margin-bottom: 0.75rem;
+  color: var(--color-cta);
+  font-family: "Jost";
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.abp-about-page h1,
+.abp-about-page h2 {
+  color: var(--color-cta);
+  font-family: "Jost";
+  font-weight: 500;
+  text-shadow: 0 0.2rem 0.35rem rgba(0, 0, 0, 0.32);
+}
+
+.abp-about-page h1 {
+  margin-bottom: 1rem;
+  font-size: clamp(3rem, 7vw, 5.8rem);
+  /* font-style: italic; */
+}
+
+.abp-about-page h2 {
+  margin-bottom: 1rem;
+  font-size: clamp(2rem, 4vw, 3.1rem);
+  line-height: 1.08;
+}
+
+.abp-lead {
+  font-family: "Jost";
+  font-size: clamp(1.25rem, 2vw, 1.55rem);
+  line-height: 1.55;
+}
+
+.abp-section {
+  margin-top: 1.5rem;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border: 1px solid rgba(242, 240, 232, 0.14);
+  border-radius: 2rem;
+  background: rgba(209, 217, 189, 0.1);
+  box-shadow: 0 1rem 2.25rem rgba(0, 0, 0, 0.16);
+}
+
+.abp-section p,
+.abp-section li {
+  font-family: "Jost";
+  font-size: 1.08rem;
+  line-height: 1.65;
+}
+
+.abp-section-story,
+.abp-delivery {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(13rem, 0.55fr);
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.abp-highlight {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 1.6rem;
+  border-radius: 1.4rem;
+  background: rgba(112, 136, 52, 0.35);
+}
+
+.abp-highlight span {
+  color: rgba(242, 240, 232, 0.72);
+  font-family: "Jost";
+  font-size: 0.9rem;
+}
+
+.abp-highlight strong {
+  color: var(--color-cta);
+  font-family: "Jost";
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.abp-section-intro {
+  max-width: 42rem;
+  margin-bottom: 1.4rem;
+}
+
+.abp-pricing ol {
+  display: grid;
+  gap: 0.9rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  counter-reset: pricing;
+}
+
+.abp-pricing li {
+  position: relative;
+  padding: 1rem 1rem 1rem 4rem;
+  border-radius: 1rem;
+  background: rgba(242, 240, 232, 0.08);
+  counter-increment: pricing;
+}
+
+.abp-pricing li::before {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-cta);
+  color: #5d6b3e;
+  content: counter(pricing);
+  font-family: "Jost";
+  font-weight: 500;
+}
+
+.abp-catalog-link {
+  display: inline-flex;
+  justify-content: center;
+  padding: 0.9rem 1.4rem;
+  border-radius: 999px;
+  background: var(--color-cta);
+  color: #5d6b3e;
+  font-family: "Jost";
+  font-weight: 500;
+  text-decoration: none;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.abp-catalog-link:hover {
+  background: #ffd064;
+  transform: translateY(-0.15rem);
+}
+
+@media (max-width: 700px) {
+  .abp-about-page {
+    padding: 7.5rem 0 4rem;
+  }
+
+  .abp-section-story,
+  .abp-delivery {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .abp-catalog-link {
+    width: fit-content;
+  }
+}

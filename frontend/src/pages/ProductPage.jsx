@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
@@ -8,9 +8,12 @@ import AdminUserMenu from "../components/AdminUserMenu";
 import PhotoUploadField from "../components/PhotoUploadField";
 import { compressImageFiles } from "../utils/imageCompression";
 import { useSamplerSettings } from "../context/SamplerSettingsContext";
+import { getAbsoluteUrl, useSeo } from "../components/Seo";
+import { getProductPath } from "../utils/productUrl";
 
 const ProductPage = () => {
-  const { id } = useParams();
+  const { id: legacyId, product: productPath } = useParams();
+  const id = legacyId || productPath?.match(/([a-f\d]{24})$/i)?.[1];
   const { addToCart, cartItems } = useCart();
   const { samplerSizeGrams } = useSamplerSettings();
   const { user, token, isAdmin } = useAuth();
@@ -27,6 +30,64 @@ const ProductPage = () => {
   const [adminCommentExistingPhotos, setAdminCommentExistingPhotos] = useState({});
   const [adminCommentPhotos, setAdminCommentPhotos] = useState({});
   const [adminCommentDropActive, setAdminCommentDropActive] = useState({});
+
+  const seo = useMemo(() => {
+    if (!product) {
+      return {
+        title: "Чай в интернет-магазине | Чудо чай",
+        description: "Купить листовой чай в интернет-магазине Чудо чай.",
+        canonicalPath: "/catalog",
+        noIndex: true,
+      };
+    }
+
+    const unitLabel = (product.unit || "grams") === "grams" ? "100 г" : "штуку";
+    const image = product.images?.find((media) => media.type !== "video")?.url;
+    const canonicalPath = getProductPath(product);
+
+    return {
+      title: `Купить ${product.name} | Чудо чай`,
+      description: `Купить ${product.name} в интернет-магазине Чудо чай. ${product.description}`.slice(0, 160),
+      canonicalPath,
+      image,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: product.name,
+        description: product.description,
+        image: product.images
+          ?.filter((media) => media.type !== "video")
+          .map((media) => getAbsoluteUrl(media.url)),
+        brand: {
+          "@type": "Brand",
+          name: "Чудо чай",
+        },
+        offers: {
+          "@type": "Offer",
+          url: getAbsoluteUrl(canonicalPath),
+          priceCurrency: "RUB",
+          price: product.price,
+          priceSpecification: {
+            "@type": "UnitPriceSpecification",
+            price: product.price,
+            priceCurrency: "RUB",
+            referenceQuantity: {
+              "@type": "QuantitativeValue",
+              value: 1,
+              unitText: unitLabel,
+            },
+          },
+          availability:
+            product.remains > 0
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock",
+          itemCondition: "https://schema.org/NewCondition",
+        },
+      },
+    };
+  }, [product]);
+
+  useSeo(seo);
 
   useEffect(() => {
     const fetchProduct = async () => {

@@ -31,6 +31,16 @@
   margin-bottom: 2rem;
 }
 
+.cp-catalog-page .cp-seo-intro {
+  max-width: 46rem;
+  margin: -1.2rem auto 2rem;
+  color: rgba(242, 240, 232, 0.82);
+  font-family: "Jost";
+  font-size: 1rem;
+  line-height: 1.55;
+  text-align: center;
+}
+
 .cp-catalog-page .cp-products-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
@@ -44,11 +54,15 @@
   padding: 2.4rem 1.8rem 2rem;
   background: rgba(209, 217, 189, 0.34);
   overflow: hidden;
-  cursor: pointer;
   border: 18px solid rgba(192, 204, 164, 0.8);
   border-radius: 42px;
   box-shadow: 0 15px 28px rgba(0, 0, 0, 0.18);
   transition: 0.3s ease-in-out;
+}
+
+.cp-catalog-page .cp-product-link {
+  color: inherit;
+  text-decoration: none;
 }
 
 .cp-catalog-page .cp-product-card:hover {

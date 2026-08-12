@@ -983,12 +983,14 @@ const adminRoutes = require("./routes/adminRoutes");
 const emailRoutes = require("./routes/emailRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
 const chatRoutes = require("./routes/chatRoutes");
+const seoRoutes = require("./routes/seoRoutes");
 const { log } = require("console");
 
 console.log("Routes imported");
 
 // Use routes
 // app.use("/api/payment", paymentRoutes);
+app.use("/api", seoRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/auth", authRoutes);

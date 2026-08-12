@@ -15,9 +15,11 @@ import ThankYouPage from "./pages/ThankYouPage";
 import ProfilePage from "./pages/ProfilePage";
 import PersonalDataPolicyPage from "./pages/PersonalDataPolicyPage";
 import RefundPolicyPage from "./pages/RefundPolicyPage";
+import AboutPage from "./pages/AboutPage";
 import AdminPanel from "./pages/AdminPanel";
 import LoginModal from "./components/LoginModal";
 import ChatWidget from "./components/ChatWidget";
+import PageSeo from "./components/PageSeo";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
@@ -29,6 +31,7 @@ function AppContent() {
 
   return (
     <>
+      <PageSeo />
       <Header />
       {isAdminPage ? (
         <Routes>
@@ -40,6 +43,8 @@ function AppContent() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/catalog" element={<CatalogPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/tea/:product" element={<ProductPage />} />
               <Route path="/product/:id" element={<ProductPage />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />

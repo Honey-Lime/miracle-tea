@@ -22,8 +22,8 @@ const Header = () => {
           <div className="hdr-logo">
             <Link className="logo-block" to="/">
               <img className="hdr-cart-icon" src={logoPNG} alt="" />
-              <h1 className="logo-miracle">Чудо</h1>
-              <h1 className="logo-tea">чай</h1>
+              <span className="logo-word logo-miracle">Чудо</span>
+              <span className="logo-word logo-tea">чай</span>
             </Link>
             <p className="hdr-tagline">Качественный чай по лояльной цене</p>
           </div>
@@ -46,6 +46,7 @@ const Header = () => {
             >
               <NavLink to="/" onClick={closeMenu}>Главная</NavLink>
               <NavLink to="/catalog" onClick={closeMenu}>Каталог</NavLink>
+              <NavLink to="/about" onClick={closeMenu}>О нас</NavLink>
               {user ? (
                 <>
                 <Link

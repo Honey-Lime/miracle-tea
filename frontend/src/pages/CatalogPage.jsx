@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { getProducts } from "../services/productService";
 import { useCart } from "../context/CartContext";
 import { useSamplerSettings } from "../context/SamplerSettingsContext";
+import { getProductPath } from "../utils/productUrl";
 
 const CatalogPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [gramCounts, setGramCounts] = useState({});
   const [sortOrder, setSortOrder] = useState("");
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart, cartItems } = useCart();
   const { samplerSizeGrams } = useSamplerSettings();
@@ -106,18 +106,6 @@ const CatalogPage = () => {
     addToCart(product, samplerSizeGrams, true);
   };
 
-  const handleCardClick = (e, productId) => {
-    // Не переходим на страницу товара, если кликнули на кнопки управления
-    if (
-      e.target.closest(".gram-btn") ||
-      e.target.closest(".gram-count") ||
-      e.target.closest(".cp-add-to-cart-btn")
-    ) {
-      return;
-    }
-    navigate(`/product/${productId}`);
-  };
-
   // Получить первое изображение (не видео) для отображения в каталоге
   const getFirstImage = (product) => {
     if (!product.images || product.images.length === 0) return null;
@@ -138,8 +126,15 @@ const CatalogPage = () => {
         <nav className="breadcrumbs">
           <Link to="/catalog">Каталог</Link>
         </nav>
-        <h1>Каталог чая</h1>
-        <p className="cp-price-note">*Цена указана за 100г</p>
+        <h1>Качественный чай недорого</h1>
+        <p className="cp-price-note">
+          Китайский, черный, зеленый и другой листовой чай. Цена указана за 100 г.
+        </p>
+        <p className="cp-seo-intro">
+          Выбирайте качественный китайский чай недорого: улуны, пуэры, зеленые и
+          красные сорта. Заказать чай можно от 50 г, чтобы познакомиться со вкусом
+          без лишних расходов.
+        </p>
 
         <div className="cp-catalog-controls">
           {allTags.length > 0 && (
@@ -196,20 +191,24 @@ const CatalogPage = () => {
               (item) => item.pid === product._id && item.isSampler === true,
             );
             return (
-            <div
-              key={product._id}
-              className="cp-product-card"
-              onClick={(e) => handleCardClick(e, product._id)}
-            >
-              <div className="cp-product-image">
+            <article key={product._id} className="cp-product-card">
+              <Link
+                className="cp-product-link"
+                to={getProductPath(product)}
+                aria-label={`Купить ${product.name}`}
+              >
+                <div className="cp-product-image">
                 {getFirstImage(product) ? (
                   <img src={getFirstImage(product).url} alt={product.name} />
                 ) : (
                   <div className="cp-no-image">Нет изображения</div>
                 )}
-              </div>
+                </div>
+               <div className="cp-product-info">
+                  <h2>{product.name}</h2>
+                </div>
+              </Link>
               <div className="cp-product-info">
-                <h2>{product.name}</h2>
                 {product.tags && product.tags.length > 0 && (
                   <div className="product-tags">
                     {product.tags.map((tag, index) => (
@@ -283,7 +282,7 @@ const CatalogPage = () => {
                   </button>
                 </div>
               </div>
-            </div>
+            </article>
           );})
         )}
         </div>

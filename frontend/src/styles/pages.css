@@ -8,6 +8,7 @@
 
 /* Страницы */
 @import url("../pages/HomePage.css");
+@import url("../pages/AboutPage.css");
 @import url("../pages/CatalogPage.css");
 @import url("../pages/ProductPage.css");
 @import url("../pages/CartPage.css");
