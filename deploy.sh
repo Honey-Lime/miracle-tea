@@ -23,7 +23,7 @@ npm run build
 
 echo "===> Перезапуск backend"
 cd $PROJECT_DIR/backend
-pm2 restart miracle-tea-backend
+pm2 restart miracle-tea
 
 echo "===> Сохранение PM2 состояния"
 pm2 save
