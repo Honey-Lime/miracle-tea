@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+export PATH="/usr/bin:/bin:$PATH"
 
 PROJECT_DIR=/var/www/miracle-tea
 
