@@ -5,8 +5,6 @@ import { CartContext } from "../context/CartContext";
 import cartSVG from "/cart.svg";
 import userSVG from "/user.svg";
 import logoPNG from "/logo.png";
-// import background from "/first-screen-bg.png";
-
 
 const Header = () => {
   const { user, isAdmin, openLoginModal } = useContext(AuthContext);
@@ -21,7 +19,7 @@ const Header = () => {
         <div className="hdr-content">
           <div className="hdr-logo">
             <Link className="logo-block" to="/" aria-label="Чудо чай — на главную">
-              <img className="hdr-cart-icon" src={logoPNG} alt="" />
+              <img className="hdr-logo-img" src={logoPNG} alt="" width="44" height="44" />
               <span className="logo-word logo-miracle">Чудо</span>
               <span className="logo-word logo-tea">чай</span>
             </Link>
@@ -79,7 +77,7 @@ const Header = () => {
                   title="Войти"
                   aria-label="Войти в личный кабинет"
                 >
-                  <img className="hdr-cart-icon" src={userSVG} alt="" />
+                  <img className="hdr-icon" src={userSVG} alt="" width="24" height="24" />
                 </button>
               )}
             </nav>
@@ -93,7 +91,7 @@ const Header = () => {
                   : "Корзина пуста"
               }
             >
-              <img className="hdr-cart-icon" src={cartSVG} alt="" />
+              <img className="hdr-icon" src={cartSVG} alt="" width="24" height="24" />
               {totalUniqueItems > 0 && (
                 <span className="hdr-cart-count">{totalUniqueItems}</span>
               )}

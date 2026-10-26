@@ -1,11 +1,9 @@
 @import url("./colors.css");
+@import url("./tokens.css");
 @import url("./components.css");
 @import url("./fonts.css");
 
 @media (max-width: 420px) {
-  html {
-    font-size: 14px;
-  }
   .crt-cart-page .crt-item .crt-item-total {
     min-width: 55px;
   }
@@ -19,10 +17,6 @@
     width: 5rem;
     height: 5rem;
   }
-  .container
-  {
-    padding: 0 16px;
-  }
 }
 
 /* Reset and base styles */
@@ -32,12 +26,28 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-padding-top: calc(var(--header-h) + var(--space-4));
+}
+
 body {
-  font-family: "Jost";
-  font-weight: 300;
+  font-family: "Jost", sans-serif;
+  font-weight: 400;
+  font-size: var(--fs-base);
   background-color: var(--color-primary);
   color: var(--color-text-primary);
-  line-height: 1.6;
+  line-height: var(--lh-body);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.accent-script {
+  font-family: "Princess Diana", cursive;
+  font-weight: 400;
+  letter-spacing: 0.02em;
 }
 
 h1,
@@ -48,7 +58,7 @@ h5,
 h6 {
   font-family: "Jost";
   font-weight: 500;
-  line-height: 1.3;
+  line-height: var(--lh-heading);
 }
 
 a {
@@ -64,7 +74,7 @@ button {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-cta);
+  outline: 2px solid var(--color-cta-text);
   outline-offset: 2px;
 }
 
@@ -76,7 +86,7 @@ button {
   padding: 0.6rem 1rem;
   border-radius: 8px;
   background: var(--color-cta);
-  color: #1b220e;
+  color: var(--color-on-cta);
   font-weight: 500;
 }
 
@@ -108,12 +118,10 @@ button {
 }
 
 .container {
-  font-family: "Jost";
-  font-weight: 300;
   width: 100%;
-  max-width: 1224px;
-  margin: 0 auto;
-  padding: 0 20px;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
 }
 
 /* Utility classes */
@@ -258,6 +266,8 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: clip;
 }
 
 main {

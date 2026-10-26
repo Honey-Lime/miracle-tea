@@ -35,26 +35,30 @@ const HomePage = () => {
   return (
     <div className="hp-home-page">
       <section className="hp-hero">
-        <div className="hp-hero-content block">
+        <div className="container hp-hero-inner">
           <div className="hp-hero-copy">
-            <h1>Качественный чай недорого с доставкой</h1>
+            <h1>
+              Качественный <span className="accent-script">чай</span> недорого с доставкой
+            </h1>
             <p className="hp-subtitle">
               Китайский и листовой чай по честным ценам — от 50 г
             </p>
             <div className="hp-hero-actions">
-              <Link to="/catalog">Перейти в каталог</Link>
-              <Link to="/about">О нас</Link>
+              <Link className="btn btn--primary" to="/catalog">Перейти в каталог</Link>
+              <Link className="btn btn--secondary" to="/about">О нас</Link>
             </div>
           </div>
-          <img className="firstscreen-image" src={firstscreen} alt="Чайник, пиала и листья китайского чая" fetchpriority="high" width="1976" height="1636" />
+          <img className="hp-hero-image" src={firstscreen} alt="Чайник, пиала и листья китайского чая" fetchpriority="high" width="1976" height="1636" />
         </div>
       </section>
 
-      <section className="hp-intro hp-feature-row hp-feature-row-first">
-        <div className="block">
-          <img className="hp-block-image" src={homepage1} alt="Заваренный китайский чай в пиале" loading="lazy" width="1103" height="986" />
-          <img className="leaf1" src={leaf1} alt="" />
-          <img className="leaf2" src={leaf2} alt="" />
+      <section className="hp-feature">
+        <div className="container hp-feature-grid">
+          <div className="hp-feature-media">
+            <img className="hp-block-image" src={homepage1} alt="Заваренный китайский чай в пиале" loading="lazy" decoding="async" width="1103" height="986" />
+            <img className="leaf1" src={leaf1} alt="" loading="lazy" decoding="async" />
+            <img className="leaf2" src={leaf2} alt="" loading="lazy" decoding="async" />
+          </div>
           <div className="hp-feature-text">
             <h2>Качественный китайский чай<br />по доступной цене</h2>
             <p>
@@ -66,9 +70,13 @@ const HomePage = () => {
         </div>
       </section>
 
-      <section className="hp-benefits hp-feature-row">
-        <div className="block">
-          <div className="hp-feature-text hp-feature-text-left">
+      <section className="hp-feature hp-feature--reverse">
+        <div className="container hp-feature-grid">
+          <div className="hp-feature-media">
+            <img className="hp-block-image" src={homepage2} alt="Мастер-тестер оценивает чай" loading="lazy" decoding="async" width="1103" height="986" />
+            <img className="leaf3" src={leaf3} alt="" loading="lazy" decoding="async" />
+          </div>
+          <div className="hp-feature-text">
             <h2>Знак качества</h2>
             <p>
               Мы не доверяем выбор фасованным образцам вслепую. Перед тем как
@@ -78,17 +86,15 @@ const HomePage = () => {
               ежедневного чаепития.
             </p>
           </div>
-          <img className="hp-block-image" src={homepage2} alt="Мастер-тестер оценивает чай" loading="lazy" width="1103" height="986" />
-          <img className="leaf3" src={leaf3} alt="" />
-          {/* <div className="hp-feature-image hp-feature-image-right"></div> */}
         </div>
       </section>
 
-      <section className="hp-sampler hp-feature-row">
-        <div className="block">
-          <img className="hp-block-image" src={homepage3} alt="Пробники чая для знакомства со вкусом" loading="lazy" width="1103" height="986" />
-          <img className="leaf4" src={leaf4} alt="" />
-          {/* <div className="hp-feature-image hp-feature-image-bottom"></div> */}
+      <section className="hp-feature">
+        <div className="container hp-feature-grid">
+          <div className="hp-feature-media">
+            <img className="hp-block-image" src={homepage3} alt="Пробники чая для знакомства со вкусом" loading="lazy" decoding="async" width="1103" height="986" />
+            <img className="leaf4" src={leaf4} alt="" loading="lazy" decoding="async" />
+          </div>
           <div className="hp-feature-text">
             <h2>Снимите пробу</h2>
             <p>

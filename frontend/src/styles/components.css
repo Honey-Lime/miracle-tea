@@ -119,10 +119,51 @@
     BUTTONS
     =================================== */
 .btn {
-  padding: 10px 20px;
-  border-radius: 4px;
-  font-weight: 600;
-  transition: background-color 0.3s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap-size);
+  padding: var(--space-2) var(--space-5);
+  border: 2px solid transparent;
+  border-radius: var(--radius-pill);
+  font-family: "Jost", sans-serif;
+  font-size: var(--fs-base);
+  font-weight: 500;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.btn--primary {
+  background-color: var(--color-cta);
+  color: var(--color-on-cta);
+}
+
+.btn--primary:hover {
+  background-color: var(--color-cta-dark);
+  color: var(--color-on-cta-hover);
+}
+
+.btn--primary:active {
+  transform: translateY(1px);
+}
+
+.btn--secondary {
+  border-color: var(--color-text-primary);
+  background-color: transparent;
+  color: var(--color-text-primary);
+}
+
+.btn--secondary:hover {
+  background-color: rgba(240, 238, 231, 0.14);
+}
+
+.btn--secondary:active {
+  background-color: rgba(240, 238, 231, 0.24);
+  transform: translateY(1px);
 }
 
 .btn-primary {
@@ -159,7 +200,8 @@
   color: var(--btn-outline-hover-text);
 }
 
-.btn:disabled {
+.btn:disabled,
+.btn[aria-disabled="true"] {
   opacity: 0.6;
   cursor: not-allowed;
 }

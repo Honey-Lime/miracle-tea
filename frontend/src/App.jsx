@@ -28,6 +28,7 @@ import { SamplerSettingsProvider } from "./context/SamplerSettingsContext";
 function AppContent() {
   const location = useLocation();
   const isAdminPage = location.pathname.startsWith("/admin");
+  const isFullBleedPage = ["/", "/catalog"].includes(location.pathname);
 
   return (
     <>
@@ -42,7 +43,7 @@ function AppContent() {
         </Routes>
       ) : (
         <>
-          <main className="container" id="main-content">
+          <main className={isFullBleedPage ? undefined : "container"} id="main-content">
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/catalog" element={<CatalogPage />} />

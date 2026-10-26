@@ -18,12 +18,15 @@
 
   /* Text Colors */
   --color-text-primary: #f0eee7; /* Светлый текст на оливковом фоне */
-  --color-text-secondary: #d8d5ca; /* Второстепенный текст */
+  --color-text-secondary: #e8e5da; /* Второстепенный текст (≥4.5:1 на #5f6b46) */
 
   /* CTA Accent - Dynamic (Terracotta / Имбирь) */
   --color-cta: #f4aa32; /* Оранжевый акцент из макета */
   --color-cta-dark: #d88d19; /* Темный вариант для hover */
   --color-cta-light: #dfd2c4; /* Светлый бежевый вариант */
+  --color-cta-text: #ffc35c; /* Оранжевый текст/заголовки на оливковом фоне */
+  --color-on-cta: #3a4a15; /* Текст на оранжевой заливке */
+  --color-on-cta-hover: #242d0c; /* Текст на hover-заливке (≥4.5:1 на #d88d19) */
 
   /* Neutral Colors */
   --color-white: #ffffff;
