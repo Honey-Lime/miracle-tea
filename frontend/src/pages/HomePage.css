@@ -8,7 +8,7 @@
   padding: 5.8rem 0 3rem;
   color: var(--color-white);
   /* background:
-    linear-gradient(180deg, rgba(20, 27, 13, 0.08), rgba(139, 150, 116, 0.58) 88%),
+    linear-gradient(180deg, rgba(20, 27, 13, 0.08), rgba(95, 107, 70, 0.58) 88%),
     url("/first-screen-bg.png") center top / cover no-repeat; */
   background:
     url("/first-screen-bg.png") center top / cover no-repeat;
@@ -31,6 +31,7 @@
   top: 0;
   /* max-height: 100%; */
   height: 120%;
+  width: auto;
   max-width: 80%;
   object-fit: contain;
 }
@@ -94,7 +95,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
-  max-width: 13.125rem;
+  max-width: 17rem;
   margin-top: 3.3rem;
 }
 
@@ -116,6 +117,7 @@
 
 .hp-block-image {
   max-width: 50%;
+  height: auto;
 }
 
 /* .hp-hero-actions a::after {
@@ -315,4 +317,125 @@
     margin: 0;
     border-radius: 2.625rem;
   }
+}
+
+
+/* Популярное и «Как заказать» */
+.hp-popular,
+.hp-order-info {
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: 4rem 1rem 0;
+}
+
+.hp-popular h2,
+.hp-order-info h2 {
+  text-align: center;
+  color: var(--color-cta);
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin-bottom: 2rem;
+  text-shadow: 0 3px 5px rgba(0, 0, 0, 0.4);
+}
+
+.hp-popular-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 1.5rem;
+  list-style: none;
+}
+
+.hp-popular-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  height: 100%;
+  padding: 0.8rem 0.8rem 1.2rem;
+  border-radius: 1.5rem;
+  background: rgba(209, 217, 189, 0.22);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18);
+  text-align: center;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.hp-popular-card:hover {
+  transform: translateY(-4px);
+  background: rgba(209, 217, 189, 0.32);
+}
+
+.hp-popular-card img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 1rem;
+}
+
+.hp-popular-name {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--color-cta);
+}
+
+.hp-popular-price {
+  font-size: 1.3rem;
+  font-weight: 500;
+}
+
+.hp-popular-price small {
+  font-size: 0.85rem;
+  font-weight: 300;
+  color: var(--color-text-secondary);
+}
+
+.hp-popular-all {
+  display: block;
+  width: fit-content;
+  margin: 2rem auto 0;
+  padding: 0.7rem 1.8rem;
+  border-radius: 999px;
+  background: var(--color-cta);
+  color: #1b220e;
+  font-weight: 500;
+}
+
+.hp-popular-all:hover {
+  background: var(--color-cta-dark);
+}
+
+.hp-order-info {
+  padding-bottom: 5rem;
+}
+
+.hp-order-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1.5rem;
+  list-style: none;
+  counter-reset: step;
+}
+
+.hp-order-steps li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 1.4rem;
+  border-radius: 1.2rem;
+  background: rgba(0, 0, 0, 0.14);
+  counter-increment: step;
+}
+
+.hp-order-steps li::before {
+  content: counter(step);
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  background: var(--color-cta);
+  color: #1b220e;
+  font-weight: 500;
+}
+
+.hp-order-steps strong {
+  font-size: 1.2rem;
+  font-weight: 500;
 }

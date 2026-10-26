@@ -1,3 +1,7 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { getProducts } from "../services/productService";
+import { getProductPath } from "../utils/productUrl";
 import homepage1 from "/homepage1.png";
 import homepage2 from "/homepage2.png";
 import homepage3 from "/homepage3.png";
@@ -10,6 +14,23 @@ import { useSamplerSettings } from "../context/SamplerSettingsContext";
 
 const HomePage = () => {
   const { samplerSizeGrams } = useSamplerSettings();
+  const [popularProducts, setPopularProducts] = useState([]);
+
+  useEffect(() => {
+    let isActive = true;
+    getProducts()
+      .then((response) => {
+        if (!isActive) return;
+        const inStock = response.data.filter(
+          (product) => product.remains > 0 && product.images?.some((img) => img.type !== "video"),
+        );
+        setPopularProducts(inStock.slice(0, 4));
+      })
+      .catch((error) => console.error("Ошибка загрузки товаров:", error));
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   return (
     <div className="hp-home-page">
@@ -21,17 +42,17 @@ const HomePage = () => {
               Китайский и листовой чай по честным ценам — от 50 г
             </p>
             <div className="hp-hero-actions">
-              <a href="/catalog">Каталог</a>
-              <a href="/cart">Корзина</a>
+              <Link to="/catalog">Перейти в каталог</Link>
+              <Link to="/about">О нас</Link>
             </div>
           </div>
-          <img className="firstscreen-image" src={firstscreen} alt="" />
+          <img className="firstscreen-image" src={firstscreen} alt="Чайник, пиала и листья китайского чая" fetchpriority="high" width="1976" height="1636" />
         </div>
       </section>
 
       <section className="hp-intro hp-feature-row hp-feature-row-first">
         <div className="block">
-          <img className="hp-block-image" src={homepage1} alt="" />
+          <img className="hp-block-image" src={homepage1} alt="Заваренный китайский чай в пиале" loading="lazy" width="1103" height="986" />
           <img className="leaf1" src={leaf1} alt="" />
           <img className="leaf2" src={leaf2} alt="" />
           <div className="hp-feature-text">
@@ -57,7 +78,7 @@ const HomePage = () => {
               ежедневного чаепития.
             </p>
           </div>
-          <img className="hp-block-image" src={homepage2} alt="" />
+          <img className="hp-block-image" src={homepage2} alt="Мастер-тестер оценивает чай" loading="lazy" width="1103" height="986" />
           <img className="leaf3" src={leaf3} alt="" />
           {/* <div className="hp-feature-image hp-feature-image-right"></div> */}
         </div>
@@ -65,7 +86,7 @@ const HomePage = () => {
 
       <section className="hp-sampler hp-feature-row">
         <div className="block">
-          <img className="hp-block-image" src={homepage3} alt="" />
+          <img className="hp-block-image" src={homepage3} alt="Пробники чая для знакомства со вкусом" loading="lazy" width="1103" height="986" />
           <img className="leaf4" src={leaf4} alt="" />
           {/* <div className="hp-feature-image hp-feature-image-bottom"></div> */}
           <div className="hp-feature-text">
@@ -78,6 +99,49 @@ const HomePage = () => {
             </p>
           </div>
         </div>
+      </section>
+
+      {popularProducts.length > 0 && (
+        <section className="hp-popular" aria-labelledby="hp-popular-title">
+          <h2 id="hp-popular-title">Популярное</h2>
+          <ul className="hp-popular-list">
+            {popularProducts.map((product) => {
+              const image = product.images.find((img) => img.type !== "video");
+              return (
+                <li key={product._id}>
+                  <Link className="hp-popular-card" to={getProductPath(product)}>
+                    <img src={image.url} alt={product.name} loading="lazy" />
+                    <span className="hp-popular-name">{product.name}</span>
+                    <span className="hp-popular-price">
+                      {product.price} ₽ <small>за 100 г</small>
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+          <Link className="hp-popular-all" to="/catalog">
+            Смотреть весь каталог
+          </Link>
+        </section>
+      )}
+
+      <section className="hp-order-info" aria-labelledby="hp-order-title">
+        <h2 id="hp-order-title">Как заказать</h2>
+        <ol className="hp-order-steps">
+          <li>
+            <strong>Выберите чай</strong>
+            <span>Заказ от 50 г, шаг — 50 г. Можно взять пробник {samplerSizeGrams} г.</span>
+          </li>
+          <li>
+            <strong>Оформите заказ</strong>
+            <span>Укажите контакты и пункт выдачи — стоимость доставки рассчитается отдельно.</span>
+          </li>
+          <li>
+            <strong>Оплатите онлайн</strong>
+            <span>Оплата на сайте, статус заказа виден в личном кабинете.</span>
+          </li>
+        </ol>
       </section>
     </div>
   );

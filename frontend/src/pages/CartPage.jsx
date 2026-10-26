@@ -4,8 +4,31 @@ import { Link } from "react-router-dom";
 import { getProducts } from "../services/productService";
 
 const CartPage = () => {
-  const { cartItems, totalPrice, updateQuantity, removeFromCart } =
+  const { cartItems, totalPrice, updateQuantity, removeFromCart, addToCart } =
     useContext(CartContext);
+  const [undoItem, setUndoItem] = useState(null);
+
+  const handleRemove = (item) => {
+    removeFromCart(item.pid, item.isSampler);
+    setUndoItem(item);
+  };
+
+  const handleUndo = () => {
+    if (!undoItem) return;
+    const isGrams = (undoItem.unit || "grams") === "grams";
+    addToCart(
+      {
+        _id: undoItem.pid,
+        name: undoItem.name,
+        price: isGrams ? undoItem.price * 100 : undoItem.price,
+        unit: undoItem.unit || "grams",
+        remains: undoItem.maxRemains,
+      },
+      undoItem.count,
+      undoItem.isSampler,
+    );
+    setUndoItem(null);
+  };
   const [currentRemains, setCurrentRemains] = useState({});
   const [removedOutOfStockNotice, setRemovedOutOfStockNotice] = useState(false);
 
@@ -99,12 +122,18 @@ const CartPage = () => {
     return (
       <div className="crt-cart-page crt-empty">
         <h1>Корзина пуста</h1>
+        {undoItem && (
+          <div className="crt-undo" role="status">
+            <span>«{undoItem.name}» удалён из корзины.</span>
+            <button type="button" onClick={handleUndo}>Отменить</button>
+          </div>
+        )}
         {removedOutOfStockNotice && (
           <div className="crt-removed-notice">
             Некоторые позиции закончились и были удалены из заказа
           </div>
         )}
-        <p>Добавьте товары из каталога.</p>
+        <p>Добавьте товары из каталога — заказ от 50 г, а для знакомства со вкусом есть пробники.</p>
         <Link to="/catalog" className="btn btn-primary">
           Перейти в каталог
         </Link>
@@ -115,6 +144,12 @@ const CartPage = () => {
   return (
     <div className="crt-cart-page">
       <h1>Корзина</h1>
+      {undoItem && (
+        <div className="crt-undo" role="status">
+          <span>«{undoItem.name}» удалён из корзины.</span>
+          <button type="button" onClick={handleUndo}>Отменить</button>
+        </div>
+      )}
       <div className="crt-items">
         {cartItems.map((item) => {
           const isGrams = (item.unit || "grams") === "grams";
@@ -140,7 +175,7 @@ const CartPage = () => {
                 {item.name} {item.isSampler && `(Пробник ${item.count}г)`}
               </h3>
               <p>
-                Цена: {isGrams ? `${(item.price * 10).toFixed(2)} ₽/10г` : `${item.price.toFixed(2)} ₽/шт`}
+                Цена: {isGrams ? `${(item.price * 100).toFixed(2)} ₽ за 100 г` : `${item.price.toFixed(2)} ₽ за шт`}
               </p>
               {itemWarning && (
                 <div className="crt-stock-warning-message">
@@ -158,7 +193,7 @@ const CartPage = () => {
                     <button
                       type="button"
                       className="crt-btn-remove crt-btn-remove-warning"
-                      onClick={() => removeFromCart(item.pid, item.isSampler)}
+                      onClick={() => handleRemove(item)}
                     >
                       Удалить
                     </button>
@@ -169,6 +204,8 @@ const CartPage = () => {
             <div className="crt-item-controls">
               <div className="crt-quantity">
                 <button
+                  type="button"
+                  aria-label={`Уменьшить количество: ${item.name}`}
                   onClick={() =>
                     updateQuantity(item.pid, item.isSampler, item.count - step)
                   }
@@ -176,10 +213,12 @@ const CartPage = () => {
                 >
                   -
                 </button>
-                <span>
+                <span aria-live="polite">
                   {item.count} {unitLabel}{item.isSampler && " (пробник)"}
                 </span>
                 <button
+                  type="button"
+                  aria-label={`Увеличить количество: ${item.name}`}
                   onClick={() =>
                     updateQuantity(item.pid, item.isSampler, item.count + step)
                   }
@@ -193,8 +232,10 @@ const CartPage = () => {
               </div>
               {!itemWarning && (
                 <button
+                  type="button"
                   className="crt-btn-remove"
-                  onClick={() => removeFromCart(item.pid, item.isSampler)}
+                  aria-label={`Удалить из корзины: ${item.name}`}
+                  onClick={() => handleRemove(item)}
                 >
                   Удалить
                 </button>
@@ -219,9 +260,12 @@ const CartPage = () => {
             <span>{totalPrice} ₽</span>
           </div>
           <div className="crt-summary-row total">
-            <span>Итого к оплате:</span>
+            <span>Итого за товары:</span>
             <span>{totalPrice} ₽</span>
           </div>
+          <p className="crt-delivery-note">
+            Стоимость доставки рассчитывается на следующем шаге.
+          </p>
           <div className="crt-checkout-note">
             {cartItems.length === 0 && <p className="crt-warning">Добавьте товары.</p>}
             {hasStockWarnings && (

@@ -10,7 +10,7 @@ import logoPNG from "/logo.png";
 
 const Header = () => {
   const { user, isAdmin, openLoginModal } = useContext(AuthContext);
-  const { totalUniqueItems } = useContext(CartContext);
+  const { totalUniqueItems, totalPrice } = useContext(CartContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const closeMenu = () => setIsMenuOpen(false);
@@ -20,7 +20,7 @@ const Header = () => {
       <div className="container">
         <div className="hdr-content">
           <div className="hdr-logo">
-            <Link className="logo-block" to="/">
+            <Link className="logo-block" to="/" aria-label="Чудо чай — на главную">
               <img className="hdr-cart-icon" src={logoPNG} alt="" />
               <span className="logo-word logo-miracle">Чудо</span>
               <span className="logo-word logo-tea">чай</span>
@@ -42,6 +42,7 @@ const Header = () => {
             </button>
             <nav
               id="hdr-menu"
+              aria-label="Основное меню"
               className={`hdr-nav${isMenuOpen ? " hdr-nav--open" : ""}`}
             >
               <NavLink to="/" onClick={closeMenu}>Главная</NavLink>
@@ -64,7 +65,7 @@ const Header = () => {
                     title="Админка"
                     onClick={closeMenu}
                   >
-                    Adm
+                    Админка
                   </Link>
                 )}
                 </>
@@ -75,15 +76,24 @@ const Header = () => {
                     closeMenu();
                     openLoginModal();
                   }}
-                  title="Вход"
+                  title="Войти"
+                  aria-label="Войти в личный кабинет"
                 >
                   <img className="hdr-cart-icon" src={userSVG} alt="" />
                 </button>
               )}
             </nav>
-            <Link to="/cart" className="hdr-cart-link" title="Корзина">
+            <Link
+              to="/cart"
+              className="hdr-cart-link"
+              title="Корзина"
+              aria-label={
+                totalUniqueItems > 0
+                  ? `Корзина: ${totalUniqueItems} поз., ${totalPrice} ₽`
+                  : "Корзина пуста"
+              }
+            >
               <img className="hdr-cart-icon" src={cartSVG} alt="" />
-              {/* <span className="hdr-cart-icon">🛒</span> */}
               {totalUniqueItems > 0 && (
                 <span className="hdr-cart-count">{totalUniqueItems}</span>
               )}

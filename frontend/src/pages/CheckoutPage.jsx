@@ -29,6 +29,8 @@ const CheckoutPage = () => {
   const [bonusSpent, setBonusSpent] = useState(0);
   const [withoutPayment, setWithoutPayment] = useState(false);
   const [withoutDeliveryPayment, setWithoutDeliveryPayment] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [orderError, setOrderError] = useState("");
   const canPay = Boolean(
     deliveryData?.checked && personalDataAccepted && refundPolicyAccepted,
   );
@@ -61,6 +63,9 @@ const CheckoutPage = () => {
 
   // Оформление заказа
   const handlePlaceOrder = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    setOrderError("");
     try {
       if (!cartItems.length) {
         addToast("Корзина пуста", "warning");
@@ -202,13 +207,36 @@ const CheckoutPage = () => {
 
     } catch (error) {
       addToast(error.message, "error");
+      setOrderError(error.message);
       console.error(error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  const pendingSteps = [
+    !deliveryData?.checked && "подтвердите способ и адрес доставки",
+    !personalDataAccepted && "примите политику обработки персональных данных",
+    !refundPolicyAccepted && "примите политику возврата средств",
+  ].filter(Boolean);
 
   return (
     <div className="chp-checkout-page container">
       <h1>Оформление заказа</h1>
+      <ol className="chp-steps" aria-label="Шаги оформления заказа">
+        <li className="chp-step chp-step--done">Корзина</li>
+        <li className={`chp-step ${deliveryData?.checked ? "chp-step--done" : "chp-step--current"}`}>
+          Доставка
+        </li>
+        <li
+          className={`chp-step ${
+            deliveryData?.checked && !canPay ? "chp-step--current" : canPay ? "chp-step--done" : ""
+          }`}
+        >
+          Согласия
+        </li>
+        <li className={`chp-step ${canPay ? "chp-step--current" : ""}`}>Оплата</li>
+      </ol>
       <div className="chp-checkout-content">
         <div className="chp-order-summary">
           <h2>Ваш заказ</h2>
@@ -217,12 +245,12 @@ const CheckoutPage = () => {
               const isGrams = (item.unit || "grams") === "grams";
               const unitLabel = isGrams ? "г" : "шт";
               const priceLabel = isGrams
-                ? `${item.price * 10} ₽/10г`
-                : `${item.price} ₽/шт`;
+                ? `${Math.round(item.price * 100 * 100) / 100} ₽ за 100 г`
+                : `${item.price} ₽ за шт`;
               return (
                 <li key={`${item.pid}-${item.isSampler}`}>
                   {item.name} {item.isSampler && "(Пробник)"} — {item.count} {unitLabel} ×{" "}
-                  {priceLabel} = {item.count * item.price} ₽
+                  {priceLabel} = {Math.round(item.count * item.price * 100) / 100} ₽
                 </li>
               );
             })}
@@ -262,7 +290,7 @@ const CheckoutPage = () => {
                 <span>Товары: </span>
                 <span>{totalPrice} ₽</span>
               </div>
-              {deliveryData?.price && (
+              {Boolean(deliveryData?.price) && (
                 <div>
                   <span>Доставка: </span>
                   <span>{deliveryData.price} ₽</span>
@@ -277,10 +305,12 @@ const CheckoutPage = () => {
                     min="0"
                     max={maxBonusSpent}
                     step="1"
+                    inputMode="numeric"
+                    aria-describedby="bonusSpentHint"
                     value={bonusSpent}
                     onChange={(event) => setBonusSpent(event.target.value)}
                   />
-                  <small>
+                  <small id="bonusSpentHint">
                     Доступно: {userBonusBalance}. Можно списать до {maxBonusSpent} бонусов
                   </small>
                 </div>
@@ -368,18 +398,25 @@ const CheckoutPage = () => {
               Также вы можете посмотреть статус заказа в личном кабинете.
             </p>
 
+            {pendingSteps.length > 0 && (
+              <p className="chp-pending" id="chp-pending">
+                Чтобы оплатить: {pendingSteps.join("; ")}.
+              </p>
+            )}
+            {orderError && (
+              <p className="chp-order-error" role="alert">
+                {orderError}
+              </p>
+            )}
+
             <button
+              type="button"
               className="btn btn-primary chp-btn-large"
-              disabled={!canPay}
-              onClick={()=> {
-                if (canPay) {
-                  handlePlaceOrder();
-                } else {
-                  addToast("Подтвердите доставку и примите обе политики", "warning");
-                }
-              }}
+              disabled={!canPay || isSubmitting}
+              aria-describedby={pendingSteps.length > 0 ? "chp-pending" : undefined}
+              onClick={handlePlaceOrder}
             >
-              Оплатить
+              {isSubmitting ? "Оформляем заказ…" : `Оплатить ${finalTotal} ₽`}
             </button>
           </div>
         </div>

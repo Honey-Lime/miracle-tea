@@ -9,7 +9,7 @@
 
 .ftr-footer .ftr-content {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 2rem;
   margin-bottom: 2rem;
 }
@@ -25,7 +25,7 @@
   font-family: "Jost";
   font-weight: 300;
   margin-bottom: 0.5rem;
-  opacity: 0.9;
+  opacity: 1;
 }
 
 .ftr-footer .ftr-section a {
@@ -47,5 +47,14 @@
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 1rem;
   text-align: center;
-  opacity: 0.8;
+  opacity: 0.9;
+}
+
+.ftr-footer .ftr-section a:hover,
+.ftr-footer .ftr-section a:focus-visible {
+  text-decoration: underline;
+}
+
+.ftr-footer .ftr-section a.ftr-inline-link {
+  display: inline;
 }

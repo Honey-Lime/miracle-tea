@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const Footer = () => {
   return (
     <footer className="ftr-footer">
@@ -9,15 +11,24 @@ const Footer = () => {
           </div>
           <div className="ftr-section">
             <h4>Контакты</h4>
-            <p>Email: vikdub01@mail.ru</p>
-            {/* <p>Примем звонков с 12:00 до 21:00 <br/>
-            Телефон: +7 (920) 211-51-08</p> */}
+            <p>
+              Email:{" "}
+              <a className="ftr-inline-link" href="mailto:vikdub01@mail.ru">
+                vikdub01@mail.ru
+              </a>
+            </p>
           </div>
           <div className="ftr-section">
-            <h4>Быстрые ссылки</h4>
-            <a href="/catalog">Каталог</a>
-            <a href="/cart">Корзина</a>
-            <a href="/profile">Личный кабинет</a>
+            <h4>Навигация</h4>
+            <Link to="/catalog">Каталог</Link>
+            <Link to="/about">О нас</Link>
+            <Link to="/cart">Корзина</Link>
+            <Link to="/profile">Личный кабинет</Link>
+          </div>
+          <div className="ftr-section">
+            <h4>Информация</h4>
+            <Link to="/refund-policy">Возврат и обмен</Link>
+            <Link to="/personal-data-policy">Политика конфиденциальности</Link>
           </div>
         </div>
         <div className="ftr-bottom">

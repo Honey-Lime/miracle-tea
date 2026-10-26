@@ -3,17 +3,17 @@
    =================================== */
 :root {
   /* Primary Colors - Background */
-  --color-primary: #8b9674; /* Оливковый фон из макета */
+  --color-primary: #5f6b46; /* Оливковый фон из макета */
   --color-primary-subtle: #778a3a; /* Нижний/админский оливковый тон */
 
   /* Brand Color - Main Accent (Teal / Морская волна) */
-  --color-brand: #6f8731; /* Ключевой оливковый цвет */
-  --color-brand-dark: #52651f; /* Темный вариант для hover */
+  --color-brand: #4f6320; /* Ключевой оливковый цвет */
+  --color-brand-dark: #3a4a15; /* Темный вариант для hover */
   --color-brand-light: #a8b67b; /* Светлый вариант для акцентов */
 
   /* Secondary Color - Laguna Blue */
   --color-secondary: #aab77b; /* Светлый оливковый */
-  --color-secondary-dark: #718538; /* Темный вариант для hover */
+  --color-secondary-dark: #566a22; /* Темный вариант для hover */
   --color-secondary-light: #d9dccb; /* Светлый фон */
 
   /* Text Colors */
@@ -45,7 +45,7 @@
 
   /* Component Specific Colors */
   --header-bg: rgba(36, 42, 25, 0.48);
-  --footer-bg: #6f8731;
+  --footer-bg: #4f6320;
   --btn-primary-bg: var(--color-brand);
   --btn-primary-hover: var(--color-brand-dark);
   --btn-primary-text: var(--color-white);
@@ -93,6 +93,7 @@
   --status-cart-text: var(--color-gray-600);
   --error-bg: #fde8e8;
   --error-text: #dc5656;
+  --toast-error-bg: #b33a3a;
   --success-bg: var(--color-secondary-light);
   --success-text: var(--color-secondary-dark);
   --modal-title: var(--color-brand);

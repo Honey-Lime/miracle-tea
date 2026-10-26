@@ -4,7 +4,7 @@
 
 @media (max-width: 420px) {
   html {
-    font-size: 10px;
+    font-size: 14px;
   }
   .crt-cart-page .crt-item .crt-item-total {
     min-width: 55px;
@@ -21,7 +21,7 @@
   }
   .container
   {
-    padding: 5px !important;
+    padding: 0 16px;
   }
 }
 
@@ -59,9 +59,52 @@ a {
 button {
   cursor: pointer;
   border: none;
-  outline: none;
   font-family: "Jost";
   font-weight: 500;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-cta);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 10000;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  background: var(--color-cta);
+  color: #1b220e;
+  font-weight: 500;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 .container {
@@ -157,8 +200,20 @@ button {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   animation: slideIn 0.3s ease-out;
   cursor: pointer;
-  opacity: 0.9;
+  opacity: 0.97;
   transition: opacity 0.2s;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.toast-close {
+  margin-left: auto;
+  background: transparent;
+  color: inherit;
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0 2px;
 }
 
 .toast:hover {
@@ -180,7 +235,7 @@ button {
 }
 
 .toast-error {
-  background-color: #dc5656;
+  background-color: var(--toast-error-bg);
 }
 
 @keyframes slideIn {
@@ -190,7 +245,7 @@ button {
   }
   to {
     transform: translateX(0);
-    opacity: 0.9;
+    opacity: 0.97;
   }
 }
 /* Sticky footer */
@@ -211,4 +266,11 @@ main {
 
 footer {
   flex-shrink: 0;
+}
+
+/* Плавающая кнопка чата не должна перекрывать нижние кнопки */
+@media (max-width: 768px) {
+  main {
+    padding-bottom: 4.5rem;
+  }
 }

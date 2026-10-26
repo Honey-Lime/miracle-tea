@@ -188,3 +188,28 @@
   opacity: 0.5;
   pointer-events: none;
 }
+
+
+.crt-cart-page .crt-undo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.crt-cart-page .crt-undo button {
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  background: var(--color-cta);
+  color: #1b220e;
+}
+
+.crt-cart-page .crt-delivery-note {
+  margin-top: 0.4rem;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}

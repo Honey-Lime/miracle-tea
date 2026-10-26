@@ -8,8 +8,11 @@ import { getProductPath } from "../utils/productUrl";
 const CatalogPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [gramCounts, setGramCounts] = useState({});
   const [sortOrder, setSortOrder] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart, cartItems } = useCart();
   const { samplerSizeGrams } = useSamplerSettings();
@@ -17,6 +20,8 @@ const CatalogPage = () => {
 
   useEffect(() => {
     const fetchProducts = async () => {
+      setLoading(true);
+      setLoadError(false);
       try {
         const response = await getProducts();
         setProducts(response.data);
@@ -30,20 +35,29 @@ const CatalogPage = () => {
         setGramCounts(initialGrams);
       } catch (error) {
         console.error("Ошибка загрузки товаров:", error);
+        setLoadError(true);
       } finally {
         setLoading(false);
       }
     };
     fetchProducts();
-  }, []);
+  }, [reloadKey]);
 
   // Получаем все уникальные теги
   const allTags = [...new Set(products.flatMap((p) => p.tags || []))];
 
   // Фильтруем товары по выбранному тегу
-  const filteredProducts = selectedTag
-    ? products.filter((product) => product.tags?.includes(selectedTag))
-    : products;
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const filteredProducts = products.filter(
+    (product) =>
+      (!selectedTag || product.tags?.includes(selectedTag)) &&
+      (!normalizedQuery || product.name.toLowerCase().includes(normalizedQuery)),
+  );
+
+  const formatRub = (value) =>
+    new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 }).format(
+      Math.round(value * 100) / 100,
+    );
 
   const displayedProducts = [...filteredProducts].sort((firstProduct, secondProduct) => {
     if (sortOrder === "price-asc") {
@@ -67,6 +81,11 @@ const CatalogPage = () => {
     }
 
     setSearchParams(nextSearchParams);
+  };
+
+  const resetFilters = () => {
+    setSearchQuery("");
+    handleTagChange(null);
   };
 
   const handleGramChange = (product, delta) => {
@@ -118,13 +137,32 @@ const CatalogPage = () => {
     return firstPhoto || null;
   };
 
-  if (loading) return <div className="loading">Загрузка...</div>;
+  if (loading) {
+    return (
+      <div className="cp-catalog-page" aria-busy="true">
+        <div className="container">
+          <h1>Качественный чай недорого</h1>
+          <div className="cp-products-grid" aria-label="Загрузка каталога">
+            {[0, 1, 2, 3, 4, 5].map((index) => (
+              <div key={index} className="cp-product-card cp-skeleton" aria-hidden="true">
+                <div className="cp-skeleton-image" />
+                <div className="cp-skeleton-line" />
+                <div className="cp-skeleton-line cp-skeleton-line--short" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="cp-catalog-page">
       <div className="container">
-        <nav className="breadcrumbs">
-          <Link to="/catalog">Каталог</Link>
+        <nav className="breadcrumbs" aria-label="Хлебные крошки">
+          <Link to="/">Главная</Link>
+          <span aria-hidden="true"> / </span>
+          <span aria-current="page">Каталог</span>
         </nav>
         <h1>Качественный чай недорого</h1>
         <p className="cp-price-note">
@@ -138,8 +176,9 @@ const CatalogPage = () => {
 
         <div className="cp-catalog-controls">
           {allTags.length > 0 && (
-            <div className="cp-tags-filter">
+            <div className="cp-tags-filter" role="group" aria-label="Фильтр по тегам">
               <button
+                aria-pressed={!selectedTag}
                 className={`cp-tag-filter-btn ${!selectedTag ? "active" : ""}`}
                 onClick={() => handleTagChange(null)}
               >
@@ -148,6 +187,7 @@ const CatalogPage = () => {
               {allTags.map((tag) => (
                 <button
                   key={tag}
+                  aria-pressed={selectedTag === tag}
                   className={`cp-tag-filter-btn ${
                     selectedTag === tag ? "active" : ""
                   }`}
@@ -158,6 +198,16 @@ const CatalogPage = () => {
               ))}
             </div>
           )}
+          <label className="cp-search-filter">
+            <span className="visually-hidden">Поиск по названию</span>
+            <input
+              type="search"
+              className="cp-search-input"
+              placeholder="Поиск по названию"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+            />
+          </label>
           <label className="cp-sort-filter">
             <span>Сортировка:</span>
             <select
@@ -172,8 +222,20 @@ const CatalogPage = () => {
           </div>
 
         <div className="cp-products-grid">
-        {displayedProducts.length === 0 ? (
-          <p className="cp-no-products">Товары с выбранным тегом не найдены</p>
+        {loadError ? (
+          <div className="cp-no-products" role="alert">
+            <p>Не удалось загрузить каталог. Проверьте соединение и попробуйте ещё раз.</p>
+            <button type="button" className="cp-reset-btn" onClick={() => setReloadKey((key) => key + 1)}>
+              Повторить
+            </button>
+          </div>
+        ) : displayedProducts.length === 0 ? (
+          <div className="cp-no-products">
+            <p>По вашему запросу ничего не найдено</p>
+            <button type="button" className="cp-reset-btn" onClick={resetFilters}>
+              Сбросить фильтры
+            </button>
+          </div>
         ) : (
           displayedProducts.map((product) => {
             const isGrams = (product.unit || "grams") === "grams";
@@ -186,6 +248,7 @@ const CatalogPage = () => {
             const availableToAdd = Math.max(product.remains - alreadyInCart, 0);
             const currentCount = gramCounts[product._id] || minCount;
             const canAddCurrentCount = currentCount >= minCount && currentCount <= availableToAdd;
+            const isOutOfStock = product.remains < minCount;
             const isSamplerAvailable = isGrams && availableToAdd >= samplerSizeGrams;
             const hasSamplerInCart = cartItems.some(
               (item) => item.pid === product._id && item.isSampler === true,
@@ -199,7 +262,7 @@ const CatalogPage = () => {
               >
                 <div className="cp-product-image">
                 {getFirstImage(product) ? (
-                  <img src={getFirstImage(product).url} alt={product.name} />
+                  <img src={getFirstImage(product).url} alt={product.name} loading="lazy" decoding="async" />
                 ) : (
                   <div className="cp-no-image">Нет изображения</div>
                 )}
@@ -222,8 +285,13 @@ const CatalogPage = () => {
                   {product.description.substring(0, 100)}...
                 </p> */}
                 <div className="cp-product-meta">
-                  <span className="cp-price">{product.price}₽</span>
-                  {product.remains < 250 && (
+                  <span className="cp-price">
+                    {formatRub(product.price)}₽
+                    <small className="cp-price-unit">{isGrams ? "за 100 г" : "за шт"}</small>
+                  </span>
+                  {isOutOfStock ? (
+                    <span className="cp-remains cp-remains--out">Нет в наличии</span>
+                  ) : product.remains < 250 && (
                     <span className="cp-remains">
                       Остаток {product.remains}{unitLabel}
                     </span>
@@ -236,49 +304,46 @@ const CatalogPage = () => {
                       onClick={() =>
                         handleGramChange(product, -step)
                       }
+                      aria-label={`Уменьшить на ${step} ${unitLabel}`}
                       disabled={currentCount - step < minCount}
                     >
                       -{step}
                     </button>
-                    <span className={`gram-count ${!canAddCurrentCount ? "disabled" : ""}`}
-                      // aria-disabled={!canAddCurrentCount}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (!canAddCurrentCount) return;
-                        handleAddToCart(product, currentCount);
-                      }}>
+                    <span className="gram-count" aria-live="polite">
                       <span className="current">{currentCount}{unitLabel}</span>
                       <span className="line"></span>
-                      <span className="price">{product.price * currentCount * 0.01}₽</span>
-                      <span className="hover">В корзину</span>
+                      <span className="price">{formatRub(product.price * currentCount * 0.01)}₽</span>
                     </span>
                     <button
                       className="gram-btn gram-btn_plus"
                       onClick={() =>
                         handleGramChange(product, step)
                       }
+                      aria-label={`Увеличить на ${step} ${unitLabel}`}
                       disabled={currentCount + step > availableToAdd}
                     >
                       +{step}
                     </button>
                   </div>
                   <button
-                    className="btn btn-primary cp-add-to-cart-btn"
-                    onClick={() =>
-                      handleAddSamplerToCart(product)
-                    }
-                    disabled={!isSamplerAvailable || hasSamplerInCart}
-                    title={
-                      hasSamplerInCart
-                        ? "Уже в корзине"
-                        : "🛒ПРОБНИК"
-                    }
+                    type="button"
+                    className="cp-buy-btn"
+                    onClick={() => handleAddToCart(product, currentCount)}
+                    disabled={!canAddCurrentCount}
                   >
-                    {
-                      hasSamplerInCart
-                        ? "Уже в корзине"
-                        : "🛒ПРОБНИК"
-                    }
+                    {isOutOfStock
+                      ? "Нет в наличии"
+                      : `В корзину · ${formatRub(product.price * currentCount * 0.01)}₽`}
+                  </button>
+                  <button
+                    type="button"
+                    className="cp-sampler-btn"
+                    onClick={() => handleAddSamplerToCart(product)}
+                    disabled={!isSamplerAvailable || hasSamplerInCart}
+                  >
+                    {hasSamplerInCart
+                      ? "Пробник уже в корзине"
+                      : `Пробник ${samplerSizeGrams} г`}
                   </button>
                 </div>
               </div>

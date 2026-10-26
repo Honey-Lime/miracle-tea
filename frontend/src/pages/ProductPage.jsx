@@ -340,8 +340,9 @@ const ProductPage = () => {
 
   return (
     <div className="pp-product-page container">
-      <nav className="breadcrumbs">
-        <Link to="/catalog">Каталог</Link> / <span>{product.name}</span>
+      <nav className="breadcrumbs" aria-label="Хлебные крошки">
+        <Link to="/">Главная</Link> / <Link to="/catalog">Каталог</Link> /{" "}
+        <span aria-current="page">{product.name}</span>
       </nav>
       <div className="pp-product-container">
         {/* Левая колонка: медиа */}
@@ -376,7 +377,7 @@ const ProductPage = () => {
                   {item.type === "video" ? (
                     <span>🎥</span>
                   ) : (
-                    <img src={item.url} alt={`${idx}`} />
+                    <img src={item.url} alt={`${product.name} — фото ${idx + 1}`} />
                   )}
                 </button>
               ))}

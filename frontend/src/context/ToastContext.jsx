@@ -8,7 +8,7 @@ export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
 
   const addToast = useCallback((message, type = "info", duration = 3000) => {
-    const id = Date.now();
+    const id = Date.now() + Math.random();
     setToasts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((toast) => toast.id !== id));
@@ -24,14 +24,26 @@ export const ToastProvider = ({ children }) => {
   return (
     <ToastContext.Provider value={{ addToast, showToast }}>
       {children}
-      <div className="toast-container">
+      <div className="toast-container" aria-live="polite" aria-atomic="false">
         {toasts.map((toast) => (
           <div
             key={toast.id}
+            role={toast.type === "error" ? "alert" : "status"}
             className={`toast toast-${toast.type}`}
             onClick={() => removeToast(toast.id)}
           >
-            {toast.message}
+            <span>{toast.message}</span>
+            <button
+              type="button"
+              className="toast-close"
+              aria-label="Закрыть уведомление"
+              onClick={(event) => {
+                event.stopPropagation();
+                removeToast(toast.id);
+              }}
+            >
+              ×
+            </button>
           </div>
         ))}
       </div>

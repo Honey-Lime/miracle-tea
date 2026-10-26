@@ -269,7 +269,8 @@ form {
 
 .form-group input:focus,
 .form-group textarea:focus {
-  outline: none;
+  outline: 2px solid var(--color-cta);
+  outline-offset: 2px;
   border-color: var(--color-brand);
   box-shadow: 0 0 0 3px var(--input-focus-shadow);
 }
@@ -337,7 +338,8 @@ form .btn-primary {
 }
 
 .search-input:focus {
-  outline: none;
+  outline: 2px solid var(--color-cta);
+  outline-offset: 2px;
   border-color: var(--color-brand);
   box-shadow: 0 0 0 3px var(--input-focus-shadow);
 }
@@ -451,7 +453,8 @@ form .btn-primary {
 }
 
 .city-input:focus {
-  outline: none;
+  outline: 2px solid var(--color-cta);
+  outline-offset: 2px;
   border-color: var(--color-brand);
   box-shadow: 0 0 0 3px var(--input-focus-shadow);
 }

@@ -32,6 +32,9 @@ function AppContent() {
   return (
     <>
       <PageSeo />
+      <a className="skip-link" href="#main-content">
+        Перейти к содержимому
+      </a>
       <Header />
       {isAdminPage ? (
         <Routes>
@@ -39,7 +42,7 @@ function AppContent() {
         </Routes>
       ) : (
         <>
-          <main className="container">
+          <main className="container" id="main-content">
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/catalog" element={<CatalogPage />} />
