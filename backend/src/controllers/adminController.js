@@ -21,6 +21,7 @@ const {
   setSamplerSizeGrams,
 } = require("../services/samplerService");
 const { getLogFilePath, logError } = require("../utils/logger");
+const { getServicesSettings, setServicesSettings } = require("../services/delivery");
 const path = require("path");
 const fs = require("fs");
 
@@ -211,6 +212,24 @@ exports.getBonusSettings = async (_req, res) => {
     res.json({ bonusPercent, reviewBonusAmount, notificationEmail, samplerSizeGrams });
   } catch (error) {
     logError(error, "getBonusSettings");
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getDeliverySettings = async (_req, res) => {
+  try {
+    res.json({ services: await getServicesSettings() });
+  } catch (error) {
+    logError(error, "getDeliverySettings");
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.updateDeliverySettings = async (req, res) => {
+  try {
+    res.json({ services: await setServicesSettings(req.body?.services) });
+  } catch (error) {
+    logError(error, "updateDeliverySettings");
     res.status(500).json({ message: error.message });
   }
 };

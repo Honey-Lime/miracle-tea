@@ -9,6 +9,10 @@ const SettingsPage = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [deliveryServices, setDeliveryServices] = useState([]);
+  const [deliveryLoading, setDeliveryLoading] = useState(false);
+  const [deliveryMessage, setDeliveryMessage] = useState("");
+  const [deliveryError, setDeliveryError] = useState("");
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -28,8 +32,48 @@ const SettingsPage = () => {
       }
     };
 
+    const loadDeliverySettings = async () => {
+      setDeliveryLoading(true);
+      setDeliveryError("");
+
+      try {
+        const response = await api.get("/admin/settings/delivery");
+        setDeliveryServices(response.data.services || []);
+      } catch (requestError) {
+        setDeliveryError(requestError.response?.data?.message || "Не удалось загрузить службы доставки");
+      } finally {
+        setDeliveryLoading(false);
+      }
+    };
+
     loadSettings();
+    loadDeliverySettings();
   }, []);
+
+  const toggleDeliveryService = (key) => {
+    setDeliveryMessage("");
+    setDeliveryServices((prev) =>
+      prev.map((service) => (service.key === key ? { ...service, enabled: !service.enabled } : service)),
+    );
+  };
+
+  const handleDeliverySubmit = async (event) => {
+    event.preventDefault();
+    setDeliveryMessage("");
+    setDeliveryError("");
+    setDeliveryLoading(true);
+
+    try {
+      const services = Object.fromEntries(deliveryServices.map((service) => [service.key, service.enabled]));
+      const response = await api.put("/admin/settings/delivery", { services });
+      setDeliveryServices(response.data.services || []);
+      setDeliveryMessage("Службы доставки сохранены");
+    } catch (requestError) {
+      setDeliveryError(requestError.response?.data?.message || "Не удалось сохранить службы доставки");
+    } finally {
+      setDeliveryLoading(false);
+    }
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -128,6 +172,32 @@ const SettingsPage = () => {
         {message && <p className="success-message">{message}</p>}
         <button type="submit" className="btn btn-primary" disabled={loading}>
           {loading ? "Сохранение..." : "Сохранить"}
+        </button>
+      </form>
+
+      <h2>Службы доставки</h2>
+      <form className="form-group" onSubmit={handleDeliverySubmit}>
+        {deliveryServices.map((service) => (
+          <label key={service.key} className="ap-delivery-service">
+            <input
+              type="checkbox"
+              checked={service.enabled}
+              onChange={() => toggleDeliveryService(service.key)}
+              disabled={deliveryLoading}
+            />{" "}
+            {service.name}
+            {!service.configured && (
+              <small className="hint"> — не заданы ключи API на сервере, покупатели её не увидят</small>
+            )}
+          </label>
+        ))}
+        <small className="hint">
+          Отключённые службы не показываются при оформлении заказа. Ключи API служб хранятся на сервере в backend/.env.
+        </small>
+        {deliveryError && <p className="error">{deliveryError}</p>}
+        {deliveryMessage && <p className="success-message">{deliveryMessage}</p>}
+        <button type="submit" className="btn btn-primary" disabled={deliveryLoading}>
+          {deliveryLoading ? "Сохранение..." : "Сохранить"}
         </button>
       </form>
     </section>

@@ -651,3 +651,10 @@
     grid-template-columns: 1fr;
   }
 }
+
+.ap-settings-page .ap-delivery-service {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: normal;
+}

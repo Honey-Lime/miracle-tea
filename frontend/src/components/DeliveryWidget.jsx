@@ -1,7 +1,7 @@
 import { useState, useEffect, Fragment, useRef } from "react";
 import { AddressSuggestions } from 'react-dadata';
 import 'react-dadata/dist/react-dadata.css';
-import "./EShopLogistic.css";
+import "./DeliveryWidget.css";
 
 const DEFAULT_MAP_LOCATION = {
   center: [37.588144, 55.733842],
@@ -17,7 +17,7 @@ const INITIAL_STATUS = {
 
 const DELIVERY_CONTACT_STORAGE_KEY = "EShopLogisticDeliveryData";
 
-const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, orderWeight, onDeliveryConfirm }) => {
+const DeliveryWidget = ({ DADATA_TOKEN, YANDEX_API_KEY, orderWeight, onDeliveryConfirm }) => {
   // Этап 1. Загружаем справочники и базовые данные для расчёта доставки.
   // Основные данные API и справочники служб доставки.
   function getSavedDeliveryContact() {
@@ -433,16 +433,17 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, orde
     mapInstanceRef.current.addChild(deliveryAddressMarkerRef.current);
   }
 
-  // Обёртка над API EShopLogistic с сохранением ответа в общий state.
+  // Обёртка над серверным API доставки (/api/delivery) с сохранением ответа в общий state.
+  // Ключи служб доставки хранятся только на сервере.
   async function customFetch(api, props = {}, saveKey = false) {
     const apiParts = api.split("/");
     const dataKey = apiParts[apiParts.length - 1];
 
     try {
-      const response = await fetch("https://api.esplc.ru" + api, {
+      const response = await fetch("/api/delivery" + api, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key: ESHOPLOGISTIC_TOKEN, ...props }),
+        body: JSON.stringify(props),
       });
 
       setDeliveryLoading(prev => ({
@@ -707,19 +708,22 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, orde
           // console.log("Адрес доставки", deliveryAddress.value);
           
           recalculation = await customFetch(
-            "/delivery/calculation",
+            "/calculation",
             {
               to: selectedCity.fias,
               weight: orderWeight,
               service: selectedMethod.name,
               address: deliveryAddress.value,
+              lat: deliveryAddress.lat,
+              lon: deliveryAddress.lon,
+              recalculation: true,
             },
             selectedMethod.name
           );
 
           // console.log('📦 Результат пересчёта:', recalculation);
 
-          if (!recalculation) {
+          if (!recalculation?.data?.door) {
             console.error('❌ Пересчёт не удался');
             return;
           }
@@ -793,7 +797,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, orde
   }, [deliveryAddress, mapReady, addressPickMode]);
 
   // Этап 4.3. При открытии виджета загружаем базовые данные и пробуем определить город.
-  // Загружаем базовые данные: состояние EShopLogistic и примерный город по IP.
+  // Загружаем базовые данные: доступные службы доставки и примерный город по IP.
   useEffect(() => {
     const loadInitialData = async () => {
       try {
@@ -801,7 +805,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, orde
         clearStatus();
         showStatus("initial-loading", "info", "Загружаем варианты доставки...");
 
-        await customFetch("/client/state");
+        await customFetch("/state");
 
         const ipResponse = await fetch("https://api.ipify.org?format=json");
         if (!ipResponse.ok) {
@@ -866,8 +870,15 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, orde
 
       Object.keys(services).forEach((service) => {
         customFetch(
-          "/delivery/calculation",
-          { to: selectedCity.fias, weight: orderWeight, service, address: selectedCity.value },
+          "/calculation",
+          {
+            to: selectedCity.fias,
+            weight: orderWeight,
+            service,
+            address: selectedCity.value,
+            lat: selectedCity.lat,
+            lon: selectedCity.lon,
+          },
           service
         );
       });
@@ -1252,7 +1263,7 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, orde
 
 
   return (
-    <div className="EShopLogistic">
+    <div className="DeliveryWidget">
 
       {loading && <div className="deliveryLoading">Загрузка...</div>}
 
@@ -1428,4 +1439,4 @@ const EShopLogistic = ({ DADATA_TOKEN, ESHOPLOGISTIC_TOKEN, YANDEX_API_KEY, orde
     </div>
   );
 };
-export { EShopLogistic };
+export { DeliveryWidget };

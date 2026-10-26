@@ -11,6 +11,7 @@ const {
 } = require("../services/bonusService");
 const { notifyAdmin } = require("../services/adminNotificationService");
 const { getSamplerSizeGrams } = require("../services/samplerService");
+const { isServiceAvailable } = require("../services/delivery");
 
 const ID_COUNTER = "orderSequence";
 const LETTERS_COUNT = 26;
@@ -167,6 +168,10 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({
         message: "Перед оформлением заказа нужно принять политику обработки данных и политику возврата средств",
       });
+    }
+
+    if (delivery?.provider && !(await isServiceAvailable(delivery.provider))) {
+      return res.status(400).json({ message: "Выбранная служба доставки сейчас недоступна. Выберите другой способ." });
     }
 
     const user = req.userId

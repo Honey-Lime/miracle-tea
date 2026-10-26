@@ -3,13 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
-import { EShopLogistic } from "../components/EShopLogistic";
-// import { EShopLogistic } from "eshoplogistic-react/client";
-// import "eshoplogistic-react/styles.css";
+import { DeliveryWidget } from "../components/DeliveryWidget";
 
 
 const DADATA_TOKEN = "eb5a9b17d07d3320d19d665bc0ade765f3f016d3";
-const ESHOPLOGISTIC_TOKEN = "df616893f983b20fed6ac71e5f6cb9f2";
 const YANDEX_API_KEY = "d748d3d0-760c-44fa-923c-d865d6017c60";
 
 
@@ -103,7 +100,7 @@ const CheckoutPage = () => {
         delivery: {
           address: deliveryData?.address || null,
           price: withoutDeliveryPayment ? 0 : deliveryData?.price || 0,
-          provider: deliveryData?.service || "eshop",
+          provider: deliveryData?.service || "",
           did: deliveryData?.code || "",
           details: deliveryData,
         },
@@ -268,9 +265,8 @@ const CheckoutPage = () => {
           </div>
         </div>
 
-        <EShopLogistic
+        <DeliveryWidget
           DADATA_TOKEN={DADATA_TOKEN}
-          ESHOPLOGISTIC_TOKEN={ESHOPLOGISTIC_TOKEN}
           YANDEX_API_KEY={YANDEX_API_KEY}
           orderWeight={totalWeight / 1000}
 

@@ -21,11 +21,10 @@ const User = require("./models/User");
 const { getBonusPercent } = require("./services/bonusService");
 const { sendEmail } = require('./services/emailService');
 
-const { createEShopDeliveryOrder } = require("./utils/createEShopDeliveryOrder");
+const { SERVICES: DELIVERY_SERVICES, createDeliveryOrder } = require("./services/delivery");
 
 const TERMINAL_KEY = process.env.TERMINAL_KEY;
 const TERMINAL_PASSWORD = process.env.TERMINAL_PASSWORD;
-const ESHOPLOGISTIC_TOKEN = process.env.ESHOPLOGISTIC_TOKEN;
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -235,7 +234,8 @@ function formatRub(value) {
 
 function buildPaidOrderEmail({ user, order, deliveryId, orderItems }) {
   const customerName = user?.name || "покупатель";
-  const deliveryProvider = order.delivery?.provider || "служба доставки";
+  const deliveryProvider =
+    DELIVERY_SERVICES[order.delivery?.provider]?.name || order.delivery?.provider || "служба доставки";
   const deliveryAddress = order.delivery?.address?.value || "адрес доставки не указан";
   const itemsTotal = Number(order.itemsTotal) || orderItems.reduce((sum, item) => sum + item.total, 0);
   const bonusSpent = Number(order.bonuses?.spent) || 0;
@@ -559,7 +559,7 @@ async function arrangeDeliveryOrder(orderId, deliveryData)
 
   orderData.dimensions = `${orderData.dimensions}${real_orders * 6}`;
 
-  const deliveryId = await createEShopDeliveryOrder(ESHOPLOGISTIC_TOKEN, deliveryData, orderData, companyData);
+  const deliveryId = await createDeliveryOrder(deliveryData, orderData, companyData);
   return deliveryId;
 }
 
@@ -774,7 +774,7 @@ app.post('/api/create-payment', async(req, res) => {
       ...order.delivery,
       address: deliveryData.address || order.delivery?.address || null,
       price: Number(deliveryData.price || order.delivery?.price || 0),
-      provider: deliveryData.service || order.delivery?.provider || "eshop",
+      provider: deliveryData.service || order.delivery?.provider || "",
       terminalCode: deliveryData.code || order.delivery?.terminalCode || "",
       details: deliveryData,
     };
@@ -879,101 +879,6 @@ app.get("/api/bonus-settings", async (_req, res) => {
   }
 });
 
-// async function createDeliveryOrder(deliveryData, orderData, otherData)
-// {
-//   const ESHOPLOGISTIC_TOKEN = "df616893f983b20fed6ac71e5f6cb9f2";
-
-//   let location_from = 
-//   otherData.delivery.location_from.pick_up == true 
-//   ? { 
-//     pick_up: otherData.delivery.location_from.pick_up,
-//     address: otherData.delivery.location_from.address
-//   }
-//   : {
-//     pick_up: otherData.delivery.location_from.pick_up
-//   };
-
-//   let location_to = 
-//   deliveryData.type == "terminal" 
-//   ? {
-//     terminal: deliveryData.code
-//   }
-//   : {
-//     address: {
-//       country: deliveryData.address.country,    // string 	Код страны.
-//                                                 // Варианты: RU, UZ, AZ, KZ, AB, TM, BY, UA, TJ, KG, AM, MD 
-//       region: deliveryData.address.region,      // string 	Регион. Например: Московская область
-//       city: deliveryData.address.city,          // string 	Населённый пункт
-//       district: deliveryData.address.district,  // string 	Район
-//       street: deliveryData.address.street,      // string 	Улица
-//       house: deliveryData.address.house,        // string 	Номер строения
-//       room: deliveryData.room,                  // string 	Квартира / офис / помещение
-//     }
-//   };
-
-//   let order = {
-//     id: orderData.id,
-//     comment: deliveryData.comment // string 	Комментарий
-//   }
-//   let tariff;
-//   switch (deliveryData.service) {
-//     case "sdek":
-//       order.type = orderData.type;
-//       if (orderData.combine_places_apply == true)
-//       {
-//         order.combine_places = {};
-//         order.combine_places.apply = true;
-//         order.combine_places.weight = orderData.total_weight;
-//         order.combine_places.dimensions = orderData.dimensions;
-//       }
-
-//       if(deliveryData.type == "terminal")
-//       {
-//         tariff = 136;
-//       } else if(deliveryData.type == "door")
-//       {
-//         tariff = 137;
-//       }
-//       break;
-  
-//     default:
-//       break;
-//   }
-
-//   let data = { 
-//     key: ESHOPLOGISTIC_TOKEN, 
-//     action: "create",
-//     cms: "custom",
-//     service: deliveryData.service,
-//     order: order,
-//     sender: otherData.sender,
-//     receiver: {
-//       name: deliveryData.name,
-//       phone: deliveryData.phone
-//     },
-//     places: orderData.places,
-//     delivery: {
-//       type: deliveryData.type,
-//       tariff: tariff,
-//       location_from: {
-//         pick_up: otherData.delivery.location_from.pick_up
-//       },
-//       location_to: location_to,
-//       payment: orderData.payment,
-//       cost: deliveryData.price
-//     }
-//   };
-  
-//   console.log(data);
-//   let response = await fetch("https://api.esplc.ru/delivery/order", {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify(data),
-//   });
-//   let result = await response.json();
-//   console.log("eshopResult", result);
-// }
-
 // Import routes
 // const paymentRoutes = require("./routes/paymentRoutes");
 const productRoutes = require("./routes/productRoutes");
@@ -984,6 +889,7 @@ const emailRoutes = require("./routes/emailRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const seoRoutes = require("./routes/seoRoutes");
+const deliveryRoutes = require("./routes/deliveryRoutes");
 const { log } = require("console");
 
 console.log("Routes imported");
@@ -998,6 +904,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/email", emailRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/chats", chatRoutes);
+app.use("/api/delivery", deliveryRoutes);
 
 console.log("Routes registered");
 
