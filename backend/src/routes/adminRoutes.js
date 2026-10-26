@@ -54,6 +54,8 @@ router.get("/settings/bonuses", adminController.getBonusSettings);
 router.put("/settings/bonuses", adminController.updateBonusSettings);
 router.get("/settings/delivery", adminController.getDeliverySettings);
 router.put("/settings/delivery", adminController.updateDeliverySettings);
+router.get("/settings/popular", adminController.getPopularSettings);
+router.put("/settings/popular", adminController.updatePopularSettings);
 
 // Reviews
 router.get("/notifications/counts", adminController.getAdminNotificationCounts);

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getProducts } from "../services/productService";
+import { getPopularProducts, getProducts } from "../services/productService";
 import { getProductPath } from "../utils/productUrl";
 import ResponsiveImage from "../components/ResponsiveImage";
 import { useSamplerSettings } from "../context/SamplerSettingsContext";
@@ -12,13 +12,18 @@ const HomePage = () => {
 
   useEffect(() => {
     let isActive = true;
-    getProducts()
-      .then((response) => {
-        if (!isActive) return;
-        const inStock = response.data.filter(
-          (product) => product.remains > 0 && product.images?.some((img) => img.type !== "video"),
-        );
-        setPopularProducts(inStock.slice(0, 4));
+    const hasPhoto = (product) => product.images?.some((img) => img.type !== "video");
+    // Сначала — сорта, выбранные в админке; если ничего не выбрано, первые 4 товара в наличии
+    getPopularProducts()
+      .then((response) => response.data.filter(hasPhoto))
+      .catch(() => [])
+      .then(async (selected) => {
+        if (selected.length > 0) return selected;
+        const response = await getProducts();
+        return response.data.filter((product) => product.remains > 0 && hasPhoto(product)).slice(0, 4);
+      })
+      .then((products) => {
+        if (isActive) setPopularProducts(products);
       })
       .catch((error) => console.error("Ошибка загрузки товаров:", error))
       .finally(() => {

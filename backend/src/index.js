@@ -19,6 +19,7 @@ const Order = require("./models/Order");
 const Product = require("./models/Product");
 const User = require("./models/User");
 const { getBonusPercent } = require("./services/bonusService");
+const { getPopularProducts } = require("./services/popularProductsService");
 const { sendEmail } = require('./services/emailService');
 
 const { SERVICES: DELIVERY_SERVICES, createDeliveryOrder } = require("./services/delivery");
@@ -876,6 +877,15 @@ app.get("/api/bonus-settings", async (_req, res) => {
     res.json({ bonusPercent: await getBonusPercent() });
   } catch (error) {
     res.status(500).json({ message: "Не удалось загрузить настройки бонусов" });
+  }
+});
+
+app.get("/api/popular-products", async (_req, res) => {
+  try {
+    res.json(await getPopularProducts());
+  } catch (error) {
+    logError(error, "getPopularProducts");
+    res.status(500).json({ message: "Не удалось загрузить популярные товары" });
   }
 });
 

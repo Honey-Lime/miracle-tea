@@ -22,6 +22,11 @@ const {
 } = require("../services/samplerService");
 const { getLogFilePath, logError } = require("../utils/logger");
 const { getServicesSettings, setServicesSettings } = require("../services/delivery");
+const {
+  MAX_POPULAR_PRODUCTS,
+  getPopularProductIds,
+  setPopularProductIds,
+} = require("../services/popularProductsService");
 const path = require("path");
 const fs = require("fs");
 
@@ -230,6 +235,25 @@ exports.updateDeliverySettings = async (req, res) => {
     res.json({ services: await setServicesSettings(req.body?.services) });
   } catch (error) {
     logError(error, "updateDeliverySettings");
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getPopularSettings = async (_req, res) => {
+  try {
+    res.json({ productIds: await getPopularProductIds(), maxCount: MAX_POPULAR_PRODUCTS });
+  } catch (error) {
+    logError(error, "getPopularSettings");
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.updatePopularSettings = async (req, res) => {
+  try {
+    const productIds = await setPopularProductIds(req.body?.productIds);
+    res.json({ productIds, maxCount: MAX_POPULAR_PRODUCTS });
+  } catch (error) {
+    logError(error, "updatePopularSettings");
     res.status(500).json({ message: error.message });
   }
 };

@@ -658,3 +658,37 @@
   gap: 8px;
   font-weight: normal;
 }
+
+.ap-settings-page .ap-popular-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding-left: 1.5em;
+}
+
+.ap-settings-page .ap-popular-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ap-settings-page .ap-popular-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.ap-settings-page .ap-popular-item .btn {
+  padding: 4px 10px;
+}
+
+.ap-settings-page .ap-popular-add {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.ap-settings-page .ap-popular-add select {
+  flex: 1;
+  min-width: 0;
+}
