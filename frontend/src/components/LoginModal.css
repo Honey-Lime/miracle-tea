@@ -11,7 +11,7 @@
 }
 
 .lgn-modal-content .lgn-error {
-  color: #dc5656;
+  color: var(--error-text);
   margin-bottom: 1rem;
 }
 
@@ -118,7 +118,7 @@
 
 .required-mark,
 .lgn-required-mark {
-  color: #dc5656;
+  color: var(--error-text);
 }
 
 .password-input-wrapper,

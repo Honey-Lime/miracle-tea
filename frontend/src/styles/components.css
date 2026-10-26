@@ -159,11 +159,11 @@
 }
 
 .btn--secondary:hover {
-  background-color: rgba(240, 238, 231, 0.14);
+  background-color: var(--hover-bg);
 }
 
 .btn--secondary:active {
-  background-color: rgba(240, 238, 231, 0.24);
+  background-color: var(--active-bg);
   transform: translateY(1px);
 }
 
@@ -226,7 +226,7 @@
 .modal-content {
   display: flex;
   flex-direction: column;
-  background: var(--color-primary);
+  background: var(--color-surface);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 2rem;
@@ -238,7 +238,7 @@
 .modal-content h2 {
   margin-bottom: 0;
   /* color: var(--color-brand); */
-  color: white;
+  color: var(--color-text-primary);
 }
 
 .modal-close {
@@ -280,7 +280,7 @@ form {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: #070707;
+  color: var(--color-text-primary);
   font-size: 0.9rem;
   letter-spacing: 0.02em;
 }
@@ -293,7 +293,7 @@ form {
   border-radius: 8px;
   font-size: 0.95rem;
   font-family: inherit;
-  color: #070707;
+  color: var(--color-text-primary);
   background: var(--color-white);
   transition: all 0.25s ease;
   box-sizing: border-box;

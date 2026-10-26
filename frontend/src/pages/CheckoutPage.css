@@ -24,7 +24,7 @@
 .chp-checkout-page .chp-order-summary,
 .chp-checkout-page .chp-checkout-settings,
 .chp-checkout-page .chp-final-total {
-  background: var(--color-primary);
+  background: var(--color-surface);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 2rem;
@@ -36,7 +36,7 @@
 .chp-checkout-page .chp-checkout-settings h2,
 .chp-checkout-page .chp-final-total h2 {
   margin-bottom: 1.5rem;
-  color: var(--color-white);
+  color: var(--color-text-primary);
 }
 
 .chp-checkout-page .chp-checkout-sidebar {
@@ -88,7 +88,7 @@
   padding: 0.85rem 1rem;
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  background: var(--color-primary);
+  background: var(--color-surface);
   color: inherit;
   transition:
     border-color 0.2s ease,
@@ -114,7 +114,7 @@
   padding: 0.9rem 1rem;
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  background: var(--color-primary);
+  background: var(--color-surface);
   cursor: pointer;
 }
 
@@ -158,7 +158,7 @@
   font-size: 0.95rem;
   line-height: 1.4;
   /* color: var(--color-text-primary); */
-  color: grey;
+  color: var(--color-text-secondary);
 }
 
 .chp-checkout-page .chp-policy-consent input {
@@ -183,7 +183,7 @@
 .chp-checkout-page .chp-grand-total {
   font-size: 1.5rem;
   font-weight: bold;
-  color: var(--color-cta);
+  color: var(--color-cta-text);
   border-bottom: none !important;
   margin-top: 1rem;
 }
@@ -212,7 +212,7 @@
   gap: 0.5rem;
   padding: 0.35rem 0.9rem 0.35rem 0.4rem;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.14);
+  background: var(--color-primary-subtle);
   color: var(--color-text-secondary);
   font-size: 0.95rem;
 }
@@ -224,7 +224,7 @@
   width: 1.6rem;
   height: 1.6rem;
   border-radius: 50%;
-  background: rgba(240, 238, 231, 0.25);
+  background: var(--color-gray-200);
   color: var(--color-text-primary);
   font-size: 0.85rem;
 }
@@ -236,19 +236,19 @@
 
 .chp-checkout-page .chp-step--current::before {
   background: var(--color-cta);
-  color: #1b220e;
+  color: var(--color-on-cta);
 }
 
 .chp-checkout-page .chp-step--done::before {
   content: "✓";
   background: var(--color-brand-light);
-  color: #1b220e;
+  color: var(--color-brand);
 }
 
 .chp-checkout-page .chp-pending {
   margin-top: 0.8rem;
   font-size: 0.95rem;
-  color: var(--color-cta-light);
+  color: var(--color-cta-text);
 }
 
 .chp-checkout-page .chp-order-error {

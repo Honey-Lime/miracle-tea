@@ -53,7 +53,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  background: var(--color-primary);
+  background: var(--color-surface);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   box-shadow: 0 2px 4px var(--shadow-color);
@@ -63,7 +63,7 @@
 }
 
 .crt-cart-page .crt-item.crt-item-stock-warning {
-  border-color: #dc5656;
+  border-color: var(--error-text);
   background: #fff7f7;
 }
 
@@ -149,7 +149,7 @@
 }
 
 .crt-cart-page .crt-summary {
-  background: var(--color-primary);
+  background: var(--color-surface);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 2rem;
@@ -180,7 +180,7 @@
 }
 
 .crt-cart-page .crt-warning {
-  color: #dc5656;
+  color: var(--error-text);
   margin-bottom: 1rem;
 }
 
@@ -198,14 +198,14 @@
   margin-bottom: 1rem;
   padding: 0.8rem 1rem;
   border-radius: 12px;
-  background: rgba(0, 0, 0, 0.22);
+  background: var(--color-primary-subtle);
 }
 
 .crt-cart-page .crt-undo button {
   padding: 0.4rem 1rem;
   border-radius: 999px;
   background: var(--color-cta);
-  color: #1b220e;
+  color: var(--color-on-cta);
 }
 
 .crt-cart-page .crt-delivery-note {

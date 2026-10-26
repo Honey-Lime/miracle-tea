@@ -2,7 +2,7 @@
   max-width: 68rem;
   margin: 0 auto;
   padding: 9rem 0 6rem;
-  color: rgba(242, 240, 232, 0.9);
+  color: var(--color-text-primary);
 }
 
 .abp-hero {
@@ -12,7 +12,7 @@
 
 .abp-eyebrow {
   margin-bottom: 0.75rem;
-  color: var(--color-cta);
+  color: var(--color-cta-text);
   font-family: "Jost";
   font-size: 0.9rem;
   font-weight: 500;
@@ -22,10 +22,9 @@
 
 .abp-about-page h1,
 .abp-about-page h2 {
-  color: var(--color-cta);
+  color: var(--color-cta-text);
   font-family: "Jost";
   font-weight: 500;
-  text-shadow: 0 0.2rem 0.35rem rgba(0, 0, 0, 0.32);
 }
 
 .abp-about-page h1 {
@@ -49,10 +48,10 @@
 .abp-section {
   margin-top: 1.5rem;
   padding: clamp(1.5rem, 4vw, 3rem);
-  border: 1px solid rgba(242, 240, 232, 0.14);
+  border: 1px solid var(--border-color-light);
   border-radius: 2rem;
-  background: rgba(209, 217, 189, 0.1);
-  box-shadow: 0 1rem 2.25rem rgba(0, 0, 0, 0.16);
+  background: var(--color-surface);
+  box-shadow: 0 1rem 2.25rem var(--shadow-color);
 }
 
 .abp-section p,
@@ -76,17 +75,17 @@
   gap: 0.7rem;
   padding: 1.6rem;
   border-radius: 1.4rem;
-  background: rgba(112, 136, 52, 0.35);
+  background: var(--color-secondary-light);
 }
 
 .abp-highlight span {
-  color: rgba(242, 240, 232, 0.72);
+  color: var(--color-text-secondary);
   font-family: "Jost";
   font-size: 0.9rem;
 }
 
 .abp-highlight strong {
-  color: var(--color-cta);
+  color: var(--color-cta-text);
   font-family: "Jost";
   font-size: 1.35rem;
   line-height: 1.2;
@@ -110,7 +109,7 @@
   position: relative;
   padding: 1rem 1rem 1rem 4rem;
   border-radius: 1rem;
-  background: rgba(242, 240, 232, 0.08);
+  background: var(--color-primary-subtle);
   counter-increment: pricing;
 }
 
@@ -124,7 +123,7 @@
   place-items: center;
   border-radius: 50%;
   background: var(--color-cta);
-  color: #5d6b3e;
+  color: var(--color-on-cta);
   content: counter(pricing);
   font-family: "Jost";
   font-weight: 500;
@@ -136,7 +135,7 @@
   padding: 0.9rem 1.4rem;
   border-radius: 999px;
   background: var(--color-cta);
-  color: #5d6b3e;
+  color: var(--color-on-cta);
   font-family: "Jost";
   font-weight: 500;
   text-decoration: none;
@@ -144,7 +143,7 @@
 }
 
 .abp-catalog-link:hover {
-  background: #ffd064;
+  background: var(--color-cta-dark);
   transform: translateY(-0.15rem);
 }
 

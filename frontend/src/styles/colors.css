@@ -1,52 +1,60 @@
 /* ===================================
    COLOR PALETTE - CSS VARIABLES
+   Палитра «Рисовая бумага и хвоя»
    =================================== */
 :root {
   /* Primary Colors - Background */
-  --color-primary: #5f6b46; /* Оливковый фон из макета */
-  --color-primary-subtle: #778a3a; /* Нижний/админский оливковый тон */
+  --color-primary: #f6f1e7; /* Кремовый фон страницы (рисовая бумага) */
+  --color-primary-subtle: #ece5d6; /* Чередующиеся секции, плашки */
+  --color-surface: #ffffff; /* Карточки, модалки, формы */
 
-  /* Brand Color - Main Accent (оливковый) */
-  --color-brand: #4f6320; /* Ключевой оливковый цвет */
-  --color-brand-dark: #3a4a15; /* Темный вариант для hover */
-  --color-brand-light: #a8b67b; /* Светлый вариант для акцентов */
+  /* Brand Color - хвойный зелёный */
+  --color-brand: #1f3b2d; /* Ключевой хвойный цвет */
+  --color-brand-dark: #142a1f; /* Темный вариант для hover */
+  --color-brand-light: #c9d6b3; /* Светлый вариант для акцентов */
 
-  /* Secondary Color - светлый оливковый */
-  --color-secondary: #aab77b; /* Светлый оливковый */
-  --color-secondary-dark: #566a22; /* Темный вариант для hover */
-  --color-secondary-light: #d9dccb; /* Светлый фон */
+  /* Secondary Color - матча */
+  --color-secondary: #5f7d3a; /* Матча (≥4.5:1 с белым текстом) */
+  --color-secondary-dark: #46602a; /* Темный вариант для hover */
+  --color-secondary-light: #e6ead8; /* Светлый фон */
 
   /* Text Colors */
-  --color-text-primary: #f0eee7; /* Светлый текст на оливковом фоне */
-  --color-text-secondary: #e8e5da; /* Второстепенный текст (≥4.5:1 на #5f6b46) */
+  --color-text-primary: #1f3b2d; /* Основной текст на кремовом фоне */
+  --color-text-secondary: #55655a; /* Второстепенный текст (≥4.5:1 на #f6f1e7) */
 
-  /* CTA Accent - оранжевый (имбирь) */
-  --color-cta: #f4aa32; /* Оранжевый акцент из макета */
-  --color-cta-dark: #d88d19; /* Темный вариант для hover */
-  --color-cta-light: #dfd2c4; /* Светлый бежевый вариант */
-  --color-cta-text: #ffc35c; /* Оранжевый текст/заголовки на оливковом фоне */
-  --color-on-cta: #3a4a15; /* Текст на оранжевой заливке */
-  --color-on-cta-hover: #242d0c; /* Текст на hover-заливке (≥4.5:1 на #d88d19) */
+  /* CTA Accent - хвойная заливка, золото для цен и акцентов */
+  --color-cta: #1f3b2d; /* Заливка главной кнопки */
+  --color-cta-dark: #2f5440; /* Hover главной кнопки */
+  --color-cta-light: #f1e4c8; /* Светлый золотистый фон */
+  --color-cta-text: #8a5f1e; /* Золотой текст: цены, акценты (≥4.5:1 на #f6f1e7) */
+  --color-on-cta: #f6f1e7; /* Текст на хвойной заливке */
+  --color-on-cta-hover: #ffffff; /* Текст на hover-заливке */
+
+  /* Тёмные зоны: шапка, подвал, hero */
+  --color-dark: #1f3b2d;
+  --color-on-dark: #f6f1e7;
+  --color-on-dark-muted: #d9ddd0;
+  --color-gold-on-dark: #e0b866;
 
   /* Neutral Colors */
   --color-white: #ffffff;
-  --color-gray-100: #f5f5f5;
-  --color-gray-200: #e0e0e0;
-  --color-gray-300: #ddd;
-  --color-gray-400: #ccc;
-  --color-gray-500: #666666;
-  --color-gray-600: #555555;
-  --color-gray-700: #333333;
+  --color-gray-100: #f3eee3;
+  --color-gray-200: #e4ddcd;
+  --color-gray-300: #d8d0be;
+  --color-gray-400: #a39c8c;
+  --color-gray-500: #6b6a60;
+  --color-gray-600: #55554c;
+  --color-gray-700: #33332d;
 
   /* Border & Shadow */
-  --border-color: rgba(240, 238, 231, 0.32);
-  --border-color-light: rgba(240, 238, 231, 0.18);
-  --shadow-color: rgba(24, 31, 14, 0.24);
-  --shadow-dark: rgba(24, 31, 14, 0.38);
-  --overlay-color: rgba(0, 0, 0, 0.5);
+  --border-color: rgba(31, 59, 45, 0.18);
+  --border-color-light: rgba(31, 59, 45, 0.1);
+  --shadow-color: rgba(31, 43, 30, 0.08);
+  --shadow-dark: rgba(20, 32, 24, 0.22);
+  --overlay-color: rgba(20, 32, 24, 0.55);
 
   /* Component Specific Colors */
-  --footer-bg: #4f6320;
+  --footer-bg: var(--color-dark);
   --btn-primary-bg: var(--color-brand);
   --btn-primary-hover: var(--color-brand-dark);
   --btn-primary-text: var(--color-white);
@@ -56,45 +64,69 @@
   --btn-outline-text: var(--color-brand);
   --btn-outline-hover-bg: var(--color-brand);
   --btn-outline-hover-text: var(--color-white);
-  /* Gram control buttons (тёмная тема) */
-  --gram-btn-bg: rgba(0, 0, 0, 0.28);
+  /* Gram control buttons */
+  --gram-btn-bg: var(--color-secondary-light);
   --gram-btn-text: var(--color-text-primary);
-  --gram-btn-hover-bg: rgba(240, 238, 231, 0.14);
-  --gram-btn-active-bg: rgba(240, 238, 231, 0.24);
-  --gram-btn-disabled-text: rgba(240, 238, 231, 0.4);
+  --gram-btn-hover-bg: rgba(31, 59, 45, 0.1);
+  --gram-btn-active-bg: rgba(31, 59, 45, 0.18);
+  --gram-btn-disabled-text: rgba(31, 59, 45, 0.35);
 
-  /* Gram value display (center) */
+  /* Hover/active подложки для прозрачных кнопок */
+  --hover-bg: rgba(31, 59, 45, 0.07);
+  --active-bg: rgba(31, 59, 45, 0.14);
 
   /* Cart button */
-  --cart-btn-hover-shadow: 0 6px 16px rgba(36, 42, 25, 0.32);
+  --cart-btn-hover-shadow: 0 6px 16px rgba(31, 59, 45, 0.24);
   --tag-active-bg: var(--color-brand);
   --tag-active-text: var(--color-white);
   --tag-active-border: var(--color-brand);
   --product-tag-bg: var(--color-secondary-light);
-  --product-tag-text: var(--color-brand-dark);
+  --product-tag-text: var(--color-secondary-dark);
   --status-ordered-bg: var(--color-secondary-light);
   --status-ordered-text: var(--color-secondary-dark);
   --status-paid-bg: var(--color-cta-light);
-  --status-paid-text: var(--color-cta-dark);
+  --status-paid-text: var(--color-cta-text);
   --status-shipping-bg: var(--color-secondary-light);
   --status-shipping-text: var(--color-secondary-dark);
   --status-completed-bg: var(--color-secondary-light);
   --status-completed-text: var(--color-secondary-dark);
-  --status-cancelled-bg: #fde8e8;
-  --status-cancelled-text: #dc5656;
+  --status-cancelled-bg: #fbe9e5;
+  --status-cancelled-text: #a8382a;
   --status-cart-bg: var(--color-gray-200);
   --status-cart-text: var(--color-gray-600);
-  --error-bg: #fde8e8;
-  --error-text: #dc5656;
-  --toast-error-bg: #b33a3a;
+  --error-bg: #fbe9e5;
+  --error-text: #a8382a;
+  --toast-error-bg: #a8382a;
   --success-bg: var(--color-secondary-light);
   --success-text: var(--color-secondary-dark);
-  --input-focus-shadow: rgba(255, 195, 92, 0.3);
-  --link-hover: var(--color-secondary-dark);
+  --input-focus-shadow: rgba(95, 125, 58, 0.25);
+  --link-hover: var(--color-secondary);
   --breadcrumb-default: var(--color-text-secondary);
   --breadcrumb-current: var(--color-text-primary);
-  --profile-link-bg: rgba(255, 255, 255, 0.15);
-  --profile-link-hover: rgba(255, 255, 255, 0.25);
-  --admin-link-bg: var(--color-cta);
-  --admin-link-hover: var(--color-cta-dark);
+  --profile-link-bg: rgba(246, 241, 231, 0.15);
+  --profile-link-hover: rgba(246, 241, 231, 0.25);
+  --admin-link-bg: var(--color-gold-on-dark);
+  --admin-link-hover: #ecc97f;
+}
+
+/* Тёмные зоны переопределяют текстовые токены для своего содержимого */
+.hdr-header,
+.ftr-footer,
+.hp-hero,
+.cp-hero {
+  --color-text-primary: var(--color-on-dark);
+  --color-text-secondary: var(--color-on-dark-muted);
+  --color-cta: var(--color-gold-on-dark);
+  --color-cta-dark: #ecc97f;
+  --color-cta-text: var(--color-gold-on-dark);
+  --color-on-cta: #1f3b2d;
+  --color-on-cta-hover: #142a1f;
+  --border-color: rgba(246, 241, 231, 0.32);
+  --border-color-light: rgba(246, 241, 231, 0.18);
+  --hover-bg: rgba(246, 241, 231, 0.14);
+  --active-bg: rgba(246, 241, 231, 0.24);
+  --breadcrumb-default: var(--color-on-dark-muted);
+  --breadcrumb-current: var(--color-on-dark);
+  --link-hover: var(--color-gold-on-dark);
+  color: var(--color-text-primary);
 }

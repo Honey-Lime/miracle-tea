@@ -185,7 +185,7 @@ button {
 
 /* Card */
 .card {
-  background: var(--color-primary);
+  background: var(--color-surface);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   box-shadow: 0 2px 8px var(--shadow-color);
@@ -242,8 +242,8 @@ button {
 }
 
 .toast-warning {
-  background-color: var(--color-cta);
-  color: var(--color-brand);
+  background-color: var(--color-cta-light);
+  color: var(--color-cta-text);
 }
 
 .toast-error {

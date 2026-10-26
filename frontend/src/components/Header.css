@@ -6,7 +6,7 @@
   inset: 0 0 auto;
   z-index: 900;
   height: var(--header-h);
-  background-color: rgba(36, 42, 25, 0.72);
+  background-color: rgba(20, 42, 31, 0.9);
   color: var(--color-text-primary);
   box-shadow: 0 2px 8px var(--shadow-dark);
   backdrop-filter: blur(12px);
@@ -15,7 +15,7 @@
 }
 
 .hdr-header.header--scrolled {
-  background-color: rgba(36, 42, 25, 0.94);
+  background-color: rgba(20, 42, 31, 0.97);
 }
 
 .hdr-header .container,
@@ -96,7 +96,7 @@
   justify-content: center;
   width: var(--tap-size);
   height: var(--tap-size);
-  border: 2px solid rgba(240, 238, 231, 0.78);
+  border: 2px solid rgba(246, 241, 231, 0.78);
   border-radius: 50%;
   background: transparent;
   color: var(--color-text-primary);
@@ -118,13 +118,13 @@
 .hdr-menu-toggle:hover,
 .hdr-cart-link:hover,
 .hdr-header .hdr-btn-login:hover {
-  background-color: rgba(240, 238, 231, 0.18);
+  background-color: rgba(246, 241, 231, 0.18);
 }
 
 .hdr-menu-toggle:active,
 .hdr-cart-link:active,
 .hdr-header .hdr-btn-login:active {
-  background-color: rgba(240, 238, 231, 0.3);
+  background-color: rgba(246, 241, 231, 0.3);
 }
 
 .hdr-cart-count {
@@ -158,7 +158,7 @@
   padding: var(--space-3);
   border: 1px solid var(--border-color-light);
   border-radius: var(--radius-md);
-  background: rgba(32, 42, 31, 0.97);
+  background: rgba(20, 42, 31, 0.97);
   box-shadow: 0 14px 30px var(--shadow-dark);
 }
 
@@ -178,11 +178,11 @@
 }
 
 .hdr-header .hdr-nav a:hover {
-  background-color: rgba(240, 238, 231, 0.14);
+  background-color: var(--hover-bg);
 }
 
 .hdr-header .hdr-nav a:active {
-  background-color: rgba(240, 238, 231, 0.24);
+  background-color: var(--active-bg);
 }
 
 .hdr-header .hdr-nav a.active {
@@ -242,6 +242,6 @@
   }
 
   .hdr-header .hdr-nav a:hover {
-    background-color: rgba(240, 238, 231, 0.14);
+    background-color: var(--hover-bg);
   }
 }

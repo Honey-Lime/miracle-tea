@@ -37,7 +37,7 @@
 }
 
 .puf-dropzone small {
-  color: #070707;
+  color: var(--color-text-primary);
   font-size: 0.82rem;
 }
 

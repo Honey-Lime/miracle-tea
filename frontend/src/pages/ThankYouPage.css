@@ -11,7 +11,7 @@
 
 .typ-thank-you-page .typ-thank-you-content {
   text-align: center;
-  background: var(--color-primary);
+  background: var(--color-surface);
   border: 1px solid var(--border-color);
   padding: 3rem;
   border-radius: 12px;
@@ -38,8 +38,8 @@
 }
 
 .typ-thank-you-page .typ-thank-you-content .typ-error {
-  color: #dc5656;
-  background: #fde8e8;
+  color: var(--error-text);
+  background: var(--error-bg);
   padding: 0.75rem 1rem;
   border-radius: 4px;
   margin: 1rem 0;
