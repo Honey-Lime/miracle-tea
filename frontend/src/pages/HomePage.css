@@ -10,7 +10,7 @@
   padding-block: calc(var(--header-h) + var(--space-6)) var(--section-py);
   background:
     linear-gradient(180deg, rgba(36, 42, 25, 0.78), rgba(54, 63, 37, 0.94)),
-    url("/first-screen-bg.png") center top / cover no-repeat;
+    var(--bg-leaves) center top / cover no-repeat;
   overflow: clip;
 }
 
@@ -226,13 +226,15 @@ a.hp-popular-card:hover {
   padding: var(--space-3) var(--space-4);
   font-size: var(--fs-md);
   font-weight: 500;
-  color: var(--color-cta-text);
+  color: var(--color-text-primary);
   text-decoration: underline;
-  text-underline-offset: 4px;
+  text-decoration-color: var(--color-cta-text);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
 }
 
 .hp-popular-all:hover {
-  color: var(--color-text-primary);
+  color: var(--color-cta-text);
 }
 
 .hp-skeleton {

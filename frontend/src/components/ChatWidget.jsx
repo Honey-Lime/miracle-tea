@@ -105,7 +105,7 @@ const ChatWidget = () => {
 
   return (
     <div className={`cw-chat-widget ${open ? "open" : ""}`}>
-      <button className="cw-chat-toggle" type="button" onClick={() => (user ? setOpen(!open) : openLoginModal())}>
+      <button className="cw-chat-toggle" type="button" aria-label={unread > 0 ? `Чат с администратором, непрочитанных: ${unread}` : "Чат с администратором"} onClick={() => (user ? setOpen(!open) : openLoginModal())}>
         <span aria-hidden="true">Чат</span>
         {unread > 0 && <strong>{unread}</strong>}
       </button>

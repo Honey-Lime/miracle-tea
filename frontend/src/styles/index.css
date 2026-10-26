@@ -39,6 +39,10 @@ body {
   line-height: var(--lh-body);
 }
 
+picture {
+  display: contents;
+}
+
 img {
   max-width: 100%;
   height: auto;

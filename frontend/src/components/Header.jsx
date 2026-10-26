@@ -27,9 +27,9 @@ const Header = () => {
       <div className="container">
         <div className="hdr-content">
           <div className="hdr-logo">
-            <Link className="logo-block" to="/" aria-label="Чудо чай — на главную">
+            <Link className="logo-block" to="/">
               <img className="hdr-logo-img" src={logoPNG} alt="" width="44" height="44" />
-              <span className="logo-word logo-miracle">Чудо</span>
+              <span className="logo-word logo-miracle">Чудо</span>{" "}
               <span className="logo-word logo-tea">чай</span>
             </Link>
             <p className="hdr-tagline">Качественный чай по лояльной цене</p>

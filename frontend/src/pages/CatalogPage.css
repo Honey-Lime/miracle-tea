@@ -12,7 +12,7 @@
   padding: calc(var(--header-h) + var(--space-2)) 0 var(--space-5);
   background:
     linear-gradient(180deg, rgba(36, 42, 25, 0.8), rgba(54, 63, 37, 0.95)),
-    url("/first-screen-bg.png") center / cover no-repeat;
+    var(--bg-leaves) center / cover no-repeat;
 }
 
 .cp-hero .breadcrumbs {
@@ -322,7 +322,7 @@
   justify-content: stretch;
   overflow: hidden;
   border-radius: var(--radius-pill);
-  background: rgba(240, 238, 231, 0.14);
+  background: var(--gram-btn-bg);
 }
 
 .cp-product-card .gram-btn {
@@ -335,7 +335,7 @@
   padding: 0 var(--space-3);
   border-radius: 0;
   background: transparent;
-  color: var(--color-text-primary);
+  color: var(--gram-btn-text);
   font-family: inherit;
   font-size: var(--fs-base);
   font-weight: 500;
@@ -343,16 +343,16 @@
 }
 
 .cp-product-card .gram-btn:hover:not(:disabled) {
-  background: rgba(240, 238, 231, 0.18);
-  color: var(--color-text-primary);
+  background: var(--gram-btn-hover-bg);
+  color: var(--gram-btn-text);
 }
 
 .cp-product-card .gram-btn:active:not(:disabled) {
-  background: rgba(240, 238, 231, 0.28);
+  background: var(--gram-btn-active-bg);
 }
 
 .cp-product-card .gram-btn:disabled {
-  color: rgba(240, 238, 231, 0.4);
+  color: var(--gram-btn-disabled-text);
 }
 
 .cp-product-card .gram-count {

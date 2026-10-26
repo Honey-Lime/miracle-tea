@@ -2,14 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getProducts } from "../services/productService";
 import { getProductPath } from "../utils/productUrl";
-import homepage1 from "/homepage1.png";
-import homepage2 from "/homepage2.png";
-import homepage3 from "/homepage3.png";
-import leaf1 from "/leaf1.png";
-import leaf2 from "/leaf2.png";
-import leaf3 from "/leaf3.png";
-import leaf4 from "/leaf4.png";
-import firstscreen from "/firstscreen.png";
+import ResponsiveImage from "../components/ResponsiveImage";
 import { useSamplerSettings } from "../context/SamplerSettingsContext";
 
 const HomePage = () => {
@@ -52,7 +45,14 @@ const HomePage = () => {
               <Link className="btn btn--secondary" to="/about">О нас</Link>
             </div>
           </div>
-          <img className="hp-hero-image" src={firstscreen} alt="Чайник, пиала и листья китайского чая" fetchpriority="high" width="1976" height="1636" />
+          <ResponsiveImage
+            name="firstscreen"
+            className="hp-hero-image"
+            alt="Чайник, пиала и листья китайского чая"
+            sizes="(min-width: 768px) 576px, calc(100vw - 32px)"
+            loading="eager"
+            fetchpriority="high"
+          />
         </div>
       </section>
 
@@ -93,9 +93,9 @@ const HomePage = () => {
       <section className="hp-feature">
         <div className="container hp-feature-grid">
           <div className="hp-feature-media">
-            <img className="hp-block-image" src={homepage1} alt="Заваренный китайский чай в пиале" loading="lazy" decoding="async" width="1103" height="986" />
-            <img className="leaf1" src={leaf1} alt="" loading="lazy" decoding="async" />
-            <img className="leaf2" src={leaf2} alt="" loading="lazy" decoding="async" />
+            <ResponsiveImage name="homepage1" className="hp-block-image" alt="Заваренный китайский чай в пиале" sizes="(min-width: 1024px) 520px, (min-width: 768px) 45vw, calc(100vw - 32px)" />
+            <ResponsiveImage name="leaf1" className="leaf1" sizes="136px" />
+            <ResponsiveImage name="leaf2" className="leaf2" sizes="136px" />
           </div>
           <div className="hp-feature-text">
             <h2>Качественный китайский чай<br />по доступной цене</h2>
@@ -111,8 +111,8 @@ const HomePage = () => {
       <section className="hp-feature hp-feature--reverse">
         <div className="container hp-feature-grid">
           <div className="hp-feature-media">
-            <img className="hp-block-image" src={homepage2} alt="Мастер-тестер оценивает чай" loading="lazy" decoding="async" width="1103" height="986" />
-            <img className="leaf3" src={leaf3} alt="" loading="lazy" decoding="async" />
+            <ResponsiveImage name="homepage2" className="hp-block-image" alt="Мастер-тестер оценивает чай" sizes="(min-width: 1024px) 520px, (min-width: 768px) 45vw, calc(100vw - 32px)" />
+            <ResponsiveImage name="leaf3" className="leaf3" sizes="136px" />
           </div>
           <div className="hp-feature-text">
             <h2>Знак качества</h2>
@@ -130,8 +130,8 @@ const HomePage = () => {
       <section className="hp-feature">
         <div className="container hp-feature-grid">
           <div className="hp-feature-media">
-            <img className="hp-block-image" src={homepage3} alt="Пробники чая для знакомства со вкусом" loading="lazy" decoding="async" width="1103" height="986" />
-            <img className="leaf4" src={leaf4} alt="" loading="lazy" decoding="async" />
+            <ResponsiveImage name="homepage3" className="hp-block-image" alt="Пробники чая для знакомства со вкусом" sizes="(min-width: 1024px) 520px, (min-width: 768px) 45vw, calc(100vw - 32px)" />
+            <ResponsiveImage name="leaf4" className="leaf4" sizes="136px" />
           </div>
           <div className="hp-feature-text">
             <h2>Снимите пробу</h2>

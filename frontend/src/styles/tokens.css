@@ -35,6 +35,15 @@
   --header-h: 64px;
   --tap-size: 44px;
 
+  /* Фоновое фото листьев (AVIF/WebP с PNG-фолбэком) */
+  --bg-leaves: image-set(
+    url("/img/first-screen-bg-1280.avif") 1x type("image/avif"),
+    url("/img/first-screen-bg-1920.avif") 2x type("image/avif"),
+    url("/img/first-screen-bg-1280.webp") 1x type("image/webp"),
+    url("/img/first-screen-bg-1920.webp") 2x type("image/webp"),
+    url("/first-screen-bg.png") 1x type("image/png")
+  );
+
   /* Радиусы */
   --radius-sm: 8px;
   --radius-md: 16px;

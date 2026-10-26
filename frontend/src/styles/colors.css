@@ -6,12 +6,12 @@
   --color-primary: #5f6b46; /* Оливковый фон из макета */
   --color-primary-subtle: #778a3a; /* Нижний/админский оливковый тон */
 
-  /* Brand Color - Main Accent (Teal / Морская волна) */
+  /* Brand Color - Main Accent (оливковый) */
   --color-brand: #4f6320; /* Ключевой оливковый цвет */
   --color-brand-dark: #3a4a15; /* Темный вариант для hover */
   --color-brand-light: #a8b67b; /* Светлый вариант для акцентов */
 
-  /* Secondary Color - Laguna Blue */
+  /* Secondary Color - светлый оливковый */
   --color-secondary: #aab77b; /* Светлый оливковый */
   --color-secondary-dark: #566a22; /* Темный вариант для hover */
   --color-secondary-light: #d9dccb; /* Светлый фон */
@@ -20,7 +20,7 @@
   --color-text-primary: #f0eee7; /* Светлый текст на оливковом фоне */
   --color-text-secondary: #e8e5da; /* Второстепенный текст (≥4.5:1 на #5f6b46) */
 
-  /* CTA Accent - Dynamic (Terracotta / Имбирь) */
+  /* CTA Accent - оранжевый (имбирь) */
   --color-cta: #f4aa32; /* Оранжевый акцент из макета */
   --color-cta-dark: #d88d19; /* Темный вариант для hover */
   --color-cta-light: #dfd2c4; /* Светлый бежевый вариант */
@@ -30,7 +30,6 @@
 
   /* Neutral Colors */
   --color-white: #ffffff;
-  --color-black: #000000;
   --color-gray-100: #f5f5f5;
   --color-gray-200: #e0e0e0;
   --color-gray-300: #ddd;
@@ -47,7 +46,6 @@
   --overlay-color: rgba(0, 0, 0, 0.5);
 
   /* Component Specific Colors */
-  --header-bg: rgba(36, 42, 25, 0.48);
   --footer-bg: #4f6320;
   --btn-primary-bg: var(--color-brand);
   --btn-primary-hover: var(--color-brand-dark);
@@ -58,30 +56,22 @@
   --btn-outline-text: var(--color-brand);
   --btn-outline-hover-bg: var(--color-brand);
   --btn-outline-hover-text: var(--color-white);
-  /* Gram control buttons */
-  --gram-btn-bg: #f0f7f5;
+  /* Gram control buttons (тёмная тема) */
+  --gram-btn-bg: rgba(0, 0, 0, 0.28);
   --gram-btn-text: var(--color-text-primary);
-  --gram-btn-hover-bg: #e0ece8;
-  --gram-btn-disabled-bg: #f5f5f5;
-  --gram-btn-disabled-text: #cccccc;
+  --gram-btn-hover-bg: rgba(240, 238, 231, 0.14);
+  --gram-btn-active-bg: rgba(240, 238, 231, 0.24);
+  --gram-btn-disabled-text: rgba(240, 238, 231, 0.4);
 
   /* Gram value display (center) */
-  --gram-value-bg: var(--color-brand);
-  --gram-value-text: var(--color-white);
-  --gram-value-hover-bg: var(--color-brand-dark);
 
   /* Cart button */
-  --cart-btn-bg: var(--color-brand);
-  --cart-btn-text: var(--color-white);
-  --cart-btn-hover-bg: var(--color-brand-dark);
-  --cart-btn-hover-shadow: 0 4px 12px rgba(27, 123, 110, 0.25);
-  --cart-btn-disabled-bg: #cccccc;
-  --cart-btn-disabled-text: #ffffff;
+  --cart-btn-hover-shadow: 0 6px 16px rgba(36, 42, 25, 0.32);
   --tag-active-bg: var(--color-brand);
   --tag-active-text: var(--color-white);
   --tag-active-border: var(--color-brand);
   --product-tag-bg: var(--color-secondary-light);
-  --product-tag-text: var(--color-secondary-dark);
+  --product-tag-text: var(--color-brand-dark);
   --status-ordered-bg: var(--color-secondary-light);
   --status-ordered-text: var(--color-secondary-dark);
   --status-paid-bg: var(--color-cta-light);
@@ -99,9 +89,7 @@
   --toast-error-bg: #b33a3a;
   --success-bg: var(--color-secondary-light);
   --success-text: var(--color-secondary-dark);
-  --modal-title: var(--color-brand);
-  --input-focus-border: var(--color-secondary);
-  --input-focus-shadow: rgba(72, 159, 181, 0.2);
+  --input-focus-shadow: rgba(255, 195, 92, 0.3);
   --link-hover: var(--color-secondary-dark);
   --breadcrumb-default: var(--color-text-secondary);
   --breadcrumb-current: var(--color-text-primary);
@@ -109,8 +97,4 @@
   --profile-link-hover: rgba(255, 255, 255, 0.25);
   --admin-link-bg: var(--color-cta);
   --admin-link-hover: var(--color-cta-dark);
-  --btn-login-border: var(--color-white);
-  --btn-login-text: var(--color-white);
-  --btn-login-hover-bg: var(--color-white);
-  --btn-login-hover-text: var(--color-brand);
 }

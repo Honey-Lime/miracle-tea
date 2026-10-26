@@ -142,9 +142,10 @@
   color: var(--color-on-cta);
 }
 
-.btn--primary:hover {
+.btn--primary:hover:not(:disabled) {
   background-color: var(--color-cta-dark);
   color: var(--color-on-cta-hover);
+  box-shadow: var(--cart-btn-hover-shadow);
 }
 
 .btn--primary:active {

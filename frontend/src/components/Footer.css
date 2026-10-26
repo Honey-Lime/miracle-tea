@@ -2,59 +2,105 @@
     FOOTER COMPONENT
     =================================== */
 .ftr-footer {
+  padding-block: var(--space-8) calc(var(--space-5) + 4.5rem);
   background-color: var(--footer-bg);
-  color: white;
-  padding: 2rem 0;
+  color: var(--color-text-primary);
 }
 
 .ftr-footer .ftr-content {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
-  margin-bottom: 2rem;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
 }
 
 .ftr-footer .ftr-section h3,
 .ftr-footer .ftr-section h4 {
-  font-family: "Jost";
-  font-weight: 500;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-3);
+  font-size: var(--fs-md);
 }
 
 .ftr-footer .ftr-section p {
-  font-family: "Jost";
-  font-weight: 300;
-  margin-bottom: 0.5rem;
-  opacity: 1;
+  margin-bottom: var(--space-2);
+  color: var(--color-text-secondary);
 }
 
 .ftr-footer .ftr-section a {
-  font-family: "Jost";
-  font-weight: 300;
-  display: block;
-  color: white;
-  margin-bottom: 0.5rem;
-  transition: color 0.3s;
+  display: flex;
+  align-items: center;
+  min-height: var(--tap-size);
+  color: var(--color-text-primary);
 }
 
 .ftr-footer .ftr-section a:hover {
-  color: white;
-}
-
-.ftr-footer .ftr-bottom {
-  font-family: "Jost";
-  font-weight: 500;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 1rem;
-  text-align: center;
-  opacity: 0.9;
-}
-
-.ftr-footer .ftr-section a:hover,
-.ftr-footer .ftr-section a:focus-visible {
   text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .ftr-footer .ftr-section a.ftr-inline-link {
   display: inline;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ftr-social,
+.ftr-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+}
+
+.ftr-footer .ftr-social a {
+  justify-content: center;
+  width: var(--tap-size);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.ftr-footer .ftr-social a:hover {
+  background-color: rgba(240, 238, 231, 0.18);
+  text-decoration: none;
+}
+
+.ftr-badges {
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  color: var(--color-text-secondary);
+}
+
+.ftr-badge {
+  display: block;
+  height: 24px;
+}
+
+.ftr-footer .ftr-bottom {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-color-light);
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+}
+
+@media (min-width: 768px) {
+  .ftr-footer {
+    padding-bottom: var(--space-5);
+  }
+
+  .ftr-footer .ftr-content {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .ftr-footer .ftr-content {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) and (pointer: fine) {
+  .ftr-footer nav.ftr-section a {
+    min-height: 32px;
+  }
 }

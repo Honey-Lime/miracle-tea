@@ -1,0 +1,72 @@
+{
+  "firstscreen": {
+    "width": 1976,
+    "height": 1636,
+    "widths": [
+      640,
+      1280,
+      1976
+    ]
+  },
+  "homepage1": {
+    "width": 1103,
+    "height": 986,
+    "widths": [
+      640,
+      1103
+    ]
+  },
+  "homepage2": {
+    "width": 1083,
+    "height": 986,
+    "widths": [
+      640,
+      1083
+    ]
+  },
+  "homepage3": {
+    "width": 1103,
+    "height": 986,
+    "widths": [
+      640,
+      1103
+    ]
+  },
+  "leaf1": {
+    "width": 754,
+    "height": 659,
+    "widths": [
+      640,
+      754
+    ]
+  },
+  "leaf2": {
+    "width": 262,
+    "height": 316,
+    "widths": [
+      262
+    ]
+  },
+  "leaf3": {
+    "width": 580,
+    "height": 605,
+    "widths": [
+      580
+    ]
+  },
+  "leaf4": {
+    "width": 355,
+    "height": 382,
+    "widths": [
+      355
+    ]
+  },
+  "first-screen-bg": {
+    "width": 2560,
+    "height": 1448,
+    "widths": [
+      1280,
+      1920
+    ]
+  }
+}
