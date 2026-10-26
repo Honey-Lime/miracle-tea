@@ -255,6 +255,7 @@
   font-size: clamp(1rem, 8cqi, 1.375rem);
   line-height: 1.25;
   color: var(--color-cta-text);
+  text-align: center;
   overflow-wrap: break-word;
   hyphens: auto;
   text-wrap: balance;
