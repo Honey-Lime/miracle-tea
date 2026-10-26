@@ -1,5 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { CartContext } from "../context/CartContext";
 import cartSVG from "/cart.svg";
@@ -11,10 +11,19 @@ const Header = () => {
   const { totalUniqueItems, totalPrice } = useContext(CartContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 24);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const closeMenu = () => setIsMenuOpen(false);
 
   return (
-    <header className="hdr-header">
+    <header className={`hdr-header${isScrolled ? " header--scrolled" : ""}`}>
       <div className="container">
         <div className="hdr-content">
           <div className="hdr-logo">

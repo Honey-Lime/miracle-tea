@@ -15,6 +15,7 @@ import { useSamplerSettings } from "../context/SamplerSettingsContext";
 const HomePage = () => {
   const { samplerSizeGrams } = useSamplerSettings();
   const [popularProducts, setPopularProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let isActive = true;
@@ -26,7 +27,10 @@ const HomePage = () => {
         );
         setPopularProducts(inStock.slice(0, 4));
       })
-      .catch((error) => console.error("Ошибка загрузки товаров:", error));
+      .catch((error) => console.error("Ошибка загрузки товаров:", error))
+      .finally(() => {
+        if (isActive) setIsLoading(false);
+      });
     return () => {
       isActive = false;
     };
@@ -51,6 +55,40 @@ const HomePage = () => {
           <img className="hp-hero-image" src={firstscreen} alt="Чайник, пиала и листья китайского чая" fetchpriority="high" width="1976" height="1636" />
         </div>
       </section>
+
+      {(isLoading || popularProducts.length > 0) && (
+        <section className="hp-popular" aria-labelledby="hp-popular-title" aria-busy={isLoading}>
+          <h2 id="hp-popular-title">Популярное</h2>
+          <ul className="hp-popular-list">
+            {isLoading
+              ? [0, 1, 2, 3].map((index) => (
+                  <li key={index} className="hp-popular-card hp-skeleton" aria-hidden="true">
+                    <span className="hp-skeleton-block hp-skeleton-image" />
+                    <span className="hp-skeleton-block hp-skeleton-line" />
+                    <span className="hp-skeleton-block hp-skeleton-line hp-skeleton-line--short" />
+                  </li>
+                ))
+              : popularProducts.map((product) => {
+                  const image = product.images.find((img) => img.type !== "video");
+                  return (
+                    <li key={product._id}>
+                      <Link className="hp-popular-card" to={getProductPath(product)}>
+                        <img src={image.url} alt={product.name} loading="lazy" decoding="async" width="400" height="400" />
+                        <span className="hp-popular-name">{product.name}</span>
+                        <span className="hp-popular-price">
+                          {product.price} ₽ <small>за 100 г</small>
+                        </span>
+                        <span className="btn btn--primary hp-popular-cta">Выбрать</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+          </ul>
+          <Link className="hp-popular-all" to="/catalog">
+            Весь каталог →
+          </Link>
+        </section>
+      )}
 
       <section className="hp-feature">
         <div className="container hp-feature-grid">
@@ -106,31 +144,6 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-
-      {popularProducts.length > 0 && (
-        <section className="hp-popular" aria-labelledby="hp-popular-title">
-          <h2 id="hp-popular-title">Популярное</h2>
-          <ul className="hp-popular-list">
-            {popularProducts.map((product) => {
-              const image = product.images.find((img) => img.type !== "video");
-              return (
-                <li key={product._id}>
-                  <Link className="hp-popular-card" to={getProductPath(product)}>
-                    <img src={image.url} alt={product.name} loading="lazy" />
-                    <span className="hp-popular-name">{product.name}</span>
-                    <span className="hp-popular-price">
-                      {product.price} ₽ <small>за 100 г</small>
-                    </span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-          <Link className="hp-popular-all" to="/catalog">
-            Смотреть весь каталог
-          </Link>
-        </section>
-      )}
 
       <section className="hp-order-info" aria-labelledby="hp-order-title">
         <h2 id="hp-order-title">Как заказать</h2>

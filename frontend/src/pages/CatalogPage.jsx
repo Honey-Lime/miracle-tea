@@ -137,11 +137,27 @@ const CatalogPage = () => {
     return firstPhoto || null;
   };
 
+  const hero = (
+    <header className="cp-hero">
+      <div className="container">
+        <nav className="breadcrumbs" aria-label="Хлебные крошки">
+          <Link to="/">Главная</Link>
+          <span aria-hidden="true"> / </span>
+          <span aria-current="page">Каталог</span>
+        </nav>
+        <h1>Качественный чай недорого</h1>
+        <p className="cp-price-note">
+          Китайский, черный, зеленый и другой листовой чай. Цена указана за 100 г.
+        </p>
+      </div>
+    </header>
+  );
+
   if (loading) {
     return (
       <div className="cp-catalog-page" aria-busy="true">
+        {hero}
         <div className="container">
-          <h1>Качественный чай недорого</h1>
           <div className="cp-products-grid" aria-label="Загрузка каталога">
             {[0, 1, 2, 3, 4, 5].map((index) => (
               <div key={index} className="cp-product-card cp-skeleton" aria-hidden="true">
@@ -158,26 +174,13 @@ const CatalogPage = () => {
 
   return (
     <div className="cp-catalog-page">
-      <div className="container">
-        <nav className="breadcrumbs" aria-label="Хлебные крошки">
-          <Link to="/">Главная</Link>
-          <span aria-hidden="true"> / </span>
-          <span aria-current="page">Каталог</span>
-        </nav>
-        <h1>Качественный чай недорого</h1>
-        <p className="cp-price-note">
-          Китайский, черный, зеленый и другой листовой чай. Цена указана за 100 г.
-        </p>
-        <p className="cp-seo-intro">
-          Выбирайте качественный китайский чай недорого: улуны, пуэры, зеленые и
-          красные сорта. Заказать чай можно от 50 г, чтобы познакомиться со вкусом
-          без лишних расходов.
-        </p>
-
-        <div className="cp-catalog-controls">
+      {hero}
+      <div className="cp-toolbar">
+        <div className="container cp-toolbar-inner">
           {allTags.length > 0 && (
             <div className="cp-tags-filter" role="group" aria-label="Фильтр по тегам">
               <button
+                type="button"
                 aria-pressed={!selectedTag}
                 className={`cp-tag-filter-btn ${!selectedTag ? "active" : ""}`}
                 onClick={() => handleTagChange(null)}
@@ -187,6 +190,7 @@ const CatalogPage = () => {
               {allTags.map((tag) => (
                 <button
                   key={tag}
+                  type="button"
                   aria-pressed={selectedTag === tag}
                   className={`cp-tag-filter-btn ${
                     selectedTag === tag ? "active" : ""
@@ -198,19 +202,38 @@ const CatalogPage = () => {
               ))}
             </div>
           )}
-          <label className="cp-search-filter">
-            <span className="visually-hidden">Поиск по названию</span>
+          <div className="cp-search-filter">
+            <label className="visually-hidden" htmlFor="cp-search">Поиск по названию</label>
+            <svg className="cp-search-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" strokeWidth="2" />
+              <path d="m20 20-4-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
             <input
+              id="cp-search"
               type="search"
               className="cp-search-input"
               placeholder="Поиск по названию"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
             />
-          </label>
-          <label className="cp-sort-filter">
-            <span>Сортировка:</span>
+            {searchQuery && (
+              <button
+                type="button"
+                className="cp-search-clear"
+                aria-label="Очистить поиск"
+                onClick={() => setSearchQuery("")}
+              >
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+                  <path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </button>
+            )}
+          </div>
+          <div className="cp-sort-filter">
+            <label htmlFor="cp-sort">Сортировка:</label>
             <select
+              id="cp-sort"
+              className="cp-sort-select"
               value={sortOrder}
               onChange={(event) => setSortOrder(event.target.value)}
             >
@@ -218,21 +241,28 @@ const CatalogPage = () => {
               <option value="price-asc">Цена: по возрастанию</option>
               <option value="price-desc">Цена: по убыванию</option>
             </select>
-          </label>
           </div>
+        </div>
+      </div>
 
+      <div className="container">
         <div className="cp-products-grid">
         {loadError ? (
           <div className="cp-no-products" role="alert">
             <p>Не удалось загрузить каталог. Проверьте соединение и попробуйте ещё раз.</p>
-            <button type="button" className="cp-reset-btn" onClick={() => setReloadKey((key) => key + 1)}>
+            <button type="button" className="btn btn--primary" onClick={() => setReloadKey((key) => key + 1)}>
               Повторить
             </button>
           </div>
         ) : displayedProducts.length === 0 ? (
           <div className="cp-no-products">
-            <p>По вашему запросу ничего не найдено</p>
-            <button type="button" className="cp-reset-btn" onClick={resetFilters}>
+            <svg className="cp-empty-icon" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true" focusable="false">
+              <path d="M10 28h40v6a16 16 0 0 1-16 16h-8a16 16 0 0 1-16-16v-6Z" fill="none" stroke="currentColor" strokeWidth="3" strokeLinejoin="round" />
+              <path d="M50 30h4a6 6 0 0 1 0 12h-5M24 8c-3 3 3 5 0 9M34 8c-3 3 3 5 0 9" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+            </svg>
+            <h2>Ничего не нашлось</h2>
+            <p>Попробуйте изменить запрос или выбрать другую категорию.</p>
+            <button type="button" className="btn btn--primary" onClick={resetFilters}>
               Сбросить фильтры
             </button>
           </div>
@@ -281,9 +311,6 @@ const CatalogPage = () => {
                     ))}
                   </div>
                 )}
-                {/* <p className="cp-description">
-                  {product.description.substring(0, 100)}...
-                </p> */}
                 <div className="cp-product-meta">
                   <span className="cp-price">
                     {formatRub(product.price)}₽
@@ -327,7 +354,7 @@ const CatalogPage = () => {
                   </div>
                   <button
                     type="button"
-                    className="cp-buy-btn"
+                    className="btn btn--primary cp-buy-btn"
                     onClick={() => handleAddToCart(product, currentCount)}
                     disabled={!canAddCurrentCount}
                   >
@@ -337,7 +364,7 @@ const CatalogPage = () => {
                   </button>
                   <button
                     type="button"
-                    className="cp-sampler-btn"
+                    className="btn btn--secondary cp-sampler-btn"
                     onClick={() => handleAddSamplerToCart(product)}
                     disabled={!isSamplerAvailable || hasSamplerInCart}
                   >
@@ -351,6 +378,11 @@ const CatalogPage = () => {
           );})
         )}
         </div>
+        <p className="cp-seo-intro">
+          Выбирайте качественный китайский чай недорого: улуны, пуэры, зеленые и
+          красные сорта. Заказать чай можно от 50 г, чтобы познакомиться со вкусом
+          без лишних расходов.
+        </p>
       </div>
     </div>
   );

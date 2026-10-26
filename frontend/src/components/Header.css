@@ -11,6 +11,11 @@
   box-shadow: 0 2px 8px var(--shadow-dark);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  transition: background-color 0.3s ease;
+}
+
+.hdr-header.header--scrolled {
+  background-color: rgba(36, 42, 25, 0.94);
 }
 
 .hdr-header .container,
@@ -183,6 +188,9 @@
 .hdr-header .hdr-nav a.active {
   font-weight: 500;
   color: var(--color-cta-text);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
 }
 
 .hdr-header .hdr-profile-link {
