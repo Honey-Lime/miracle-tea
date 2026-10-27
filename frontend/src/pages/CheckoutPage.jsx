@@ -37,7 +37,7 @@ const CheckoutPage = () => {
   const [refundPolicyAccepted, setRefundPolicyAccepted] = useState(false);
   const [bonusPercent, setBonusPercent] = useState(0);
   const [bonusSpent, setBonusSpent] = useState(0);
-  const [withoutPayment, setWithoutPayment] = useState(false);
+  const [testOrder, setTestOrder] = useState(false);
   const [withoutDeliveryPayment, setWithoutDeliveryPayment] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderError, setOrderError] = useState("");
@@ -157,7 +157,7 @@ const CheckoutPage = () => {
         },
         promoCode: user && appliedPromo ? appliedPromo.code : undefined,
         referralCode: getReferralCode() || undefined,
-        withoutPayment: Boolean(user?.isAdmin && withoutPayment),
+        testOrder: Boolean(user?.isAdmin && testOrder),
         withoutDeliveryPayment: Boolean(user?.isAdmin && withoutDeliveryPayment),
       };
 
@@ -197,26 +197,6 @@ const CheckoutPage = () => {
       //   }),
       // });
 
-      if (user?.isAdmin && withoutPayment) {
-        await clearCart();
-        addToast("Тестовый заказ оформлен и отмечен оплаченным", "success");
-
-        await fetch("/api/test", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({
-            id: order.id,
-            deliveryData: deliveryData
-          }),
-        });
-
-        navigate("/thank-you", { state: { withoutPayment: true, orderId: order.id } });
-        return;
-      }
-
       const payment = await fetch("/api/create-payment", {
         method: "POST",
         headers: {
@@ -231,11 +211,24 @@ const CheckoutPage = () => {
 
       if (!payment.ok) {
         const error = await payment.json();
-        throw new Error(error.message || "Ошибка при оплате");
+        throw new Error(error.error || error.message || "Ошибка при оплате");
       }
-      
-      addToast("Заказ успешно оформлен!", "success");
+
       const paymentResponse = await payment.json();
+
+      // Тестовый заказ: банк пропущен, заказ уже оплачен и передан в доставку.
+      if (paymentResponse.testOrder) {
+        await clearCart();
+        if (paymentResponse.deliveryError) {
+          addToast(`Тестовый заказ оплачен, но доставка не оформлена: ${paymentResponse.deliveryError}`, "error");
+        } else {
+          addToast(`Тестовый заказ оформлен, номер в доставке: ${paymentResponse.deliveryId}`, "success");
+        }
+        navigate("/thank-you", { state: { testOrder: true, orderId: order.id } });
+        return;
+      }
+
+      addToast("Заказ успешно оформлен!", "success");
        
       // sessionStorage.setItem(
       //   "lastPayment",
@@ -445,7 +438,7 @@ const CheckoutPage = () => {
               <div>
                 <span>Оплата:</span>
                 <span>
-                  {user?.isAdmin && withoutPayment ? "Тестовый заказ" : "Картой"}
+                  {user?.isAdmin && testOrder ? "Тестовый заказ (без оплаты)" : "Картой"}
                   {/* {PAYMENT_OPTIONS.find(
                     (option) => option.value === paymentMethod,
                   )?.label || "Не выбрано"} */}
@@ -490,10 +483,10 @@ const CheckoutPage = () => {
               <label className="chp-policy-consent">
                 <input
                   type="checkbox"
-                  checked={withoutPayment}
-                  onChange={(event) => setWithoutPayment(event.target.checked)}
+                  checked={testOrder}
+                  onChange={(event) => setTestOrder(event.target.checked)}
                 />
-                <span>Без оплаты</span>
+                <span>Тестовый заказ (без оплаты, сразу считается оплаченным)</span>
               </label>
             )}
 

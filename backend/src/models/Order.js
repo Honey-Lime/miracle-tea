@@ -170,6 +170,11 @@ const orderSchema = new mongoose.Schema(
         default: null,
       },
     },
+    // Тестовый заказ администратора: оформляется без оплаты через банк.
+    isTest: {
+      type: Boolean,
+      default: false,
+    },
     stockReserved: {
       type: Boolean,
       default: false,

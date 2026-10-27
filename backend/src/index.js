@@ -613,12 +613,51 @@ async function arrangeDeliveryOrder(orderId, deliveryData)
 async function saveDeliveryIdToOrder(orderId, deliveryId) {
   await Order.findByIdAndUpdate(
     orderId,
-    { 
-      $set: { 
-        'delivery.did': deliveryId 
-      } 
+    {
+      $set: {
+        'delivery.did': deliveryId
+      }
     }
   );
+}
+
+// Выбранная покупателем доставка из виджета.
+function applyOrderDelivery(order, deliveryData) {
+  order.delivery = {
+    ...order.delivery,
+    address: deliveryData.address || order.delivery?.address || null,
+    price: Number(deliveryData.price || order.delivery?.price || 0),
+    provider: deliveryData.service || order.delivery?.provider || "",
+    terminalCode: deliveryData.code || order.delivery?.terminalCode || "",
+    details: deliveryData,
+  };
+}
+
+// После оплаты: заказ в службе доставки и письмо покупателю.
+async function completePaidOrder({ order, user, deliveryData, orderEmailItems }) {
+  const deliveryId = await arrangeDeliveryOrder(order.id, deliveryData);
+  await saveDeliveryIdToOrder(order.id, deliveryId);
+
+  if (!user?.email) {
+    console.warn(`Email для заказа ${order.id} не отправлен: у пользователя не указан email`);
+    return deliveryId;
+  }
+
+  const orderEmail = buildPaidOrderEmail({
+    user,
+    order,
+    deliveryId,
+    orderItems: orderEmailItems,
+  });
+
+  await sendEmail({
+    to: user.email,
+    subject: `${order.isTest ? "[Тест] " : ""}Заказ ${order.id} оформлен и оплачен`,
+    text: orderEmail.text,
+    html: orderEmail.html,
+  });
+
+  return deliveryId;
 }
 
 
@@ -743,6 +782,28 @@ app.post('/api/create-payment', async(req, res) => {
 
     const receiptAmount = receiptItems.reduce((sum, item) => sum + item.Amount, 0);
 
+    // Тестовый заказ администратора (флаг ставит только createOrder после проверки
+    // isAdmin): банк пропускаем, дальше — как после успешной оплаты.
+    if (order.isTest) {
+      applyOrderDelivery(order, deliveryData);
+      await markOrderAsPaid(order, {
+        PaymentId: `test-${order.id}`,
+        status: "test_paid",
+        raw: { testOrder: true },
+      });
+
+      let deliveryId = null;
+      let deliveryError = null;
+      try {
+        deliveryId = await completePaidOrder({ order, user, deliveryData, orderEmailItems });
+      } catch (error) {
+        console.error(`Тестовый заказ ${order.id}: не удалось оформить доставку или письмо:`, error.message);
+        deliveryError = error.message;
+      }
+
+      return res.json({ testOrder: true, orderId: order.id, deliveryId, deliveryError });
+    }
+
     // console.log("TERMINAL_KEY", TERMINAL_KEY);
     // console.log("TERMINAL_PASSWORD", TERMINAL_PASSWORD);
     
@@ -824,15 +885,7 @@ app.post('/api/create-payment', async(req, res) => {
       raw: result,
     };
 
-    order.delivery = {
-      ...order.delivery,
-      address: deliveryData.address || order.delivery?.address || null,
-      price: Number(deliveryData.price || order.delivery?.price || 0),
-      provider: deliveryData.service || order.delivery?.provider || "",
-      terminalCode: deliveryData.code || order.delivery?.terminalCode || "",
-      details: deliveryData,
-    };
-    
+    applyOrderDelivery(order, deliveryData);
     await order.save();
 
     // Ответ сервера для React-приложения
@@ -853,32 +906,8 @@ app.post('/api/create-payment', async(req, res) => {
         raw: paymentStatus.data,
       });
 
-      let deliveryId = await arrangeDeliveryOrder(order.id, deliveryData);
-      await saveDeliveryIdToOrder(order.id, deliveryId);
-      const orderEmail = buildPaidOrderEmail({
-        user,
-        order,
-        deliveryId,
-        orderItems: orderEmailItems,
-      });
-
-      if (user?.email) {
-        const emailResult = await sendEmail({
-          to: user.email,
-          subject: `Заказ ${order.id} оформлен и оплачен`,
-          text: orderEmail.text,
-          html: orderEmail.html,
-        });
-
-        // if (emailResult.success) {
-        //   console.log('Письмо отправлено');
-        // } else {
-        //   console.error('Ошибка:', emailResult.error);
-        }
-      } else {
-        console.warn(`Email для заказа ${order.id} не отправлен: у пользователя не указан email`);
-      }
-      // console.log("ID заказа в ЛК перевозчика: ", deliveryId);}
+      await completePaidOrder({ order, user, deliveryData, orderEmailItems });
+    }
 
 
     if(paymentStatus.success === false)

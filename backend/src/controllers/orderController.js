@@ -167,7 +167,7 @@ const reserveOrderRemains = async (order) => {
 
 // Create a new order
 exports.createOrder = async (req, res) => {
-  const { list, delivery, consents, bonuses, withoutPayment, withoutDeliveryPayment, promoCode, referralCode } = req.body;
+  const { list, delivery, consents, bonuses, testOrder, withoutDeliveryPayment, promoCode, referralCode } = req.body;
   const customerType = req.userId ? "user" : "guest";
 
   try {
@@ -184,9 +184,11 @@ exports.createOrder = async (req, res) => {
     const user = req.userId
       ? await User.findById(req.userId).select("bonusBalance isAdmin delivery total referral")
       : null;
-    const isWithoutPayment = Boolean(withoutPayment && user?.isAdmin);
+    // Тестовый заказ проходит весь путь обычного (заказ в службе доставки, письмо),
+    // но /api/create-payment не обращается к банку и сразу считает его оплаченным.
+    const isTestOrder = Boolean(testOrder && user?.isAdmin);
 
-    if (withoutPayment && !isWithoutPayment) {
+    if (testOrder && !isTestOrder) {
       return res.status(403).json({ message: "Тестовый заказ доступен только администратору" });
     }
 
@@ -329,43 +331,15 @@ exports.createOrder = async (req, res) => {
         acceptedAt: consents.acceptedAt || new Date(),
       },
       totalPrice,
-      status: isWithoutPayment ? "paid" : "payment_pending",
-      payment: isWithoutPayment
-        ? {
-            PaymentId: `test-${Date.now()}`,
-            status: "test_paid",
-            raw: { withoutPayment: true },
-          }
-        : undefined,
+      status: "payment_pending",
+      isTest: isTestOrder,
     });
 
     const savedOrder = await order.save();
 
-    if (isWithoutPayment) {
-      await reserveOrderRemains(order);
-      user.delivery.last = order.delivery?.address || null;
-      user.delivery.history.push({
-        date: new Date(),
-        order: order.id,
-      });
-      const paidOrders = await Order.find({
-        userId: order.userId,
-        status: { $in: PAID_TOTAL_STATUSES },
-      }).select("totalPrice");
-      user.total = paidOrders.reduce(
-        (sum, paidOrder) => sum + (paidOrder.totalPrice || 0),
-        0,
-      );
-      await user.save();
-      await Order.updateOne(
-        { userId: order.userId, status: "cart" },
-        { $set: { list: [], totalPrice: 0 } },
-      );
-    }
-
     notifyAdmin(
-      "Новый заказ",
-      `Создан заказ №${savedOrder._id} на сумму ${savedOrder.totalPrice} ₽`,
+      isTestOrder ? "Новый тестовый заказ" : "Новый заказ",
+      `Создан ${isTestOrder ? "тестовый " : ""}заказ №${savedOrder._id} на сумму ${savedOrder.totalPrice} ₽`,
     ).catch(() => {});
 
     res.status(201).json(savedOrder);
