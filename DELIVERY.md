@@ -58,6 +58,7 @@
 | `OZON_DELIVERY_CLIENT_ID` | Личный кабинет Ozon Доставки → **Настройки → Управление частными приложениями** → создать приложение с уровнями доступа `delivery-api.delivery`, `delivery-api.delivery-point`, `delivery-api.order`, `delivery-api.posting` (или `delivery-api.all`) → в строке приложения скопировать `client_id` |
 | `OZON_DELIVERY_CLIENT_SECRET` | Там же, `client_secret` |
 | `OZON_DELIVERY_SHIPMENT_METHOD_ID` | ID метода доставки с типом «отгрузка в пункт Ozon» (dropoff): создаётся в кабинете Ozon Доставки, в нём выбираются пункт отгрузки и пункт для возвратов |
+| `OZON_DELIVERY_SCOPES` | Необязательно. Уровни доступа приложения через запятую, ровно как выбраны в кабинете. По умолчанию `delivery-api.all` |
 | `OZON_DELIVERY_ESTIMATE_PHONE` | Телефон магазина, зарегистрированный на Ozon. Расчёт `/v1/order/checkout` требует телефон получателя, а при выборе доставки покупатель ещё не указал свой |
 
 Старые имена `OZON_LOGISTICS_CLIENT_ID` / `OZON_LOGISTICS_CLIENT_SECRET` тоже принимаются.

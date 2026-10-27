@@ -14,7 +14,9 @@ const { DeliveryApiError, createTokenProvider, days, rub } = require("./http");
 
 const AUTH_URL = "https://xapi.ozon.ru/oauth/token";
 const BASE_URL = "https://api-delivery.ozon.ru";
-const SCOPES = ["delivery-api.delivery", "delivery-api.delivery-point", "delivery-api.order", "delivery-api.posting"];
+// Токен запрашивается ровно с теми уровнями доступа, что выбраны у приложения
+// в кабинете, иначе Ozon отвечает «scope … is not approved». У нашего — только «все методы».
+const SCOPES = (process.env.OZON_DELIVERY_SCOPES || "delivery-api.all").split(",").map((scope) => scope.trim()).filter(Boolean);
 
 const REQUEST_TIMEOUT_MS = 20000;
 const MAX_REDIRECTS = 5;
