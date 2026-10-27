@@ -20,6 +20,9 @@ router.post("/cart/remove", authMiddleware, orderController.removeFromCart);
 router.put("/cart/update", authMiddleware, orderController.updateCartItem);
 router.delete("/cart/clear", authMiddleware, orderController.clearCart);
 
+// Promo codes are available only for authorized users.
+router.post("/promo/check", authMiddleware, orderController.checkPromo);
+
 // Order creation is available both for authorized users and guests.
 router.post("/", optionalAuthMiddleware, orderController.createOrder);
 router.get("/my-orders", authMiddleware, orderController.getUserOrders);

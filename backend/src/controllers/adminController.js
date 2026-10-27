@@ -3,6 +3,7 @@ const Product = require("../models/Product");
 const Tag = require("../models/Tag");
 const User = require("../models/User");
 const Review = require("../models/Review");
+const ReferralSource = require("../models/ReferralSource");
 const {
   creditOrderBonuses,
   getBonusPercent,
@@ -472,6 +473,9 @@ exports.getCustomerDetails = async (req, res) => {
     const completedOrders = await Order.find({ userId: user._id, status: { $in: PAID_TOTAL_STATUSES } })
       .populate("list.pid", "name unit")
       .lean();
+    const referralSource = user.referral?.sourceId
+      ? await ReferralSource.findById(user.referral.sourceId).select("name").lean()
+      : null;
     const reviews = await Review.find({ userId: user._id })
       .populate("productId", "name")
       .sort({ createdAt: -1 })
@@ -525,6 +529,15 @@ exports.getCustomerDetails = async (req, res) => {
         delivery: user.delivery,
         consents: user.consents,
         createdAt: user.createdAt,
+        referral: referralSource
+          ? {
+              sourceId: referralSource._id,
+              sourceName: referralSource.name,
+              via: user.referral.via,
+              code: user.referral.code,
+              at: user.referral.at,
+            }
+          : null,
       },
       orders,
       reviews,

@@ -236,6 +236,11 @@ const OrdersPage = () => {
                       <strong>Стоимость доставки:</strong>{" "}
                       {formatPrice(order.delivery?.price || 0)}
                     </div>
+                    {(order.promo?.discount || 0) > 0 && (
+                      <div className="op-order-row-item">
+                        <strong>Промокод {order.promo.code}:</strong> -{formatPrice(order.promo.discount)}
+                      </div>
+                    )}
                     {(order.bonuses?.spent || 0) > 0 && (
                       <div className="op-order-row-item">
                         <strong>Списано бонусов:</strong> -{order.bonuses.spent}

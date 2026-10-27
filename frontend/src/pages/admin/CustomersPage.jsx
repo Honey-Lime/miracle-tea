@@ -140,6 +140,14 @@ const CustomersPage = () => {
                 <div><span>Сумма покупок</span><strong>{formatPrice(selectedCustomer.total)}</strong></div>
                 <div><span>Дата регистрации</span><strong>{new Date(selectedCustomer.createdAt).toLocaleDateString("ru-RU")}</strong></div>
                 <div><span>Роль</span><strong>{selectedCustomer.isAdmin ? "Админ" : "Клиент"}</strong></div>
+                <div>
+                  <span>Кто привёл</span>
+                  <strong>
+                    {selectedCustomer.referral
+                      ? `${selectedCustomer.referral.sourceName}${selectedCustomer.referral.code ? ` (${selectedCustomer.referral.code})` : ""}`
+                      : "—"}
+                  </strong>
+                </div>
               </div>
 
               <div className="ap-bonus-editor">

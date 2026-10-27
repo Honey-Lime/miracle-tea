@@ -47,6 +47,27 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // Реферальная привязка: кто привёл клиента (первое касание).
+    referral: {
+      sourceId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ReferralSource",
+        default: null,
+      },
+      via: {
+        type: String,
+        enum: ["link", "promo", "admin", null],
+        default: null,
+      },
+      code: {
+        type: String,
+        default: "",
+      },
+      at: {
+        type: Date,
+        default: null,
+      },
+    },
     consents: {
       personalData: {
         type: Boolean,

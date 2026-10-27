@@ -6,6 +6,7 @@ const adminMiddleware = require("../middleware/adminMiddleware");
 const upload = require("../middleware/uploadMiddleware");
 const chatUpload = require("../middleware/chatUploadMiddleware");
 const chatController = require("../controllers/chatController");
+const marketingController = require("../controllers/marketingController");
 
 // All admin routes require authentication and admin privileges
 router.use(authMiddleware);
@@ -56,6 +57,19 @@ router.get("/settings/delivery", adminController.getDeliverySettings);
 router.put("/settings/delivery", adminController.updateDeliverySettings);
 router.get("/settings/popular", adminController.getPopularSettings);
 router.put("/settings/popular", adminController.updatePopularSettings);
+
+// Promo codes
+router.get("/promocodes", marketingController.getPromoCodes);
+router.post("/promocodes", marketingController.createPromoCode);
+router.put("/promocodes/:id", marketingController.updatePromoCode);
+router.delete("/promocodes/:id", marketingController.deletePromoCode);
+
+// Referral sources
+router.get("/referrals", marketingController.getReferralSources);
+router.post("/referrals", marketingController.createReferralSource);
+router.get("/referrals/:id", marketingController.getReferralSourceDetails);
+router.put("/referrals/:id", marketingController.updateReferralSource);
+router.delete("/referrals/:id", marketingController.deleteReferralSource);
 
 // Reviews
 router.get("/notifications/counts", adminController.getAdminNotificationCounts);

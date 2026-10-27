@@ -1018,6 +1018,12 @@ const ProfilePage = () => {
                   <span>Стоимость доставки:</span>
                   <span>{formatPrice(getDeliveryDetails(selectedOrder).price)}</span>
                 </div>
+                {(selectedOrder.promo?.discount || 0) > 0 && (
+                  <div className="prfp-total-row">
+                    <span>Промокод {selectedOrder.promo.code}:</span>
+                    <span>-{formatPrice(selectedOrder.promo.discount)}</span>
+                  </div>
+                )}
                 {(selectedOrder.bonuses?.spent || 0) > 0 && (
                   <div className="prfp-total-row">
                     <span>Списано бонусов:</span>

@@ -240,8 +240,9 @@ function buildPaidOrderEmail({ user, order, deliveryId, orderItems }) {
   const deliveryAddress = order.delivery?.address?.value || "адрес доставки не указан";
   const itemsTotal = Number(order.itemsTotal) || orderItems.reduce((sum, item) => sum + item.total, 0);
   const bonusSpent = Number(order.bonuses?.spent) || 0;
+  const promoDiscount = Number(order.promo?.discount) || 0;
   const deliveryPrice = Number(order.delivery?.price) || 0;
-  const totalPrice = Number(order.totalPrice) || Math.max(0, itemsTotal - bonusSpent) + deliveryPrice;
+  const totalPrice = Number(order.totalPrice) || Math.max(0, itemsTotal - promoDiscount - bonusSpent) + deliveryPrice;
 
   const rowsHtml = orderItems.map((item) => `
     <tr>
@@ -264,6 +265,7 @@ function buildPaidOrderEmail({ user, order, deliveryId, orderItems }) {
     ...orderItems.map((item) => `- ${item.name}${item.isSampler ? " (Пробник)" : ""}: ${item.quantityLabel} × ${formatRub(item.price)} = ${formatRub(item.total)}`),
     "",
     `Товары: ${formatRub(itemsTotal)}`,
+    promoDiscount > 0 ? `Промокод ${order.promo.code}: −${formatRub(promoDiscount)}` : null,
     bonusSpent > 0 ? `Списано бонусов: −${formatRub(bonusSpent)}` : null,
     `Доставка: ${formatRub(deliveryPrice)}`,
     `Итого оплачено: ${formatRub(totalPrice)}`,
@@ -302,6 +304,7 @@ function buildPaidOrderEmail({ user, order, deliveryId, orderItems }) {
 
             <div style="margin-top:24px;padding:20px;background:#fbfcf8;border-radius:16px;">
               <div style="display:flex;justify-content:space-between;margin-bottom:10px;"><span>Товары</span><strong>${formatRub(itemsTotal)}</strong></div>
+              ${promoDiscount > 0 ? `<div style="display:flex;justify-content:space-between;margin-bottom:10px;color:#5d7f36;"><span>Промокод ${escapeHtml(order.promo.code)}</span><strong>−${formatRub(promoDiscount)}</strong></div>` : ""}
               ${bonusSpent > 0 ? `<div style="display:flex;justify-content:space-between;margin-bottom:10px;color:#5d7f36;"><span>Списано бонусов</span><strong>−${formatRub(bonusSpent)}</strong></div>` : ""}
               <div style="display:flex;justify-content:space-between;margin-bottom:14px;"><span>Доставка</span><strong>${formatRub(deliveryPrice)}</strong></div>
               <div style="height:1px;background:#e6ebdf;margin:14px 0;"></div>
@@ -423,6 +426,49 @@ async function markOrderAsPaid(order, paymentUpdate = {}) {
   }
 
   await order.save();
+}
+
+// Распределяет скидку (промокод + бонусы) по позициям чека, чтобы сумма чека совпала с оплатой.
+function applyReceiptDiscount(receiptItems, quantityLabels, discountKopecks) {
+  const itemsAmount = receiptItems.reduce((sum, item) => sum + item.Amount, 0);
+  const discount = Math.min(Math.max(0, Math.round(discountKopecks)), itemsAmount - receiptItems.length);
+
+  if (discount <= 0 || itemsAmount <= 0) {
+    return;
+  }
+
+  const shares = receiptItems.map((item) => Math.floor((item.Amount * discount) / itemsAmount));
+  let remainder = discount - shares.reduce((sum, share) => sum + share, 0);
+  const order = receiptItems
+    .map((item, index) => index)
+    .sort((a, b) => receiptItems[b].Amount - receiptItems[a].Amount);
+
+  while (remainder > 0) {
+    let changed = false;
+    for (const index of order) {
+      if (remainder <= 0) break;
+      if (shares[index] + 1 < receiptItems[index].Amount) {
+        shares[index] += 1;
+        remainder -= 1;
+        changed = true;
+      }
+    }
+    if (!changed) break;
+  }
+
+  receiptItems.forEach((item, index) => {
+    if (shares[index] <= 0) return;
+    const amount = item.Amount - shares[index];
+    item.Amount = amount;
+    if (amount % item.Quantity === 0) {
+      item.Price = amount / item.Quantity;
+    } else {
+      // Цена за единицу не делится нацело — пробиваем позицию одной строкой.
+      item.Name = `${item.Name.slice(0, 110)} (${quantityLabels[index]})`;
+      item.Quantity = 1;
+      item.Price = amount;
+    }
+  });
 }
 
 function isPaidTBankStatus(status) {
@@ -661,6 +707,13 @@ app.post('/api/create-payment', async(req, res) => {
         isSampler: Boolean(item.isSampler),
       });
     }
+
+    const orderDiscountRub = (Number(order.promo?.discount) || 0) + (Number(order.bonuses?.spent) || 0);
+    applyReceiptDiscount(
+      receiptItems,
+      orderEmailItems.map((item) => item.quantityLabel),
+      orderDiscountRub * 100,
+    );
 
     const deliveryPriceRub = Number(order.delivery?.price) || 0;
 

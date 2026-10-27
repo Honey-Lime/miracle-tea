@@ -41,6 +41,11 @@ const orderSchema = new mongoose.Schema(
           type: Number,
           required: true,
         },
+        // Себестоимость единицы (₽/г или ₽/шт) на момент заказа.
+        costAtOrder: {
+          type: Number,
+          default: null,
+        },
         isSampler: {
           type: Boolean,
           default: false,
@@ -118,6 +123,33 @@ const orderSchema = new mongoose.Schema(
       creditedAt: {
         type: Date,
         default: null,
+      },
+    },
+    promo: {
+      promoId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "PromoCode",
+        default: null,
+      },
+      code: {
+        type: String,
+        default: "",
+      },
+      discount: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+    },
+    referral: {
+      sourceId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ReferralSource",
+        default: null,
+      },
+      code: {
+        type: String,
+        default: "",
       },
     },
     payment: {

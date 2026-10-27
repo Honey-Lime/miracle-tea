@@ -692,3 +692,145 @@
   flex: 1;
   min-width: 0;
 }
+
+/* Промокоды и рефералы */
+.ap-marketing-page h1 {
+  margin-bottom: 1.5rem;
+}
+
+.ap-marketing-form,
+.ap-marketing-table {
+  background: var(--color-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.ap-marketing-form h2 {
+  margin-bottom: 1rem;
+}
+
+.ap-marketing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem;
+}
+
+.ap-marketing-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.ap-marketing-grid label > span {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.ap-marketing-grid input:not([type="checkbox"]),
+.ap-marketing-grid select,
+.ap-marketing-grid textarea {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--color-white);
+  font: inherit;
+}
+
+.ap-marketing-grid small {
+  color: var(--color-text-secondary);
+  font-size: 0.78rem;
+}
+
+.ap-marketing-code-input {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.ap-marketing-wide {
+  grid-column: 1 / -1;
+}
+
+.ap-marketing-grid .ap-marketing-check {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  grid-column: 1 / -1;
+}
+
+.ap-marketing-grid .ap-marketing-check span {
+  color: var(--color-text-primary);
+  font-size: 0.95rem;
+}
+
+.ap-marketing-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.ap-marketing-hint {
+  margin-top: 0.75rem;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+}
+
+.ap-marketing-table {
+  overflow-x: auto;
+}
+
+.ap-marketing-table table,
+.ap-marketing-details table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ap-marketing-table th,
+.ap-marketing-table td {
+  padding: 0.65rem;
+  border-bottom: 1px solid var(--color-gray-200);
+  text-align: left;
+  vertical-align: top;
+}
+
+.ap-marketing-table td small,
+.ap-marketing-details td small {
+  display: block;
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+}
+
+.ap-marketing-row-off td {
+  opacity: 0.55;
+}
+
+.ap-marketing-row-active td {
+  background: var(--color-secondary-light);
+}
+
+.ap-marketing-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.ap-marketing-row-actions .btn {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+.ap-marketing-link-btn {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-brand);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.78rem;
+}
+
+.ap-marketing-details {
+  margin-bottom: 1.25rem;
+}

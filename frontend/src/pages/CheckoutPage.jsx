@@ -4,11 +4,24 @@ import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { DeliveryWidget } from "../components/DeliveryWidget";
+import api from "../services/api";
+import { clearReferralCode, getReferralCode } from "../utils/referral";
 
 
 const DADATA_TOKEN = "eb5a9b17d07d3320d19d665bc0ade765f3f016d3";
 const YANDEX_API_KEY = "d748d3d0-760c-44fa-923c-d865d6017c60";
 
+
+const normalizePromoInput = (value) => value.toUpperCase().replace(/\s+/g, "");
+
+// Та же формула, что на сервере: скидка только на товары и не до нуля.
+const calculatePromoDiscount = (promo, itemsTotal) => {
+  if (!promo || itemsTotal <= 0) return 0;
+  const value = Number(promo.discountValue) || 0;
+  const discount =
+    promo.discountType === "fixed" ? value : Math.floor((itemsTotal * Math.min(value, 100)) / 100);
+  return Math.max(0, Math.min(Math.floor(discount), Math.ceil(itemsTotal) - 1));
+};
 
 // const PAYMENT_OPTIONS = [
 //   { value: "card", label: "Картой онлайн" },
@@ -16,7 +29,7 @@ const YANDEX_API_KEY = "d748d3d0-760c-44fa-923c-d865d6017c60";
 
 const CheckoutPage = () => {
   const { cartItems, totalPrice, clearCart } = useContext(CartContext);
-  const { user, token, updateUser } = useContext(AuthContext);
+  const { user, token, updateUser, openLoginModal } = useContext(AuthContext);
   const { addToast } = useToast();
   const navigate = useNavigate();
   const [deliveryData, setDeliveryData] = useState(null);
@@ -28,6 +41,10 @@ const CheckoutPage = () => {
   const [withoutDeliveryPayment, setWithoutDeliveryPayment] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderError, setOrderError] = useState("");
+  const [promoInput, setPromoInput] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState(null);
+  const [promoError, setPromoError] = useState("");
+  const [promoChecking, setPromoChecking] = useState(false);
   const canPay = Boolean(
     deliveryData?.checked && personalDataAccepted && refundPolicyAccepted,
   );
@@ -36,11 +53,13 @@ const CheckoutPage = () => {
     .filter((item) => (item.unit || "grams") === "grams")
     .reduce((sum, item) => sum + item.count, 0);
   const userBonusBalance = Number(user?.bonusBalance) || 0;
-  const maxBonusSpent = Math.min(userBonusBalance, Math.floor(totalPrice * 0.5));
+  const promoDiscount = user ? calculatePromoDiscount(appliedPromo, totalPrice) : 0;
+  const discountedItemsTotal = Math.max(0, totalPrice - promoDiscount);
+  const maxBonusSpent = Math.min(userBonusBalance, Math.floor(discountedItemsTotal * 0.5));
   const requestedBonusSpent = Math.floor(Number(bonusSpent) || 0);
   const normalizedBonusSpent = Math.min(requestedBonusSpent, maxBonusSpent);
   const deliveryPrice = deliveryData?.price || 0;
-  const finalTotal = Math.max(0, totalPrice - normalizedBonusSpent) + deliveryPrice;
+  const finalTotal = Math.max(0, discountedItemsTotal - normalizedBonusSpent) + deliveryPrice;
   const expectedBonusEarned = useMemo(() => {
     const percent = Number(bonusPercent) || 0;
 
@@ -48,8 +67,8 @@ const CheckoutPage = () => {
       return 0;
     }
 
-    return Math.floor(totalPrice * (percent / 100)) + 1;
-  }, [bonusPercent, totalPrice, user]);
+    return Math.floor(discountedItemsTotal * (percent / 100)) + 1;
+  }, [bonusPercent, discountedItemsTotal, user]);
 
   useEffect(() => {
     fetch("/api/bonus-settings")
@@ -57,6 +76,30 @@ const CheckoutPage = () => {
       .then((data) => setBonusPercent(Number(data.bonusPercent) || 0))
       .catch(() => setBonusPercent(0));
   }, []);
+
+  const handleApplyPromo = async (event) => {
+    event.preventDefault();
+    const code = normalizePromoInput(promoInput);
+    if (!code || promoChecking) return;
+    setPromoChecking(true);
+    setPromoError("");
+    try {
+      const response = await api.post("/orders/promo/check", { code, itemsTotal: totalPrice });
+      setAppliedPromo(response.data);
+      addToast(`Промокод ${response.data.code} применён`, "success");
+    } catch (error) {
+      setAppliedPromo(null);
+      setPromoError(error.response?.data?.message || "Не удалось проверить промокод");
+    } finally {
+      setPromoChecking(false);
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+    setPromoInput("");
+    setPromoError("");
+  };
 
   // Оформление заказа
   const handlePlaceOrder = async () => {
@@ -112,6 +155,8 @@ const CheckoutPage = () => {
         bonuses: {
           spent: normalizedBonusSpent,
         },
+        promoCode: user && appliedPromo ? appliedPromo.code : undefined,
+        referralCode: getReferralCode() || undefined,
         withoutPayment: Boolean(user?.isAdmin && withoutPayment),
         withoutDeliveryPayment: Boolean(user?.isAdmin && withoutDeliveryPayment),
       };
@@ -132,6 +177,7 @@ const CheckoutPage = () => {
       }
 
       const order = await response.json();
+      clearReferralCode();
       if (normalizedBonusSpent > 0) {
         updateUser({
           ...user,
@@ -292,6 +338,62 @@ const CheckoutPage = () => {
                   <span>{deliveryData.price} ₽</span>
                 </div>
               )}
+              <div className="chp-promo-control">
+                {user ? (
+                  appliedPromo ? (
+                    <div className="chp-promo-applied">
+                      <span>
+                        Промокод <strong>{appliedPromo.code}</strong>
+                        {promoDiscount > 0 ? `: -${promoDiscount} ₽` : " применён"}
+                      </span>
+                      <button type="button" className="chp-promo-remove" onClick={handleRemovePromo}>
+                        Убрать
+                      </button>
+                    </div>
+                  ) : (
+                    <form className="chp-promo-form" onSubmit={handleApplyPromo}>
+                      <label htmlFor="promoCode">Промокод:</label>
+                      <div>
+                        <input
+                          id="promoCode"
+                          type="text"
+                          autoComplete="off"
+                          autoCapitalize="characters"
+                          spellCheck="false"
+                          value={promoInput}
+                          onChange={(event) => {
+                            setPromoInput(normalizePromoInput(event.target.value));
+                            setPromoError("");
+                          }}
+                          placeholder="ВВЕДИТЕ КОД"
+                          aria-invalid={Boolean(promoError)}
+                          aria-describedby={promoError ? "promoCodeError" : undefined}
+                        />
+                        <button
+                          type="submit"
+                          className="btn btn-secondary"
+                          disabled={!promoInput || promoChecking}
+                        >
+                          {promoChecking ? "…" : "Применить"}
+                        </button>
+                      </div>
+                      {promoError && (
+                        <small id="promoCodeError" className="chp-promo-error" role="alert">
+                          {promoError}
+                        </small>
+                      )}
+                    </form>
+                  )
+                ) : (
+                  <small>
+                    Есть промокод?{" "}
+                    <button type="button" className="chp-promo-login" onClick={openLoginModal}>
+                      Войдите
+                    </button>
+                    , чтобы применить его.
+                  </small>
+                )}
+              </div>
               {user && (
                 <div className="chp-bonus-control">
                   <label htmlFor="bonusSpent">Списать бонусы:</label>

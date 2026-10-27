@@ -12,6 +12,13 @@ const {
 const { notifyAdmin } = require("../services/adminNotificationService");
 const { getSamplerSizeGrams } = require("../services/samplerService");
 const { isServiceAvailable } = require("../services/delivery");
+const { PromoError, resolvePromoForOrder } = require("../services/promoService");
+const {
+  bindUserReferral,
+  bindUserReferralByLink,
+  findSourceByLink,
+  normalizeReferralCode,
+} = require("../services/referralService");
 
 const ID_COUNTER = "orderSequence";
 const LETTERS_COUNT = 26;
@@ -160,7 +167,7 @@ const reserveOrderRemains = async (order) => {
 
 // Create a new order
 exports.createOrder = async (req, res) => {
-  const { list, delivery, consents, bonuses, withoutPayment, withoutDeliveryPayment } = req.body;
+  const { list, delivery, consents, bonuses, withoutPayment, withoutDeliveryPayment, promoCode, referralCode } = req.body;
   const customerType = req.userId ? "user" : "guest";
 
   try {
@@ -175,7 +182,7 @@ exports.createOrder = async (req, res) => {
     }
 
     const user = req.userId
-      ? await User.findById(req.userId).select("bonusBalance isAdmin delivery total")
+      ? await User.findById(req.userId).select("bonusBalance isAdmin delivery total referral")
       : null;
     const isWithoutPayment = Boolean(withoutPayment && user?.isAdmin);
 
@@ -212,6 +219,18 @@ exports.createOrder = async (req, res) => {
       itemsTotal += itemPrice;
     }
 
+    let promoResult = null;
+    try {
+      promoResult = await resolvePromoForOrder({ code: promoCode, userId: req.userId, itemsTotal });
+    } catch (promoError) {
+      if (promoError instanceof PromoError) {
+        return res.status(400).json({ message: promoError.message });
+      }
+      throw promoError;
+    }
+    const promoDiscount = promoResult?.discount || 0;
+    const discountedItemsTotal = Math.max(0, itemsTotal - promoDiscount);
+
     let bonusSpent = Math.floor(Number(bonuses?.spent) || 0);
     if (bonusSpent < 0) {
       bonusSpent = 0;
@@ -223,7 +242,7 @@ exports.createOrder = async (req, res) => {
       }
 
       const bonusBalance = Number(user?.bonusBalance) || 0;
-      const maxBonusSpent = Math.floor(itemsTotal * 0.5);
+      const maxBonusSpent = Math.floor(discountedItemsTotal * 0.5);
 
       if (bonusSpent > bonusBalance) {
         return res.status(400).json({ message: "Недостаточно бонусов для списания" });
@@ -237,29 +256,55 @@ exports.createOrder = async (req, res) => {
     }
 
     const bonusPercent = await getBonusPercent();
-    const bonusEarned = req.userId ? calculateBonusEarned(itemsTotal, bonusPercent) : 0;
+    const bonusEarned = req.userId ? calculateBonusEarned(discountedItemsTotal, bonusPercent) : 0;
     const iswithoutDeliveryPayment = Boolean(withoutDeliveryPayment && user?.isAdmin);
     let totalPrice;
     if(iswithoutDeliveryPayment)
     {
-      totalPrice = Math.max(0, itemsTotal - bonusSpent);
+      totalPrice = Math.max(0, discountedItemsTotal - bonusSpent);
     } else 
     {
-      totalPrice = Math.max(0, itemsTotal - bonusSpent) + (delivery.price || 0);
+      totalPrice = Math.max(0, discountedItemsTotal - bonusSpent) + (delivery.price || 0);
     }
 
     // Build list with priceAtOrder (price per gram)
     const listWithPrices = await Promise.all(
       list.map(async (item) => {
         const product = await Product.findById(item.pid);
+        const isGrams = (product.unit || "grams") === "grams";
+        const hasCost = Number.isFinite(Number(product.cost)) && product.cost !== null;
         return {
           pid: item.pid,
           count: item.count,
-          priceAtOrder: (product.unit || "grams") === "grams" ? product.price / 100 : product.price,
+          priceAtOrder: isGrams ? product.price / 100 : product.price,
+          costAtOrder: hasCost ? (isGrams ? product.cost / 100 : product.cost) : null,
           isSampler: item.isSampler || false,
         };
       }),
     );
+
+    // Реферальная привязка: промокод источника или реферальная ссылка (первое касание).
+    let orderReferral = { sourceId: null, code: "" };
+    if (user) {
+      if (promoResult?.promo?.referralSourceId) {
+        await bindUserReferral(user._id, {
+          sourceId: promoResult.promo.referralSourceId,
+          via: "promo",
+          code: promoResult.promo.code,
+        });
+      } else if (referralCode) {
+        await bindUserReferralByLink(user._id, referralCode);
+      }
+      const freshUser = await User.findById(user._id).select("referral");
+      if (freshUser?.referral?.sourceId) {
+        orderReferral = { sourceId: freshUser.referral.sourceId, code: freshUser.referral.code || "" };
+      }
+    } else if (referralCode) {
+      const source = await findSourceByLink(referralCode);
+      if (source) {
+        orderReferral = { sourceId: source._id, code: normalizeReferralCode(referralCode) };
+      }
+    }
 
     const order = new Order({
       _id: await generateId(),
@@ -268,6 +313,10 @@ exports.createOrder = async (req, res) => {
       list: listWithPrices,
       delivery,
       itemsTotal,
+      promo: promoResult
+        ? { promoId: promoResult.promo._id, code: promoResult.promo.code, discount: promoDiscount }
+        : undefined,
+      referral: orderReferral,
       bonuses: {
         spent: bonusSpent,
         earned: bonusEarned,
@@ -322,6 +371,29 @@ exports.createOrder = async (req, res) => {
     res.status(201).json(savedOrder);
   } catch (error) {
     logError(error, "clearCart");
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Check promo code before placing an order
+exports.checkPromo = async (req, res) => {
+  try {
+    const itemsTotal = Math.max(0, Number(req.body?.itemsTotal) || 0);
+    const result = await resolvePromoForOrder({ code: req.body?.code, userId: req.userId, itemsTotal });
+    if (!result) {
+      return res.status(400).json({ message: "Введите промокод" });
+    }
+    res.json({
+      code: result.promo.code,
+      discountType: result.promo.discountType,
+      discountValue: result.promo.discountValue,
+      discount: result.discount,
+    });
+  } catch (error) {
+    if (error instanceof PromoError) {
+      return res.status(400).json({ message: error.message });
+    }
+    logError(error, "checkPromo");
     res.status(500).json({ message: error.message });
   }
 };

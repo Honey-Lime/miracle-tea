@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -24,11 +25,16 @@ import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
 import { SamplerSettingsProvider } from "./context/SamplerSettingsContext";
+import { saveReferralCodeFromSearch } from "./utils/referral";
 
 function AppContent() {
   const location = useLocation();
   const isAdminPage = location.pathname.startsWith("/admin");
   const isFullBleedPage = ["/", "/catalog"].includes(location.pathname);
+
+  useEffect(() => {
+    saveReferralCodeFromSearch(location.search);
+  }, [location.search]);
 
   return (
     <>

@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import axios from "axios";
+import { clearReferralCode, getReferralCode } from "../utils/referral";
 
 const AuthContext = createContext();
 
@@ -33,11 +34,16 @@ export const AuthProvider = ({ children }) => {
     setToken(token);
     setUser(user);
     setLoginModalOpen(false);
+    clearReferralCode();
   };
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post("/api/auth/login", { email, password });
+      const response = await axios.post("/api/auth/login", {
+        email,
+        password,
+        referralCode: getReferralCode() || undefined,
+      });
       applyAuthResponse(response);
       return { success: true };
     } catch (error) {
@@ -55,6 +61,7 @@ export const AuthProvider = ({ children }) => {
         password,
         name,
         consents,
+        referralCode: getReferralCode() || undefined,
       });
       applyAuthResponse(response);
       return { success: true };

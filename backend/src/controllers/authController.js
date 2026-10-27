@@ -7,6 +7,7 @@ const {
   generateCode,
   sendVerificationEmail,
 } = require("../services/emailService");
+const { bindUserReferralByLink } = require("../services/referralService");
 
 const getAdminEmails = () => {
   const emailsStr = process.env.ADMIN_EMAILS || "";
@@ -107,7 +108,7 @@ const createAuthToken = (user) =>
   });
 
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, referralCode } = req.body;
   const normalizedEmail = normalizeEmail(email);
 
   if (!normalizedEmail) {
@@ -142,6 +143,10 @@ exports.login = async (req, res) => {
       await user.save();
     }
 
+    if (referralCode) {
+      await bindUserReferralByLink(user._id, referralCode).catch(() => {});
+    }
+
     const token = createAuthToken(user);
 
     res.json({
@@ -155,7 +160,7 @@ exports.login = async (req, res) => {
 };
 
 exports.register = async (req, res) => {
-  const { email, password, name, phone, consents } = req.body;
+  const { email, password, name, phone, consents, referralCode } = req.body;
   const normalizedEmail = normalizeEmail(email);
   const normalizedName = normalizeName(name);
 
@@ -204,6 +209,10 @@ exports.register = async (req, res) => {
       isAdmin: isAdminUser(normalizedEmail),
     });
     await user.save();
+
+    if (referralCode) {
+      await bindUserReferralByLink(user._id, referralCode).catch(() => {});
+    }
 
     const token = createAuthToken(user);
 
