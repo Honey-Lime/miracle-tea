@@ -301,6 +301,66 @@ const DeliveryWidget = ({ DADATA_TOKEN, YANDEX_API_KEY, orderWeight, onDeliveryC
     }
   }
 
+  async function dadataRequest(method, body) {
+    const response = await fetch(
+      `https://suggestions.dadata.ru/suggestions/api/4_1/rs/${method}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: "Token " + DADATA_TOKEN,
+        },
+        body: JSON.stringify(body),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`DaData ${method}: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  // Город по IP покупателя. IP берём у своего сервера (ipify режут блокировщики),
+  // если не вышло — DaData определит его по самому запросу. Для зарубежных
+  // и неизвестных IP DaData возвращает null — тогда по умолчанию Москва.
+  async function detectCityByIp() {
+    let ip = null;
+
+    try {
+      const ipResponse = await fetch("/api/delivery/ip");
+      if (ipResponse.ok) {
+        ip = (await ipResponse.json()).ip || null;
+      }
+    } catch (requestError) {
+      console.error("Не удалось получить IP:", requestError);
+    }
+
+    try {
+      let { location } = await dadataRequest("iplocate/address", ip ? { ip } : {});
+
+      if (!location && ip) {
+        ({ location } = await dadataRequest("iplocate/address", {}));
+      }
+
+      if (location) {
+        return location;
+      }
+    } catch (requestError) {
+      console.error("Не удалось определить город по IP:", requestError);
+    }
+
+    const { suggestions } = await dadataRequest("suggest/address", {
+      query: "г Москва",
+      count: 1,
+      from_bound: { value: "city" },
+      to_bound: { value: "city" },
+    });
+
+    return suggestions?.[0] || null;
+  }
+
   // Получаем адрес по координатам клика на карте.
   async function reverseGeocode(lon, lat) {
     const response = await fetch(
@@ -807,32 +867,7 @@ const DeliveryWidget = ({ DADATA_TOKEN, YANDEX_API_KEY, orderWeight, onDeliveryC
 
         await customFetch("/state");
 
-        const ipResponse = await fetch("https://api.ipify.org?format=json");
-        if (!ipResponse.ok) {
-          throw new Error("Не удалось определить IP адрес.");
-        }
-
-        const ipData = await ipResponse.json();
-
-        const locationResponse = await fetch(
-          "https://suggestions.dadata.ru/suggestions/api/4_1/rs/iplocate/address",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-              Authorization: "Token " + DADATA_TOKEN,
-            },
-            body: JSON.stringify({ ip: ipData.ip }),
-          }
-        );
-
-        if (!locationResponse.ok) {
-          throw new Error("Не удалось определить город автоматически.");
-        }
-
-        const locationData = await locationResponse.json();
-        handleCitySelect(locationData.location);
+        handleCitySelect(await detectCityByIp());
 
         // Автоопределённый по геолокации город нужен только для расчёта доставки,
         // но не должен считаться выбранным адресом доставки.

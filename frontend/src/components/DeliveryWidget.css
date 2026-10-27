@@ -128,11 +128,15 @@ textarea.comment {
   box-sizing: content-box;
 
   position: relative;
-  top: calc(-1.5vw - 3px);
-  left: calc(-1.5vw - 3px);
+  top: -23px;
+  left: -23px;
 
-  width: 3vw;
-  height: 3vw;
+  /* Глобальное img { max-width: 100% } сплющивало иконку в контейнере маркера нулевой ширины. */
+  width: 40px;
+  height: 40px;
+  max-width: none;
+  object-fit: contain;
+  background: #fff;
 
   border: 3px solid transparent;
   border-radius: 50%;

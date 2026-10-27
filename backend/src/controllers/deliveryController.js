@@ -30,3 +30,12 @@ exports.calculate = async (req, res) => {
     res.status(502).json({ message: "Не удалось рассчитать доставку" });
   }
 };
+
+// IP покупателя для определения города: за Caddy и nginx первый адрес в
+// X-Forwarded-For — клиентский (Caddy подставляет его сам). Сторонние сервисы
+// вроде ipify часто режут блокировщики рекламы, поэтому IP отдаём сами.
+exports.getClientIp = (req, res) => {
+  const forwarded = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+  const ip = (forwarded || req.socket?.remoteAddress || "").replace(/^::ffff:/, "");
+  res.json({ ip });
+};

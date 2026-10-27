@@ -299,7 +299,17 @@ const CheckoutPage = () => {
             })}
           </ul>
           <div className="chp-summary-total">
-            <strong>Сумма товаров: {totalPrice} ₽</strong>
+            <strong>
+              Сумма товаров:{" "}
+              {promoDiscount > 0 ? (
+                <>
+                  <s className="chp-price-old">{totalPrice} ₽</s>{" "}
+                  <span className="chp-price-new">{discountedItemsTotal} ₽</span>
+                </>
+              ) : (
+                `${totalPrice} ₽`
+              )}
+            </strong>
             <br />
             <small>Общий вес: {totalWeight} г</small>
             {user && (
@@ -330,7 +340,14 @@ const CheckoutPage = () => {
             <div className="chp-total-breakdown">
               <div>
                 <span>Товары: </span>
-                <span>{totalPrice} ₽</span>
+                {promoDiscount > 0 ? (
+                  <span>
+                    <s className="chp-price-old">{totalPrice} ₽</s>{" "}
+                    <span className="chp-price-new">{discountedItemsTotal} ₽</span>
+                  </span>
+                ) : (
+                  <span>{totalPrice} ₽</span>
+                )}
               </div>
               {Boolean(deliveryData?.price) && (
                 <div>
