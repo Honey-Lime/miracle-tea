@@ -1230,7 +1230,10 @@ const DeliveryWidget = ({ DADATA_TOKEN, YANDEX_API_KEY, orderWeight, onDeliveryC
       nextErrors.deliveryRoom = true;
     }
 
-    if (!deliveryName?.trim()) {
+    // Службы доставки (СДЭК) не принимают имя получателя без букв.
+    const nameHasLetters = /\p{L}/u.test(deliveryName || "");
+
+    if (!nameHasLetters) {
       nextErrors.deliveryName = true;
     }
 
@@ -1243,7 +1246,11 @@ const DeliveryWidget = ({ DADATA_TOKEN, YANDEX_API_KEY, orderWeight, onDeliveryC
     setFieldErrors(nextErrors);
 
     if (Object.keys(nextErrors).length > 0) {
-      showError("delivery-required-fields", "Заполните обязательные поля доставки.");
+      const onlyBadName = deliveryName?.trim() && !nameHasLetters && Object.keys(nextErrors).length === 1;
+      showError(
+        "delivery-required-fields",
+        onlyBadName ? "Имя получателя должно содержать буквы." : "Заполните обязательные поля доставки.",
+      );
       return;
     }
 
@@ -1273,7 +1280,7 @@ const DeliveryWidget = ({ DADATA_TOKEN, YANDEX_API_KEY, orderWeight, onDeliveryC
   useEffect(() => {
     const nextErrors = {};
     nextErrors.deliveryRoom = deliveryRoom ? false : true;
-    nextErrors.deliveryName = deliveryName ? false : true;
+    nextErrors.deliveryName = /\p{L}/u.test(deliveryName || "") ? false : true;
     nextErrors.deliveryPhone = deliveryPhone ? false : true;
     setFieldErrors(nextErrors);
 
