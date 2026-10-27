@@ -124,9 +124,20 @@ const getToken = createTokenProvider(async () => {
   }
 });
 
+// Ozon может отозвать токен до истечения expires_in (например, когда по тем же ключам
+// выдан новый токен) — тогда один раз повторяем запрос со свежим токеном.
 async function ozonRequest(path, body, headers = {}) {
+  const send = (token) => ozonFetch(`${BASE_URL}${path}`, { body, headers: { Authorization: `Bearer ${token}`, ...headers } });
   const token = await getToken();
-  return ozonFetch(`${BASE_URL}${path}`, { body, headers: { Authorization: `Bearer ${token}`, ...headers } });
+
+  try {
+    return await send(token);
+  } catch (error) {
+    if (!(error instanceof DeliveryApiError) || error.status !== 401) throw error;
+    console.warn(`[ozon] ${path}: токен отклонён (401), запрашиваем новый`);
+    getToken.reset(token);
+    return send(await getToken());
+  }
 }
 
 function normalizePhone(value) {

@@ -78,7 +78,7 @@ function createTokenProvider(fetchToken) {
   let expiresAt = 0;
   let pending = null;
 
-  return async function getToken() {
+  async function getToken() {
     if (token && expiresAt - 60000 > Date.now()) {
       return token;
     }
@@ -96,7 +96,18 @@ function createTokenProvider(fetchToken) {
     }
 
     return pending;
+  }
+
+  // Сервер отверг токен (401) раньше срока — забыть его, чтобы следующий запрос взял новый.
+  // Сбрасываем только отвергнутый токен: параллельный запрос мог уже получить свежий.
+  getToken.reset = (rejectedToken) => {
+    if (token === rejectedToken) {
+      token = null;
+      expiresAt = 0;
+    }
   };
+
+  return getToken;
 }
 
 const rub = (value) => ({ value: Math.ceil(Number(value) || 0), unit: "руб." });
