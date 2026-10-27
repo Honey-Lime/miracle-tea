@@ -45,7 +45,10 @@
 
 .cw-chat-panel {
   margin-bottom: 0.75rem;
-  overflow: hidden;
+  /* Панель не должна уходить за верх экрана: высота окна минус кнопка и отступы */
+  max-height: calc(100vh - 68px - 40px - 0.75rem);
+  overflow-x: hidden;
+  overflow-y: auto;
   border: 1px solid var(--border-color);
   border-radius: 14px;
   background: var(--color-primary);
