@@ -23,8 +23,10 @@ const MAX_REDIRECTS = 5;
 const POINTS_TTL_MS = 12 * 60 * 60 * 1000;
 const POINTS_RADIUS_KM = 25;
 const MAX_POINTS_ON_MAP = 300;
-const INFO_BATCH = 1000;
-const INFO_PARALLEL = 5;
+const LIST_PAGE = 1000;
+// В документации /delivery-point/info принимает до 1000 id, на деле — не больше 100.
+const INFO_BATCH = 100;
+const INFO_PARALLEL = 10;
 const AVAILABILITY_BATCH = 100;
 // Объявленная ценность для предварительного расчёта: сумма заказа виджету не известна.
 const ESTIMATE_DECLARED_VALUE = 1000;
@@ -189,13 +191,14 @@ function getAllPoints() {
 }
 
 async function loadAllPoints() {
+  const startedAt = Date.now();
   const methodId = shipmentMethodId();
   const ids = [];
   let cursor;
 
   do {
     const page = await ozonRequest("/v1/delivery-point/list", {
-      pagination: { limit: INFO_BATCH, ...(cursor ? { cursor } : {}) },
+      pagination: { limit: LIST_PAGE, ...(cursor ? { cursor } : {}) },
     });
     (page?.delivery_points || []).forEach((point) => {
       const methods = [].concat(point.shipment_method_ids || []);
@@ -232,6 +235,7 @@ async function loadAllPoints() {
   if (!points.length) {
     logOzonResponse(`нет пунктов выдачи для метода доставки ${methodId}`, { ids: ids.length });
   }
+  console.log(`[ozon] загружено пунктов выдачи: ${points.length} из ${ids.length} за ${Math.round((Date.now() - startedAt) / 1000)} с`);
 
   return points;
 }
@@ -452,5 +456,12 @@ const service = {
     return postingNumber || result?.order_number;
   },
 };
+
+// Список ПВЗ грузится долго — начинаем заранее, чтобы первый покупатель не ждал.
+if (service.isConfigured()) {
+  setTimeout(() => {
+    getAllPoints().catch((error) => logOzonResponse(`предзагрузка ПВЗ ${error.status || error.message}`, error.body));
+  }, 5000).unref();
+}
 
 module.exports = service;
