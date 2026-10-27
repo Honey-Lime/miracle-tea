@@ -46,7 +46,18 @@ async function getVariants(address, deliveryTypes, pkg) {
     body: { deliveryTypes, address, radius: SEARCH_RADIUS_KM, packages: ozonPackages(pkg) },
   });
 
+  if (!result?.data?.length) {
+    logOzonResponse("нет пунктов выдачи", address, result);
+  }
+
   return result?.data || [];
+}
+
+// Ответ Ozon для диагностики: пустой расчёт и 4xx ниже не считаются ошибкой,
+// поэтому без этой записи причина пропажи Ozon из вариантов доставки не видна.
+function logOzonResponse(context, address, payload) {
+  const text = JSON.stringify(payload ?? null) || "";
+  console.warn(`[ozon] ${context} для «${address}»: ${text.slice(0, 1000)}`);
 }
 
 async function getPrices(address, pkg) {
@@ -60,12 +71,17 @@ async function getPrices(address, pkg) {
       },
     });
 
+    if (!result?.deliveryInfos?.length) {
+      logOzonResponse("пустой расчёт", address, result);
+    }
+
     const byType = {};
     (result?.deliveryInfos || []).forEach((info) => {
       byType[info.deliveryType] = { price: rub(info.price), time: days(info.deliveryTermInDays, info.deliveryTermInDays) };
     });
     return byType;
   } catch (error) {
+    logOzonResponse(`ошибка расчёта ${error.status || error.message}`, address, error.body);
     if (error instanceof DeliveryApiError && error.status >= 400 && error.status < 500 && error.status !== 401) {
       return {};
     }
