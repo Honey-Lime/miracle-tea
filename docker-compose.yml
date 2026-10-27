@@ -1,6 +1,7 @@
 # Запуск на сервере (из корня репозитория, рядом лежит backend/.env):
 #   docker compose up -d --build
-# Сайт отдаётся контейнером web на порту хоста WEB_PORT (по умолчанию 8080).
+# Сайт отдаётся контейнером web через общий Caddy (сеть edge должна существовать);
+# на порту хоста WEB_PORT (по умолчанию 8080) — только с 127.0.0.1.
 
 x-logging: &logging
   logging:
@@ -43,11 +44,21 @@ services:
     <<: *logging
     build: ./frontend
     restart: always
+    # Наружу сайт отдаёт общий Caddy сервера (сеть edge, имя miracle-tea-web);
+    # порт хоста открыт только локально — для проверки с самого сервера.
     ports:
-      - "${WEB_PORT:-8080}:80"
+      - "127.0.0.1:${WEB_PORT:-8080}:80"
+    networks:
+      default: {}
+      edge:
+        aliases: [miracle-tea-web]
     depends_on:
       - backend
     mem_limit: 128m
+
+networks:
+  edge:
+    external: true
 
 volumes:
   mongo-data:
