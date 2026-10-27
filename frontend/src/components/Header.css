@@ -221,24 +221,27 @@
 
 @media (min-width: 768px) {
   .hdr-actions {
-    gap: var(--space-5);
+    gap: var(--space-4);
   }
 
   .hdr-menu-toggle {
     display: none;
   }
 
+  /* Пункты меню становятся элементами .hdr-actions, чтобы корзина
+     встала между навигацией и именем пользователя / кнопкой входа */
   .hdr-header .hdr-nav {
-    position: static;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: var(--space-4);
-    min-width: 0;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    box-shadow: none;
+    display: contents;
+  }
+
+  .hdr-cart-link {
+    order: 1;
+  }
+
+  .hdr-header .hdr-profile-link,
+  .hdr-header .hdr-admin-link,
+  .hdr-header .hdr-btn-login {
+    order: 2;
   }
 
   .hdr-header .hdr-nav a:hover {
