@@ -220,10 +220,18 @@ const DeliveryWidget = ({ DADATA_TOKEN, YANDEX_API_KEY, orderWeight, onDeliveryC
     clearStatus("map-click-error");
 
     if (addressPickMode) {
+      // Части адреса нужны службам доставки при оформлении курьерского заказа.
       const nextAddress = {
         value: suggestion.value,
         lon: cityData.lon,
         lat: cityData.lat,
+        country: suggestion.data.country_iso_code,
+        city: suggestion.data.city_with_type || suggestion.data.settlement_with_type,
+        region: suggestion.data.region_with_type,
+        district: suggestion.data.city_district,
+        street: suggestion.data.street_with_type,
+        house: suggestion.data.house,
+        zip: suggestion.data.postal_code,
       };
 
       manualAddressChangeRef.current = true;
@@ -294,6 +302,8 @@ const DeliveryWidget = ({ DADATA_TOKEN, YANDEX_API_KEY, orderWeight, onDeliveryC
           suggestion.data.street_with_type,
         house:
           suggestion.data.house,
+        zip:
+          suggestion.data.postal_code,
       };
     } catch (requestError) {
       console.error("Ошибка получения FIAS по адресу:", requestError);
@@ -437,6 +447,8 @@ const DeliveryWidget = ({ DADATA_TOKEN, YANDEX_API_KEY, orderWeight, onDeliveryC
           locationData.street,
         house:
           locationData.house,
+        zip:
+          locationData.zip,
       };
 
       manualAddressChangeRef.current = true;

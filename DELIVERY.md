@@ -51,17 +51,25 @@
 
 Регистрация и договор: [dostavka.yandex.ru](https://dostavka.yandex.ru/).
 
-### Ozon Логистика
+### Ozon Доставка (Ozon Delivery API)
 
 | Переменная | Где взять |
 | --- | --- |
-| `OZON_LOGISTICS_CLIENT_ID` | Кабинет [Ozon Логистики для продавцов](https://logistics.ozon.ru/) → **Настройки → API-интеграция** |
-| `OZON_LOGISTICS_CLIENT_SECRET` | Там же, рядом с Client ID |
-| `OZON_LOGISTICS_FROM_PLACE_ID` | ID пункта, куда вы сдаёте отправления. Его возвращает метод `/v1/delivery/from_places` ([документация API](https://docs.ozon.ru/api/rocket/)), или его подскажет менеджер Ozon |
-| `OZON_LOGISTICS_TEST` | `true` — тестовый стенд `api-stg.ozonru.me` с тестовыми ключами из [документации API](https://docs.ozon.ru/api/rocket/) |
+| `OZON_DELIVERY_CLIENT_ID` | Личный кабинет Ozon Доставки → **Настройки → Управление частными приложениями** → создать приложение с уровнями доступа `delivery-api.delivery`, `delivery-api.delivery-point`, `delivery-api.order`, `delivery-api.posting` (или `delivery-api.all`) → в строке приложения скопировать `client_id` |
+| `OZON_DELIVERY_CLIENT_SECRET` | Там же, `client_secret` |
+| `OZON_DELIVERY_SHIPMENT_METHOD_ID` | ID метода доставки с типом «отгрузка в пункт Ozon» (dropoff): создаётся в кабинете Ozon Доставки, в нём выбираются пункт отгрузки и пункт для возвратов |
+| `OZON_DELIVERY_ESTIMATE_PHONE` | Телефон магазина, зарегистрированный на Ozon. Расчёт `/v1/order/checkout` требует телефон получателя, а при выборе доставки покупатель ещё не указал свой |
 
-Это **не** ключи Seller API из кабинета продавца на маркетплейсе (`seller.ozon.ru`): у логистики
-отдельный договор и отдельный кабинет.
+Старые имена `OZON_LOGISTICS_CLIENT_ID` / `OZON_LOGISTICS_CLIENT_SECRET` тоже принимаются.
+`OZON_LOGISTICS_FROM_PLACE_ID` и `OZON_LOGISTICS_TEST` больше не используются.
+
+Особенности:
+- доставка Ozon доступна только покупателям, зарегистрированным на Ozon (заказ создаётся по их телефону);
+- список ПВЗ Ozon отдаёт целиком, сервер кеширует его на 12 часов, поэтому первый расчёт после запуска дольше обычного;
+- после создания заказа сервер подтверждает сборку (`/v1/posting/approve`) — Ozon при этом проверяет баланс в кабинете;
+- ответы Ozon с ошибками пишутся в лог бэкенда с меткой `[ozon]`.
+
+Документация: [docs.ozon.ru/api/ozon-delivery](https://docs.ozon.ru/api/ozon-delivery/).
 
 ### Необязательные настройки
 ```
