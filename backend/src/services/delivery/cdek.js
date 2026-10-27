@@ -18,6 +18,10 @@ const TARIFF_DOOR = Number(process.env.CDEK_TARIFF_DOOR) || 137;
 const cityCache = createTtlCache(24 * 60 * 60 * 1000);
 const pointsCache = createTtlCache(30 * 60 * 1000);
 
+const ORDER_STATUS_ATTEMPTS = 10;
+const ORDER_STATUS_DELAY_MS = 1000;
+const isPending = (request) => !request || request.state === "ACCEPTED" || request.state === "WAITING";
+
 const getToken = createTokenProvider(async () => {
   const result = await requestJson(`${BASE_URL}/oauth/token`, {
     method: "POST",
@@ -201,13 +205,29 @@ const service = {
     }
 
     const result = await cdekRequest("/orders", { method: "POST", body });
-    const request = result?.requests?.[0];
+    const uuid = result?.entity?.uuid;
+    let request = result?.requests?.[0];
 
-    if (request?.state === "INVALID") {
-      throw new DeliveryApiError("СДЭК отклонил заказ", { body: request.errors });
+    // СДЭК проверяет заказ асинхронно: ответ 202 ACCEPTED ещё не значит, что заказ создан.
+    // Ждём итоговый статус, иначе отклонённый заказ молча не появится в кабинете.
+    let order = null;
+    for (let attempt = 0; uuid && attempt < ORDER_STATUS_ATTEMPTS && isPending(request); attempt++) {
+      await new Promise((resolve) => setTimeout(resolve, ORDER_STATUS_DELAY_MS));
+      order = await cdekRequest(`/orders/${uuid}`);
+      request = order?.requests?.[0];
     }
 
-    return result?.entity?.uuid;
+    if (request?.state === "INVALID") {
+      const reason = (request.errors || []).map((error) => error.message).filter(Boolean).join("; ");
+      throw new DeliveryApiError(`СДЭК отклонил заказ${reason ? `: ${reason}` : ""}`, { body: request.errors });
+    }
+
+    if (isPending(request)) {
+      console.warn(`СДЭК: заказ ${uuid} ещё в обработке, итоговый статус не получен`);
+    }
+
+    // Номер СДЭК виден в личном кабинете; пока его нет — UUID заказа.
+    return order?.entity?.cdek_number || uuid;
   },
 };
 
