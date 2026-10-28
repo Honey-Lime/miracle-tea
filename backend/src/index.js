@@ -590,7 +590,10 @@ async function arrangeDeliveryOrder(orderId, deliveryData)
         article: orderList[i].article,          // string 	Идентификатор товара / груза.
         name: orderList[i].name,                // string 	Название
         count: 1,                               // integer 	Количество
-        price: orderList[i].priceAtOrder,       // double 	Цена, включая НДС
+        // priceAtOrder — цена за грамм (или штуку), а позиция одна на весь вес,
+        // поэтому её цена — сумма по позиции. Иначе объявленная ценность занижена
+        // в count раз, и Ozon отказывается считать доставку (delivery_calculation_error).
+        price: orderList[i].priceAtOrder * orderList[i].count, // double 	Цена, включая НДС
         weight: orderList[i].count / 1000,      // double 	Вес, в кг.
         dimensions: "10*15*6",                  // string 	Габариты. Формат: строка вида «Д*Ш*В», в сантиметрах. Например: 15*25*10 .
         vat_rate: -1,                           // integer 	Значение ставки НДС 
