@@ -225,10 +225,16 @@ const service = {
     // СДЭК проверяет заказ асинхронно: ответ 202 ACCEPTED ещё не значит, что заказ создан.
     // Ждём итоговый статус, иначе отклонённый заказ молча не появится в кабинете.
     let order = null;
-    for (let attempt = 0; uuid && attempt < ORDER_STATUS_ATTEMPTS && isPending(request); attempt++) {
-      await new Promise((resolve) => setTimeout(resolve, ORDER_STATUS_DELAY_MS));
-      order = await cdekRequest(`/orders/${uuid}`);
-      request = order?.requests?.[0];
+    // Заказ уже отправлен: сбой опроса статуса не должен терять его UUID, иначе на сайте
+    // доставка будет считаться неоформленной, а в кабинете СДЭК заказ появится.
+    try {
+      for (let attempt = 0; uuid && attempt < ORDER_STATUS_ATTEMPTS && isPending(request); attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, ORDER_STATUS_DELAY_MS));
+        order = await cdekRequest(`/orders/${uuid}`);
+        request = order?.requests?.[0];
+      }
+    } catch (error) {
+      console.warn(`СДЭК: не удалось получить статус заказа ${uuid}: ${error.message}`);
     }
 
     if (request?.state === "INVALID") {

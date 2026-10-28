@@ -1,13 +1,39 @@
 // Общие помощники для запросов к API служб доставки.
 
 const REQUEST_TIMEOUT_MS = 15000;
+const NETWORK_RETRY_DELAYS_MS = [500, 2000];
+// Соединение не установилось — запрос до сервера не дошёл, повтор безопасен даже для POST.
+const CONNECT_ERRORS = new Set(["ENOTFOUND", "EAI_AGAIN", "ECONNREFUSED", "UND_ERR_CONNECT_TIMEOUT"]);
 
 class DeliveryApiError extends Error {
-  constructor(message, { status, body } = {}) {
-    super(message);
+  constructor(message, { status, body, cause } = {}) {
+    super(message, cause ? { cause } : undefined);
     this.name = "DeliveryApiError";
     this.status = status;
     this.body = body;
+  }
+}
+
+// fetch с повтором при сетевом сбое. Голое «fetch failed» прячет причину в error.cause —
+// поднимаем её в текст ошибки, чтобы в логе было видно, что и где упало.
+async function fetchWithRetry(target, init) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await fetch(target, { ...init, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
+    } catch (error) {
+      const timedOut = error.name === "TimeoutError";
+      const code = timedOut ? "таймаут" : error.cause?.code || error.cause?.message || error.message;
+      const retryable = !timedOut && (init.method === "GET" || CONNECT_ERRORS.has(error.cause?.code));
+
+      if (!retryable || attempt >= NETWORK_RETRY_DELAYS_MS.length) {
+        throw new DeliveryApiError(`${init.method} ${target.host}${target.pathname}: ошибка сети (${code})`, {
+          cause: error,
+        });
+      }
+
+      console.warn(`${init.method} ${target.host}${target.pathname}: ошибка сети (${code}), повтор`);
+      await new Promise((resolve) => setTimeout(resolve, NETWORK_RETRY_DELAYS_MS[attempt]));
+    }
   }
 }
 
@@ -23,7 +49,6 @@ async function requestJson(url, { method = "GET", headers = {}, body, form, quer
   const init = {
     method,
     headers: { Accept: "application/json", ...headers },
-    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   };
 
   if (form) {
@@ -34,7 +59,7 @@ async function requestJson(url, { method = "GET", headers = {}, body, form, quer
     init.body = JSON.stringify(body);
   }
 
-  const response = await fetch(target, init);
+  const response = await fetchWithRetry(target, init);
   const text = await response.text();
   let json = null;
 
