@@ -67,13 +67,27 @@ async function getCityCode({ fias, cityName }) {
   });
 }
 
+// Город отправки: при сдаче в ПВЗ (CDEK_SHIPMENT_POINT) — город этого пункта,
+// иначе расчёт пойдёт из другого города и не совпадёт с ценой в кабинете.
+async function getFromCityCode() {
+  const shipmentPoint = process.env.CDEK_SHIPMENT_POINT;
+  if (shipmentPoint) {
+    const code = await cityCache.get(`point:${shipmentPoint}`, async () => {
+      const points = await cdekRequest("/deliverypoints", { query: { code: shipmentPoint } });
+      return points?.[0]?.location?.city_code || null;
+    });
+    if (code) return code;
+  }
+  return Number(process.env.CDEK_FROM_CITY_CODE);
+}
+
 async function calculateTariff(tariffCode, toLocation, pkg) {
   try {
     const result = await cdekRequest("/calculator/tariff", {
       method: "POST",
       body: {
         tariff_code: tariffCode,
-        from_location: { code: Number(process.env.CDEK_FROM_CITY_CODE) },
+        from_location: { code: await getFromCityCode() },
         to_location: toLocation,
         packages: [pkg],
       },
