@@ -7,6 +7,7 @@ import { useToast } from "../context/ToastContext";
 import { cancelOrder, getMyOrders } from "../services/orderService";
 import { changePassword, getProfile, updateName } from "../services/authService";
 import PhotoUploadField from "../components/PhotoUploadField";
+import { getDeliveryMethodLabel, getDeliveryServiceLabel } from "../utils/deliveryLabels";
 
 const PasswordEyeIcon = ({ isOpen }) => (
   <svg
@@ -948,9 +949,21 @@ const ProfilePage = () => {
                 </p>
                 {(() => {
                   const deliveryDetails = getDeliveryDetails(selectedOrder);
+                  const deliveryService = getDeliveryServiceLabel(selectedOrder);
+                  const deliveryMethod = getDeliveryMethodLabel(selectedOrder);
 
                   return (
                     <>
+                      {deliveryService && (
+                        <p>
+                          <strong>Служба доставки:</strong> {deliveryService}
+                        </p>
+                      )}
+                      {deliveryMethod && (
+                        <p>
+                          <strong>Способ доставки:</strong> {deliveryMethod}
+                        </p>
+                      )}
                       {deliveryDetails.name && (
                         <p>
                           <strong>Имя:</strong> {deliveryDetails.name}

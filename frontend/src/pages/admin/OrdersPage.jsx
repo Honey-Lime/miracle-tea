@@ -3,6 +3,7 @@ import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import AdminUserMenu from "../../components/AdminUserMenu";
+import { getDeliveryMethodLabel, getDeliveryServiceLabel } from "../../utils/deliveryLabels";
 
 const OrdersPage = () => {
   const { token } = useAuth();
@@ -115,15 +116,6 @@ const OrdersPage = () => {
     if (typeof address === "string") return address;
 
     return address.address || address.value || address.details || "Не указан";
-  };
-
-  const getDeliveryTypeLabel = (order) => {
-    const type = getDeliveryDetails(order).type;
-
-    if (type === "door") return "До двери";
-    if (type === "terminal") return "До пункта выдачи";
-
-    return "Не указан";
   };
 
   const getDeliveryTime = (order) => {
@@ -262,8 +254,12 @@ const OrdersPage = () => {
                         <strong>{getDeliveryAddress(order)}</strong>
                       </div>
                       <div>
-                        <span>Тип:</span>
-                        <strong>{getDeliveryTypeLabel(order)}</strong>
+                        <span>Служба:</span>
+                        <strong>{getDeliveryServiceLabel(order) || "Не указана"}</strong>
+                      </div>
+                      <div>
+                        <span>Способ:</span>
+                        <strong>{getDeliveryMethodLabel(order) || "Не указан"}</strong>
                       </div>
                       <div>
                         <span>Стоимость доставки:</span>
